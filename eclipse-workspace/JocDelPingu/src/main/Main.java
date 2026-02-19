@@ -11,6 +11,5 @@ public class Main {
     public static void main(String[] args) {
         Lang lang = new Lang();
         
-        lang.readLangDebugg();
     }
 }
