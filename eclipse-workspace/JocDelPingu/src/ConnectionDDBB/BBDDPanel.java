@@ -1,4 +1,4 @@
-package gamePanel;
+package ConnectionDDBB;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

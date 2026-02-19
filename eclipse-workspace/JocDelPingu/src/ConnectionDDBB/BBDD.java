@@ -1,4 +1,4 @@
-package gamePanel;
+package ConnectionDDBB;
 
 import java.sql.*;
 import java.util.ArrayList;
