@@ -7,13 +7,14 @@ import java.io.InputStream;
 import java.util.Map;
 
 public class Lang {
+	
+	private static Lang instance;
 
     public String entitySealName;
     public String entityPlayerType;
 
     public Lang() {
 
-        // Ruta física dins del projecte (relativa a l'arrel del projecte)
         String yamlPath = "src/assets/lang/es_ca.yml";
 
         File yamlFile = new File(yamlPath);
@@ -21,23 +22,31 @@ public class Lang {
         try (InputStream inputStream = new FileInputStream(yamlFile)) {
             Yaml yaml = new Yaml();
 
-            // Carrega com Map<String, Object> o directament com Map
             @SuppressWarnings("unchecked")
-            Map<String, Object> data = yaml.load(inputStream);
+            Map<String, String> data = yaml.load(inputStream);
 
             if (data != null) {
                 this.entitySealName = (String) data.get("entity.seal.name");
-                this.entityPlayerType = (String) data.get("entity.player.type");  // adapta les claus del teu YAML
-                System.out.println("YAML carregat manualment!");
+                this.entityPlayerType = (String) data.get("entity.player.type");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void readLangDebugg() {
-        System.out.println("entityPlayerType: " + this.entityPlayerType);
-        System.out.println("entitySealName:   " + this.entitySealName);
+    public static Lang getInstance() {
+        if (instance == null) {
+            instance = new Lang();
+        }
+        return instance;
+    }
+    
+    public String getSealName() {
+        return entitySealName != null ? entitySealName : "Seal";
+    }
+
+    public String getPlayerType() {
+        return entityPlayerType != null ? entityPlayerType : "Penguin";
     }
 
 }
