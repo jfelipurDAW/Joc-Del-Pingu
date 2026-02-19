@@ -1,0 +1,1 @@
+INDEX VERSION 1.134+D:\Usuarios\martavoytk\Joc-Del-Pingu\eclipse-workspace\JocDelPingu\.metadata\.plugins\org.eclipse.jdt.core
