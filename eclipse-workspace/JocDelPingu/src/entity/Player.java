@@ -13,7 +13,7 @@ public class Player extends Entity{
 		this.setName(name);
 		this.setColour(colour);
 		
-		this.setNumCasella(0);		
+		//this.setNumCasella(0);		
 		
 	}
 	
