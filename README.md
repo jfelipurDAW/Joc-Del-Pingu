@@ -22,7 +22,15 @@
 <div align="left">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" height="40" alt="java logo"  />
   <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/oracle/oracle-original.svg" height="40" alt="oracle logo"  />
+  <img src="https://upload.wikimedia.org/wikipedia/fr/6/68/Oracle_SQL_Developer_logo.svg" height="40" alt="oracle sql logo"  />
 </div>
 
 ###
+
+<h2 align="left">Integrants de l'equip</h2>
+
+###
+
+<p align="left">Badreddine Essadaoui Largou</p>
+<p align="left">Jan Felip Urgell</p>
+<p align="left">Marta Voytkovych Danchyn</p>
