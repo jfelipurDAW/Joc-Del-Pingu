@@ -1,6 +1,6 @@
 package entity;
 
-public class Seal {
+public class Seal extends Entity{
 
 	private String name = "";
 	
