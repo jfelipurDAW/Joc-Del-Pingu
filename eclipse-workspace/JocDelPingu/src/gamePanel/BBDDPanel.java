@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Scanner;
 
-public class GamePanel {
+public class BBDDPanel {
 	public static Connection con;
 
 	public static void main(String[] args) {
