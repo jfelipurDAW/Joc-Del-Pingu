@@ -4,12 +4,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
 
-import config.Lang;
+import config.LangConfig;
 
 public class Main {
 
     public static void main(String[] args) {
-        Lang lang = new Lang();
+        LangConfig lang = new LangConfig();
         
     }
 }

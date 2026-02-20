@@ -1,52 +1,25 @@
 package config;
 
-import org.yaml.snakeyaml.Yaml;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Map;
-
-public class Lang {
+public enum Lang {
 	
-	private static Lang instance;
-
-    public String entitySealName;
-    public String entityPlayerType;
-
-    public Lang() {
-
-        String yamlPath = "src/assets/lang/es_ca.yml";
-
-        File yamlFile = new File(yamlPath);
-
-        try (InputStream inputStream = new FileInputStream(yamlFile)) {
-            Yaml yaml = new Yaml();
-
-            @SuppressWarnings("unchecked")
-            Map<String, String> data = yaml.load(inputStream);
-
-            if (data != null) {
-                this.entitySealName = (String) data.get("entity.seal.name");
-                this.entityPlayerType = (String) data.get("entity.player.type");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static Lang getInstance() {
-        if (instance == null) {
-            instance = new Lang();
-        }
-        return instance;
-    }
+    ENTITY_SEAL     ("object.dice"),
+    ENTITY_PLAYER   ("entity.player"),
     
-    public String getSealName() {
-        return entitySealName != null ? entitySealName : "Seal";
+    OBJECT_SNOWBALL ("object.snowball"),
+    OBJECT_FISH     ("object.fish"),
+    OBJECT_DICE     ("object.dice"),
+    OBJECT_FASTDICE ("object.fastdice"),
+    OBJECT_SLOWDICE ("object.slowdice"),
+	
+	MENU_BUTTON_EXIT ("menu.button.exit");
+
+    private final String key;
+
+    Lang(String key) {
+        this.key = key;
     }
 
-    public String getPlayerType() {
-        return entityPlayerType != null ? entityPlayerType : "Penguin";
+    public String getKey() {
+        return key;
     }
-
 }

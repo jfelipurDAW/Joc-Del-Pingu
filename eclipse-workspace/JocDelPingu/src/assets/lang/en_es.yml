@@ -1,2 +1,7 @@
 entity.seal.name: "Seal"
 entity.player.type: "Penguin"
+object.snowball: "Snowball"
+object.fish: "Fish"
+object.dice: "Dice"
+object.dice.fast: "Fast dice"
+object.dice.slow: "Slow dice"

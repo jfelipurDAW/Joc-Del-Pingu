@@ -1,10 +1,10 @@
 package entity;
 
-import config.Lang;
+import config.LangConfig;
 
 public class Seal extends Entity{
 
-	private String name = Lang.getInstance().getSealName();
+	private String name = LangConfig.getInstance().getSealName();
 	
 	
 //	public Seal {
