@@ -16,5 +16,45 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Walker/Documents/Github/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/javafx-lib/javafx.base.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Walker/Documents/Github/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/javafx-lib/javafx.controls.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Walker/Documents/Github/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/javafx-lib/javafx.fxml.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Walker/Documents/Github/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/javafx-lib/javafx.graphics.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Walker/Documents/Github/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/javafx-lib/javafx.media.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Walker/Documents/Github/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/javafx-lib/javafx.swing.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Walker/Documents/Github/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/javafx-lib/javafx.web.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Walker/Documents/Github/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/javafx-lib/javafx-swt.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
