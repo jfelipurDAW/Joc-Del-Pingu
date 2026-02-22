@@ -10,7 +10,18 @@ CREATE TABLE BOARD (
 CREATE TABLE EVENT(
     eventID     NUMBER(5)       PRIMARY KEY,
     type        VARCHAR(15)     NOT NULL
-   
+
+    --CONSTRAINT ck_event_type CHECK (type IN ('-', '-', '-', '-', '-'))
+
+);
+
+CREATE TABLE GAME (
+    gameID      NUMBER(5)       PRIMARY KEY,
+    state       VARCHAR(20)     NOT NULL,
+    date        DATE            DEFAULT SYSDATE,
+    boardID     NUMBER(5)       ,
+    
+    CONSTRAINT  fk_game_board           FOREIGN KEY (boardID) REFERENCES BOARD(boardID)
 );
 
 CREATE TABLE SQUARE(
@@ -24,29 +35,13 @@ CREATE TABLE SQUARE(
     CONSTRAINT fk_square_event          FOREIGN KEY (eventID)       REFERENCES EVENT(eventID),
     CONSTRAINT fk_square_board          FOREIGN KEY (boardID)       REFERENCES BOARD(boardID),
 
-    CONSTRAINT ck_square_type           CHECK (type IN ('BEAR', 'ICEHOLE', 'SELD', 'EVENT', 'NORMAL')),
+    CONSTRAINT ck_square_type           CHECK (type IN ('BEAR', 'ICE_HOLE', 'SLED', 'EVENT', 'NORMAL'))
 );
-
-
-
-CREATE TABLE GAME (
-    gameID      NUMBER(5)       PRIMARY KEY,
-    state       VARCHAR(20)     NOT NULL,
-    date        DATE            DEFAULT SYSDATE,
-    boardID     NUMBER(5)       ,
-    
-    CONSTRAINT  fk_game_board           FOREIGN KEY (boardID) REFERENCES BOARD(boardID)
-);
-
-
 
 CREATE TABLE INVENTORY(
     inventoryID NUMBER(5)       PRIMARY KEY,
-    entityID    NUMBER(5)       ,
-    
+    entityID    NUMBER(5)
 );
-
-
 
 CREATE TABLE ENTITY(
     entityID    NUMBER(5)       PRIMARY KEY,
@@ -60,10 +55,16 @@ CREATE TABLE ENTITY(
 
     CONSTRAINT fk_entity_square         FOREIGN KEY (squareID)      REFERENCES SQUARE(squareID),
     CONSTRAINT fk_entity_game           FOREIGN KEY (gameID)        REFERENCES GAME(gameID),
-    CONSTRAINT fk_entity_inventory      FOREIGN KEY (inventoryID)   REFERENCES INVENTORY(inventoryID)
+    CONSTRAINT fk_entity_inventory      FOREIGN KEY (inventoryID)   REFERENCES INVENTORY(inventoryID),
+
+    CONSTRAINT ck_entity_type           CHECK (type IN ('PLAYER', 'CPU')),
+    CONSTRAINT ck_player_name           CHECK ((type = 'PLAYER' AND name IS NOT NULL) OR (type != 'PLAYER' AND name IS NULL)),
+    CONSTRAINT uq_entity_name           UNIQUE (name),
+    CONSTRAINT ck_player_password       CHECK ((type = 'PLAYER' AND password IS NOT NULL) OR (type != 'PLAYER' AND password IS NULL)),
+    CONSTRAINT ck_player_colour         CHECK ((type = 'PLAYER' AND colour IS NOT NULL) OR (type != 'PLAYER' AND colour IS NULL))
 );
-    ALTER TABLE INVENTORY
-    ADD CONSTRAINT fk_inventory_entity      FOREIGN KEY (entityID)      REFERENCES ENTITY(entityID);
+
+ALTER TABLE INVENTORY ADD CONSTRAINT fk_inventory_entity FOREIGN KEY (entityID) REFERENCES ENTITY(entityID);
 
 CREATE TABLE OBJECT(
     objectID    NUMBER(5)       PRIMARY KEY,
@@ -78,16 +79,9 @@ CREATE TABLE OBJECT(
     CONSTRAINT ck_object_quantity       CHECK ((type = 'FISH' AND quantity BETWEEN 0 AND 2) OR (type = 'SNOWBALL' AND quantity BETWEEN 0 AND 6) OR (type = 'DICE' AND quantity BETWEEN 0 AND 3))
 );
 
-CREATE TABLE EVENT(
-    eventID     NUMBER(5)       PRIMARY KEY,
-    type        VARCHAR(15)     NOT NULL
 
-    --CONSTRAINT ck_event_type CHECK (type IN ('-', '-', '-', '-', '-'))
-);
-
-
-INSERT INTO BOARD (boardID, state)
-    VALUES (1, 'ACTIVE');
+INSERT INTO BOARD (boardID)
+    VALUES (1);
  
 INSERT INTO EVENT (eventID, type)
     VALUES (1, 'GET A FISH');
@@ -99,7 +93,7 @@ INSERT INTO SQUARE (squareID, type, destination, boardID, eventID)
 INSERT INTO SQUARE (squareID, type, destination, boardID, eventID)
     VALUES (3, 'ICE_HOLE', NULL, 1, NULL);
 INSERT INTO SQUARE (squareID, type, destination, boardID, eventID)
-    VALUES (4, 'SLED',     4,    1,    1, NULL);
+    VALUES (4, 'SLED',     4,    1,    1);
 INSERT INTO SQUARE (squareID, type, destination, boardID, eventID)
     VALUES (5, 'EVENT', NULL, 1, 1);
 
@@ -110,11 +104,11 @@ INSERT INTO SQUARE (squareID, type, destination, boardID, eventID)
 INSERT INTO INVENTORY (inventoryID, entityID)
     VALUES (1, NULL);
  
-INSERT INTO ENTITY (entityID, name, password, colour, gameID, squareID, inventoryID)
-    VALUES (1, 'PolarBear', 'hash1234', 'FF5733', 1, 1, 1);
+INSERT INTO ENTITY (entityID, type, name, password, colour, gameID, squareID, inventoryID)
+    VALUES (1, 'PLAYER', 'Jugador1', 'hash1234', 'FF5733', 1, 1, 1);
  
--- Actualitzem la referència circular
-UPDATE INVENTORY SET entityID = 1 WHERE inventoryID = 1;
+-- Actualització d'INVENTORY
+UPDATE INVENTORY i SET entityID = (SELECT e.entityID FROM ENTITY e WHERE e.inventoryID = i.inventoryID);
  
 INSERT INTO OBJECT (objectID, inventoryID, type, diceType, quantity)
     VALUES (1, 1, 'DICE',     'FAST', 2);
