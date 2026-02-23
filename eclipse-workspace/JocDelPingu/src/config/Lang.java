@@ -2,7 +2,7 @@ package config;
 
 public enum Lang {
 	
-    ENTITY_SEAL     ("object.dice"),
+    ENTITY_SEAL     ("entity.seal"),
     ENTITY_PLAYER   ("entity.player"),
     
     OBJECT_SNOWBALL ("object.snowball"),

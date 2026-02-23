@@ -8,35 +8,40 @@ import java.util.Map;
 
 public class LangConfig {
 	
-	private String yamlPath = "src/assets/lang/es_ca.yml";
-	private static LangConfig instance;
-
-    private Yaml yaml;
-    private File yamlFile;
+    private static final String YAML_PATH = "src/assets/lang/en_es.yml";
+    private static LangConfig instance;
     private Map<String, String> data;
 
-    public void LoadLang() {
+    private LangConfig() {
 
-    	this.yaml = new Yaml();
-        this.yamlFile = new File(yamlPath);
-
-        try (InputStream inputStream = new FileInputStream(yamlFile)) {
-
-            this.data = yaml.load(inputStream);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
-    public static LangConfig getInstance() {
+    private static LangConfig getInstance() {
         if (instance == null) {
             instance = new LangConfig();
         }
         return instance;
     }
+
+    public static void loadLang() {
+        getInstance().internalLoad();
+    }
+
+    private void internalLoad() {
+        Yaml yaml = new Yaml();
+        File yamlFile = new File(YAML_PATH);
+
+        try (InputStream inputStream = new FileInputStream(yamlFile)) {
+            data = yaml.load(inputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     
-    public String getLang(Lang lang) {
-    	return (String) data.get(lang.getKey()) != null ? data.get(lang.getKey()) : lang.getKey();
+    public static String getLang(Lang lang) { 
+        LangConfig config = getInstance();
+        
+        String value = config.data.get(lang.getKey());
+        return value != null ? value : lang.getKey();
     }
 }

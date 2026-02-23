@@ -4,10 +4,9 @@ import ObjectManagers.Inventory;
 
 public class Entity {
 	
-	private int entityId;
-	private int life;
-	private Inventory inventory;
-	private int numBox;
+	protected int entityId;
+	protected Inventory inventory;
+	protected int numBox;
 	
 	
 	public void setInventory(Inventory inventory) {

@@ -11,7 +11,7 @@
     <MenuBar VBox.vgrow="NEVER" />
     <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <children>
-            <Button fx:id="exit" layoutX="262.0" layoutY="158.0" mnemonicParsing="false" onAction="#exit" text="Exit" textAlignment="CENTER">
+            <Button fx:id="exit" layoutX="262.0" layoutY="158.0" mnemonicParsing="false" onAction="#exit" text="test" textAlignment="CENTER">
                <font>
                   <Font size="40.0" />
                </font>

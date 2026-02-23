@@ -1,5 +1,6 @@
-entity.seal.name: "Seal"
-entity.player.type: "Penguin"
+entity.seal: "Seal"
+entity.player: "Penguin"
+
 object.snowball: "Snowball"
 object.fish: "Fish"
 object.dice: "Dice"

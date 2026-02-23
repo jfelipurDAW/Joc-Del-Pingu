@@ -2,7 +2,7 @@ package ObjectManagers;
 
 public class Object {
 	
-	private ObjectType objectType;
+	protected ObjectType objectType;
 	
 	
 	public ObjectType getType() {

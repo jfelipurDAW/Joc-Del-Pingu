@@ -4,5 +4,5 @@ import ObjectManagers.ObjectType;
 
 public class Dice extends Object{
 
-	private ObjectType objectType = ObjectType.DICE;
+	protected ObjectType objectType = ObjectType.DICE;
 }

@@ -19,7 +19,7 @@ public class GamePanel extends Application {
 
         // Set the scene on the primary stage
         primaryStage.setScene(scene);
-        primaryStage.setTitle("JavaFX FXML Example");
+        primaryStage.setTitle("Joc Del Pingu");
         primaryStage.show();
     }
     
