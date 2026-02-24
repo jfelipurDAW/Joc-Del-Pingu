@@ -45,11 +45,13 @@ public class BBDD {
 		// 2) Pedir credenciales (con trim para evitar espacios raros)
 		// PODEIS HARDCODEAR ESTAS CREDENCIALES SI VAIS A USAR SIEMPRE LAS MISMAS
 		//VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-		System.out.println("¿Usuario?");
-		String user = scan.nextLine().trim();
+//		System.out.println("¿Usuario?");
+//		String user = scan.nextLine().trim();
+		String user = "DW2526_GR06_PINGU";
 
-		System.out.println("¿Contraseña?");
-		String pwd = scan.nextLine(); // aquí NO hago trim por si la contraseña tuviera espacios
+//		System.out.println("¿Contraseña?");
+//		String pwd = scan.nextLine(); // aquí NO hago trim por si la contraseña tuviera espacios
+		String pwd = "ABDJFMV";
 
 		// 3) Conectar
 		try {

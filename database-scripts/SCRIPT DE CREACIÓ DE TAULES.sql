@@ -17,8 +17,8 @@ CREATE TABLE EVENT(
 
 CREATE TABLE GAME (
     gameID      NUMBER(5)       PRIMARY KEY,
-    state       VARCHAR(20)     NOT NULL,
-    date        DATE            DEFAULT SYSDATE,
+    gameState   VARCHAR(20)     NOT NULL,
+    gameDate    DATE            DEFAULT SYSDATE,
     boardID     NUMBER(5)       ,
     
     CONSTRAINT  fk_game_board           FOREIGN KEY (boardID) REFERENCES BOARD(boardID)
@@ -44,24 +44,24 @@ CREATE TABLE INVENTORY(
 );
 
 CREATE TABLE ENTITY(
-    entityID    NUMBER(5)       PRIMARY KEY,
-    squareID    NUMBER(2)       ,
-    type        VARCHAR(10)     NOT NULL,
-    gameID      NUMBER(5)       ,
-    inventoryID NUMBER(5)       ,
-    name        VARCHAR(20)     ,
-    password    VARCHAR(50)     ,
-    colour      VARCHAR(6)      ,
+    entityID        NUMBER(5)       PRIMARY KEY,
+    squareID        NUMBER(2)       ,
+    entityType      VARCHAR(10)     NOT NULL,
+    gameID          NUMBER(5)       ,
+    inventoryID     NUMBER(5)       ,
+    playerName      VARCHAR(20)     ,
+    playerPassword  VARCHAR(50)     ,
+    colour          VARCHAR(6)      ,
 
     CONSTRAINT fk_entity_square         FOREIGN KEY (squareID)      REFERENCES SQUARE(squareID),
     CONSTRAINT fk_entity_game           FOREIGN KEY (gameID)        REFERENCES GAME(gameID),
     CONSTRAINT fk_entity_inventory      FOREIGN KEY (inventoryID)   REFERENCES INVENTORY(inventoryID),
 
-    CONSTRAINT ck_entity_type           CHECK (type IN ('PLAYER', 'CPU')),
-    CONSTRAINT ck_player_name           CHECK ((type = 'PLAYER' AND name IS NOT NULL) OR (type != 'PLAYER' AND name IS NULL)),
-    CONSTRAINT uq_entity_name           UNIQUE (name),
-    CONSTRAINT ck_player_password       CHECK ((type = 'PLAYER' AND password IS NOT NULL) OR (type != 'PLAYER' AND password IS NULL)),
-    CONSTRAINT ck_player_colour         CHECK ((type = 'PLAYER' AND colour IS NOT NULL) OR (type != 'PLAYER' AND colour IS NULL))
+    CONSTRAINT ck_entity_type           CHECK (playerType IN ('PLAYER', 'CPU')),
+    CONSTRAINT ck_player_name           CHECK ((playerType = 'PLAYER' AND playerName IS NOT NULL) OR (playerType != 'PLAYER' AND playerName IS NULL)),
+    CONSTRAINT uq_entity_name           UNIQUE (playerName),
+    CONSTRAINT ck_player_password       CHECK ((playerType = 'PLAYER' AND playerPassword IS NOT NULL) OR (playerType != 'PLAYER' AND playerPassword IS NULL)),
+    CONSTRAINT ck_player_colour         CHECK ((playerType = 'PLAYER' AND colour IS NOT NULL) OR (playerType != 'PLAYER' AND colour IS NULL))
 );
 
 ALTER TABLE INVENTORY ADD CONSTRAINT fk_inventory_entity FOREIGN KEY (entityID) REFERENCES ENTITY(entityID);
