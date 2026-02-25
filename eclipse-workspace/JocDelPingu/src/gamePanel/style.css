@@ -1,4 +1,17 @@
-.bodybg{
-/*	-fx-background-image: url("https://media.istockphoto.com/id/1284969926/vector/abstract-blue-pattern-background.jpg?s=612x612&w=0&k=20&c=PoTWtlOHO9yOdJer9LI-aM6kKr-2K_iTcLPf3TAMuxU=")
-*/	-fx-background-image: url("../assets/sprites/backgrounds/1.jpg");
+.mainmenu_bg{
+	-fx-background-image: url("../assets/sprites/backgrounds/1.png");
+	-fx-background-size: 100%;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: bottom center;
+	-fx-background-color: red;
+}
+
+.mainmenu_maintitle{
+	-fx-translate-y: -50;
+}
+
+.mainmenu_button{
+	-fx-background-image: url("../assets/sprites/buttons/button.png");
+	-fx-background-size: 100%;
+	-fx-translate-y: -20;
 }

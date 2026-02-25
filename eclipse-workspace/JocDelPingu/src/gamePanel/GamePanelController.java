@@ -4,6 +4,8 @@ import config.Lang;
 import config.LangConfig;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 public class GamePanelController {
@@ -14,8 +16,8 @@ public class GamePanelController {
 	@FXML
     public void initialize() {
 //	    LangConfig.loadLang(); 
-
 		LangConfig.loadLang();
+		
         exit.setText(LangConfig.getLang(Lang.ENTITY_SEAL));
      
 	}

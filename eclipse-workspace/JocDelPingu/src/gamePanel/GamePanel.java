@@ -11,7 +11,7 @@ public class GamePanel extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         // Load the FXML file
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("holamundo.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("mainMenu.fxml"));
         Parent root = loader.load();
 
         // Create the scene with the loaded FXML root node
