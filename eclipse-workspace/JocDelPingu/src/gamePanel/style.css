@@ -1,3 +1,6 @@
+
+/* MAIN MENU */
+
 .mainmenu_bg{
 	-fx-background-image: url("../assets/sprites/backgrounds/1.png");
 	-fx-background-size: 100%;
@@ -10,8 +13,21 @@
 	-fx-translate-y: -50;
 }
 
-.mainmenu_button{
+.mainmenu_button_newgame{
 	-fx-background-image: url("../assets/sprites/buttons/button.png");
 	-fx-background-size: 100%;
 	-fx-translate-y: -20;
+}
+
+.mainmenu_button_loadgame{
+	-fx-background-image: url("../assets/sprites/buttons/button.png");
+	-fx-background-size: 100%;
+	-fx-translate-y: -10;
+}
+
+.mainmenu_button_language{
+	-fx-background-image: url("../assets/sprites/buttons/button.png");
+	-fx-background-size: 100%;
+	-fx-translate-y: 90;
+	-fx-translate-x: 180
 }

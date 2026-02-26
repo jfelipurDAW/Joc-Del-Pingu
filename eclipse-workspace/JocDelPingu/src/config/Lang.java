@@ -11,7 +11,9 @@ public enum Lang {
     OBJECT_FASTDICE ("object.fastdice"),
     OBJECT_SLOWDICE ("object.slowdice"),
 	
-	MENU_BUTTON_EXIT ("menu.button.exit");
+	MENU_BUTTON_NEWGAME ("menu.button.newgame"),
+	MENU_BUTTON_LOADGAME ("menu.button.loadgame"),
+	MENU_BUTTON_LANGUAGE ("menu.button.language");
 
     private final String key;
 

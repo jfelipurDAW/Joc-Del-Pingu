@@ -11,20 +11,24 @@ import javafx.stage.Stage;
 public class GamePanelController {
 	
 	@FXML
-	private Button exit;
+	private Button newGame_button;
+	private Button loadGame_button;
+	private Button language_button;
 	
 	@FXML
     public void initialize() {
-//	    LangConfig.loadLang(); 
 		LangConfig.loadLang();
 		
-        exit.setText(LangConfig.getLang(Lang.ENTITY_SEAL));
+        newGame_button.setText(LangConfig.getLang(Lang.MENU_BUTTON_NEWGAME));
+        loadGame_button.setText(LangConfig.getLang(Lang.MENU_BUTTON_LOADGAME));
+        language_button.setText(LangConfig.getLang(Lang.MENU_BUTTON_LANGUAGE));
+        
      
 	}
 	
     @FXML
-    private void exit() {
-        Stage stage = (Stage) exit.getScene().getWindow();
+    private void newGame_button() {
+        Stage stage = (Stage) newGame_button.getScene().getWindow();
         stage.close();
     }
 
