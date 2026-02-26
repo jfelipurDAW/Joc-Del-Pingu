@@ -1,5 +1,10 @@
 package config;
 
+
+/////////////////////////////////////////////////
+///    STRING_KEYS'S TO REFEER THE LANG.YML   /// 
+/////////////////////////////////////////////////
+
 public enum Lang {
 	
     ENTITY_SEAL     ("entity.seal"),
@@ -13,7 +18,9 @@ public enum Lang {
 	
 	MENU_BUTTON_NEWGAME ("menu.button.newgame"),
 	MENU_BUTTON_LOADGAME ("menu.button.loadgame"),
-	MENU_BUTTON_LANGUAGE ("menu.button.language");
+	MENU_BUTTON_LANGUAGE ("menu.button.language"),
+	
+	TEXT_GAME_TITLE ("text.game.title");
 
     private final String key;
 

@@ -6,3 +6,7 @@ object.fish: "Fish"
 object.dice: "Dice"
 object.dice.fast: "Fast dice"
 object.dice.slow: "Slow dice"
+
+text.game.title: "Pingu's Game"
+
+game.main.title: "Joc del Pingu"

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<HBox alignment="CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="507.0" prefWidth="758.0" styleClass="mainmenu_bg" stylesheets="@style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamePanel.MainMenuController">
+   <children>
+      <VBox alignment="CENTER" prefHeight="507.0" prefWidth="474.0">
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="mainmenu_maintitle" text="game.main.title">
+               <font>
+                  <Font size="45.0" />
+               </font>
+            </Text>
+            <Button fx:id="newGame_button" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#newGame_button" prefHeight="42.0" prefWidth="422.0" styleClass="mainmenu_button_newgame" text="NEW GAME" textAlignment="CENTER" textFill="WHITE">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </Button>
+         </children>
+      </VBox>
+   </children>
+</HBox>
