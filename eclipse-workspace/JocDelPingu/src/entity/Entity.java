@@ -12,4 +12,6 @@ public class Entity {
 	public void setInventory(Inventory inventory) {
 		this.inventory = inventory;
 	}
+
+	
 }
