@@ -27,54 +27,84 @@ public class MainMenuController {
     }
 
     private void addBackgroundImage() {
-        String backgroundPath = "/assets/sprites/backgrounds/menu_background.png";
 
-        try (InputStream is = getClass().getResourceAsStream(backgroundPath)) {
-            if (is == null) {
-                System.err.println("No trobat: " + backgroundPath);
-                return;
-            }
+        String path = "/assets/sprites/backgrounds/1.png";
+        InputStream is = getClass().getResourceAsStream(path);
 
-            Image bgImage = new Image(is);
-            if (bgImage.isError() || bgImage.getWidth() <= 0) {
-                System.err.println("Error: " + backgroundPath);
-                return;
-            }
-
-            Canvas bgCanvas = new Canvas();
-            bgCanvas.widthProperty().bind(rootPane.widthProperty());
-            bgCanvas.heightProperty().bind(rootPane.heightProperty());
-
-            GraphicsContext gc = bgCanvas.getGraphicsContext2D();
-            gc.setImageSmoothing(false);
-
-            // Factor enter més proper (prova 3 o 4 segons com quedi)
-            double scale = 4.0;  // ← canvia a 3.0 o 4.0 per provar
-            double scaledW = bgImage.getWidth() * scale;
-            double scaledH = bgImage.getHeight() * scale;
-
-            // Centra la imatge escalada al Canvas
-            double offsetX = (bgCanvas.getWidth() - scaledW) / 2;
-            double offsetY = (bgCanvas.getHeight() - scaledH) / 2;
-
-            // Arrodoneix offsets per evitar subpíxels (borrositat)
-            offsetX = Math.round(offsetX);
-            offsetY = Math.round(offsetY);
-
-            gc.drawImage(bgImage,
-                         0, 0, bgImage.getWidth(), bgImage.getHeight(),
-                         offsetX, offsetY, scaledW, scaledH);
-
-            bgCanvas.setCache(true);
-            bgCanvas.setCacheHint(CacheHint.SPEED);
-
-            rootPane.getChildren().add(0, bgCanvas);
-
-            System.out.println("Fons amb upscale enter ×" + scale + " carregat");
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (is == null) {
+            System.out.println("Imagen no encontrada");
+            return;
         }
+
+        Image bgImage = new Image(is);
+
+        Canvas canvas = new Canvas();
+        canvas.widthProperty().bind(rootPane.widthProperty());
+        canvas.heightProperty().bind(rootPane.heightProperty());
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setImageSmoothing(false);
+
+        rootPane.getChildren().add(0, canvas);
+
+        // Redibujar cuando cambie tamaño
+        rootPane.widthProperty().addListener((obs, o, n) ->
+                drawPixelPerfect(gc, canvas, bgImage)
+        );
+
+        rootPane.heightProperty().addListener((obs, o, n) ->
+                drawPixelPerfect(gc, canvas, bgImage)
+        );
+
+        drawPixelPerfect(gc, canvas, bgImage);
+    }
+    private void updateScale(ImageView bgView, Image bgImage) {
+
+        double paneWidth = rootPane.getWidth();
+        double paneHeight = rootPane.getHeight();
+
+        double imgWidth = bgImage.getWidth();
+        double imgHeight = bgImage.getHeight();
+
+        // 🔥 Escala ENTERA automática
+        double scale = Math.floor(Math.min(
+                paneWidth / imgWidth,
+                paneHeight / imgHeight
+        ));
+
+        if (scale < 1) scale = 1;
+
+        bgView.setFitWidth(imgWidth * scale);
+        bgView.setFitHeight(imgHeight * scale);
+    }
+
+    private void drawPixelPerfect(GraphicsContext gc, Canvas canvas, Image img) {
+
+        double paneW = canvas.getWidth();
+        double paneH = canvas.getHeight();
+
+        double imgW = img.getWidth();
+        double imgH = img.getHeight();
+
+        // 🔥 Escala ENTERA que cubra TODA la pantalla
+        double scale = Math.ceil(Math.max(paneW / imgW, paneH / imgH));
+
+        if (scale < 1) scale = 1;
+
+        double drawW = imgW * scale;
+        double drawH = imgH * scale;
+
+        // 🔥 Centrado (se recorta automáticamente lo que sobra)
+        double x = Math.floor((paneW - drawW) / 2);
+        double y = Math.floor((paneH - drawH) / 2);
+
+        gc.setImageSmoothing(false);
+
+        // Limpia
+        gc.clearRect(0, 0, paneW, paneH);
+
+        // 🔥 Dibujar ocupando todo
+        gc.drawImage(img, x, y, drawW, drawH);
     }
 
     private void addBitmapTitle() {
