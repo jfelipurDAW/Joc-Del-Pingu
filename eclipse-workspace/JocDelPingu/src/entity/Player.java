@@ -2,9 +2,9 @@ package entity;
 
 public class Player extends Entity{
 	
-	private int id;
 	private String colour;
 	private String name;
+	private String password;
 	
 	
 	public Player(String name, String colour) {
@@ -12,7 +12,6 @@ public class Player extends Entity{
 		this.setID();
 		this.setName(name);
 		this.setColour(colour);
-		
 		//this.setNumCasella(0);		
 		
 	}

@@ -1,5 +1,6 @@
 package gamePanel;
 
+import board.Board;
 import config.Lang;
 import config.LangConfig;
 import javafx.application.Application;
@@ -32,6 +33,8 @@ public class MainMenu extends Application {
     	// Load the Lang file
     	LangConfig.loadLang();
     	
+//    	Board board = new Board();
+//    	board.createNewBoard();
         launch(args);
     }
     
