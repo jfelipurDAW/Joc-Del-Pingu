@@ -1,6 +1,5 @@
 package gamePanel;
 
-import board.Board;
 import config.Lang;
 import config.LangConfig;
 import javafx.application.Application;
@@ -10,32 +9,47 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class MainMenu extends Application {
-	
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-    	
-        // Load the FXML file
+        // Posem les propietats de renderitzat el més aviat possible
+        // "t2k" → millor per text en alguns casos; prova també "d3d" o "sw" si estàs en Windows
+        System.setProperty("prism.lcdtext", "false");
+        System.setProperty("prism.text", "t2k");
+
+        // Opcional: si vols forçar renderitzat per software (més consistent per pixel art, però més lent)
+        // System.setProperty("prism.order", "sw");
+
+        // Carrega l'FXML
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainMenu.fxml"));
         Parent root = loader.load();
 
-        // Create the scene with the loaded FXML root node
+        // Ara pots accedir al controlador si cal (per exemple per ajustar coses dinàmiques)
+        // MainMenuController controller = loader.getController();
+
+        // Crea l'escena
         Scene scene = new Scene(root);
 
-        // Set the scene on the primary stage
+        // Configuració de la finestra
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(774);
         primaryStage.setMinHeight(546);
         primaryStage.setTitle((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
+
+        // Opcional: centra la finestra o ajusta mida inicial
+        primaryStage.centerOnScreen();
+
         primaryStage.show();
     }
-    
+
     public static void main(String[] args) {
-    	// Load the Lang file
-    	LangConfig.loadLang();
-    	
-//    	Board board = new Board();
-//    	board.createNewBoard();
+        // Carrega la llengua abans de llançar l'app
+        LangConfig.loadLang();
+
+        // Si vols provar el board sense menú, descomenta
+        // Board board = new Board();
+        // board.createNewBoard();
+
         launch(args);
     }
-    
 }
