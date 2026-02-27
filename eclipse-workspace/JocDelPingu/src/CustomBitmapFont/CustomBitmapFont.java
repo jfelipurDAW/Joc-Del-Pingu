@@ -36,13 +36,12 @@ public class CustomBitmapFont {
      */
     private CustomBitmapFont() {
         this(
-            " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLM" +
-            "NOPQRSTUVWXYZ[\\]^_`{|}~abcdefghijklmnopqrstuvwxyz",
-            16,
-            48.0,
-            64.0,
-            0.0,
-            0.0
+        		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !?",  // ← COPIA del FontCode.txt
+                16,      // ← COPIA
+                8.0,     // ← COPIA (charW del FontCode.txt)
+                12.0,    // ← COPIA (charH del FontCode.txt)
+                1.0,     // ← COPIA (spacingX del FontCode.txt)
+                2.0    
         );
     }
 

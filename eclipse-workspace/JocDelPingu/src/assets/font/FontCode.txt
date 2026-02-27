@@ -1,0 +1,6 @@
+String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !?";
+int columns = 16;
+double charW = 8;
+double charH = 12;
+double spacingX = 1;
+double spacingY = 2;

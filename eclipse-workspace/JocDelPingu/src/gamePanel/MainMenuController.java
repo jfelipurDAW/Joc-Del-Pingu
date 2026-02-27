@@ -30,9 +30,14 @@ public class MainMenuController {
 //    }
     
     private void addBitmapTitle() {
-    	Group title = CustomBitmapFont.getInstance().createText("JOC DEL PINGU", 180, 40, 2.8);
-    	rootPane.getChildren().add(title);
-    	
+        System.out.println("Afegint text bitmap...");
+        
+        Group title = CustomBitmapFont.getInstance()
+            .createText("JOC DEL PINGU", 180, 40, 4);
+        
+        System.out.println("Text creat amb " + title.getChildren().size() + " caracters");
+        
+        rootPane.getChildren().add(title);
     }
 
 }
