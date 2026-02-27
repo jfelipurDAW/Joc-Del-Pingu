@@ -15,7 +15,7 @@ public class MainMenu extends Application {
     public void start(Stage primaryStage) throws Exception {
     	
         // Load the FXML file
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("mainMenu.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("gameBoard.fxml"));
         Parent root = loader.load();
 
         // Create the scene with the loaded FXML root node
