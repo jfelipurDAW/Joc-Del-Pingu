@@ -32,7 +32,10 @@
 	-fx-translate-x: 180
 }
 
-.square-normal { -fx-background-color: #e0e0e0; }
+.square-normal { 
+	-fx-background-image: url("../assets/sprites/tiles/normal-square.png");
+	-fx-background-color: #e0e0e0; 
+}
 .square-ice-hole { -fx-background-color: #a0d8ef; }
 .square-sled { -fx-background-color: #8b4513; }
 .square-bear { -fx-background-color: #cd853f; }
@@ -53,6 +56,7 @@
     -fx-border-width: 3px;
 }
 .square-top-right {
+	-fx-background-image: url("../assets/sprites/tiles/right-down-normal-square.png");
     -fx-border-color: #00ff00;
     -fx-border-width: 3px;
 }
