@@ -13,7 +13,7 @@ public class MainMenu extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("mainMenu.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("gameBoard.fxml"));
         Parent root = loader.load();
 
         Scene scene = new Scene(root);

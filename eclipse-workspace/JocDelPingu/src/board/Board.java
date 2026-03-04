@@ -6,15 +6,8 @@ public class Board {
 	public static final int heightBoard = 5;
 	public static final int MAX_SQUARES = widthBoard*heightBoard;
 	public static final int NORMAL_SQUARE_PERCENTAGE = 50;
-	
-//	private int widthBoard;
-//	private int heightBoard;
-	private Square[] board = new Square[MAX_SQUARES];
-	
 
-	public SquareType checkSquare(int square) {
-		return board[square].getType();
-	}
+	private Square[] board = new Square[MAX_SQUARES];
 	
 	public void createNewBoard() {
 		for (int i = 0; i < board.length; i++) {
@@ -43,5 +36,12 @@ public class Board {
 				}
 			}
 		}
+		
+		board[0] = new Square(SquareType.START);
+		board[board.length-1] = new Square(SquareType.END);
+	}
+	
+	public SquareType getSquareType(int square) {
+		return board[square].getType();
 	}
 }
