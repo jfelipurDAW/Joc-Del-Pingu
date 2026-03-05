@@ -9,7 +9,7 @@ public class Sled extends Square{
 
 	public Sled(SquareType type) {
 		super(type);
-		// TODO Auto-generated constructor stub
+		
 	}
 	
 }

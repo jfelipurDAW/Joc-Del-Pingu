@@ -346,7 +346,7 @@ public class BitmapFontGenerator extends Application {
         SpriteSheetResult result = createSpriteSheet(assigned, cols, spacingX, spacingY);
         
         FileChooser fc = new FileChooser();
-        fc.setTitle("Guardar Sprite Sheet");
+        fc.setTitle("Save Sprite Sheet");
         fc.setInitialFileName("title.png");
         fc.getExtensionFilters().add(
             new FileChooser.ExtensionFilter("PNG Image", "*.png")

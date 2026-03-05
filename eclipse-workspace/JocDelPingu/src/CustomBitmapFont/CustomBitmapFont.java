@@ -68,7 +68,7 @@ public class CustomBitmapFont {
         } catch (Exception ignored) {
         }
         if (fontSheet.isError() || fontSheet.getWidth() <= 0 || fontSheet.getHeight() <= 0) {
-            throw new RuntimeException("Error greu carregant imatge: " + resourcePath);
+            throw new RuntimeException("WARNING: " + resourcePath);
         }
 
         this.charset = charset;

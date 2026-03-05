@@ -66,7 +66,7 @@ public class MainMenuController {
         double imgWidth = bgImage.getWidth();
         double imgHeight = bgImage.getHeight();
 
-        // 🔥 Escala ENTERA automática
+        // Escala ENTERA automática
         double scale = Math.floor(Math.min(
                 paneWidth / imgWidth,
                 paneHeight / imgHeight
@@ -86,7 +86,7 @@ public class MainMenuController {
         double imgW = img.getWidth();
         double imgH = img.getHeight();
 
-        // 🔥 Escala ENTERA que cubra TODA la pantalla
+        //  Escala ENTERA que cubra TODA la pantalla
         double scale = Math.ceil(Math.max(paneW / imgW, paneH / imgH));
 
         if (scale < 1) scale = 1;
@@ -94,7 +94,7 @@ public class MainMenuController {
         double drawW = imgW * scale;
         double drawH = imgH * scale;
 
-        // 🔥 Centrado (se recorta automáticamente lo que sobra)
+        //  Centrado (se recorta automáticamente lo que sobra)
         double x = Math.floor((paneW - drawW) / 2);
         double y = Math.floor((paneH - drawH) / 2);
 
@@ -103,7 +103,7 @@ public class MainMenuController {
         // Limpia
         gc.clearRect(0, 0, paneW, paneH);
 
-        // 🔥 Dibujar ocupando todo
+        //  Dibujar ocupando todo
         gc.drawImage(img, x, y, drawW, drawH);
     }
 
