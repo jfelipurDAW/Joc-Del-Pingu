@@ -5,7 +5,7 @@ import board.SquareType;
 
 public class Sled extends Square{
 	
-	private int casellaDesti;
+	private int destination;
 
 	public Sled(SquareType type) {
 		super(type);

@@ -1,5 +1,7 @@
 package entity;
 
+import ObjectManagers.ObjectType;
+
 public class Player extends Entity{
 	
 	private String colour;
@@ -26,4 +28,32 @@ public class Player extends Entity{
 	public void setID() {
 		
 	}
+	
+	public Player SnowballWar(Player player1, Player player2) {
+		
+		if (player1.getInventory().getObjectQuantity(ObjectType.SNOWBALL) > player2.getInventory().getObjectQuantity(ObjectType.SNOWBALL)) {
+			player1.getInventory().useObject(ObjectType.SNOWBALL, player2.getInventory().getObjectQuantity(ObjectType.SNOWBALL));
+			player2.getInventory().useObject(ObjectType.SNOWBALL, player2.getInventory().getObjectQuantity(ObjectType.SNOWBALL));
+			
+			
+			return player1;
+			
+		} else if (player2.getInventory().getObjectQuantity(ObjectType.SNOWBALL) > player1.getInventory().getObjectQuantity(ObjectType.SNOWBALL)) {
+			player2.getInventory().useObject(ObjectType.SNOWBALL, player1.getInventory().getObjectQuantity(ObjectType.SNOWBALL));
+			player1.getInventory().useObject(ObjectType.SNOWBALL, player1.getInventory().getObjectQuantity(ObjectType.SNOWBALL));
+			
+			
+			return player2;
+			
+		} else {
+			player1.getInventory().useObject(ObjectType.SNOWBALL, player1.getInventory().getObjectQuantity(ObjectType.SNOWBALL));
+			player2.getInventory().useObject(ObjectType.SNOWBALL, player2.getInventory().getObjectQuantity(ObjectType.SNOWBALL));
+			
+			
+			return null;
+			
+		}
+		
+	}
+
 }

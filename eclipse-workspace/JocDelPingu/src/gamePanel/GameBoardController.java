@@ -81,6 +81,7 @@ public class GameBoardController {
                 case SLED: cell.getStyleClass().add("square-sled"); break;
                 case BEAR: cell.getStyleClass().add("square-bear"); break;
                 case EVENT: cell.getStyleClass().add("square-event"); break;
+                case BROKEN_FLOOR: cell.getStyleClass().add("square-broken-floor"); break;
                 case START: cell.getStyleClass().add("square-start"); break;
                 case END: cell.getStyleClass().add("square-end");
             }

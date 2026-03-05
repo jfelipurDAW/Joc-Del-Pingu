@@ -6,6 +6,7 @@
 .square-sled { -fx-background-color: #8b4513; }
 .square-bear { -fx-background-color: #cd853f; }
 .square-event { -fx-background-color: #ffd700; }
+.square-broken-floor { -fx-background-color: #6666ff; }
 .square-start { -fx-background-color: #991111; }
 .square-end { -fx-background-color: #333333; }
 

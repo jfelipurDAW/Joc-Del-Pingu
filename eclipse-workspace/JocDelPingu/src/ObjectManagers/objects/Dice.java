@@ -4,15 +4,39 @@ import ObjectManagers.ObjectType;
 
 public class Dice extends Object{
 
+	private static final int SLOWDICE_MIN_VALUE = 1;
+	private static final int SLOWDICE_MAX_VALUE = 3;
+
+	private static final int FASTDICE_MIN_VALUE = 5;
+	private static final int FASTDICE_MAX_VALUE = 10;
+
+	
 	protected ObjectType objectType = ObjectType.DICE;
 	
 	protected int minValue;
     protected int maxValue;
+    protected ObjectType diceType;
     
-    public Dice(ObjectType type, int min, int max) {
-        super(type);
-        this.minValue = min;
-        this.maxValue = max;
+    public Dice(ObjectType diceType) {
+        this.diceType = diceType;
+        
+        switch (diceType) {
+        
+        case FASTDICE:
+        	
+        	this.minValue = FASTDICE_MIN_VALUE;
+        	this.maxValue = FASTDICE_MAX_VALUE;
+        	
+        	break;
+    
+        case SLOWDICE:
+        	
+        	this.minValue = SLOWDICE_MIN_VALUE;
+        	this.maxValue = SLOWDICE_MAX_VALUE;
+        	
+        	break;
+        
+        }
     }
     
     public int roll() {
@@ -25,4 +49,8 @@ public class Dice extends Object{
     public int getMaxValue() { 
     	return maxValue; 
     	}
+    
+    public ObjectType getDiceType() {
+    	return this.diceType;
+    }
 }

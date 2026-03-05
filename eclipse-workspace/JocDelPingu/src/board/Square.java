@@ -2,8 +2,8 @@ package board;
 
 public class Square {
 	
-	private SquareType type;
-	
+	protected SquareType type;
+	protected int SquareID;
 	
 	
 	public Square(SquareType type) {
@@ -14,5 +14,9 @@ public class Square {
 
 	public SquareType getType() {
 		return this.type;
+	}
+	
+	public int getSquareID() {
+		return this.SquareID;
 	}
 }
