@@ -2,46 +2,46 @@ package ObjectManagers.objects;
 
 import ObjectManagers.ObjectType;
 import java.util.Random;
-public class SnowBall extends Object {
-		
-	private ObjectType objectType = ObjectType.SNOWBALL;
-	
-}
+import entity.Player;
 
-/**
- * Classe que representa una bola de neu
- */
-public class BolaDeNeu {
+public class SnowBall extends Object {
     
-    private int casellesRetrocedir;
+    private ObjectType objectType = ObjectType.SNOWBALL;
+    private int backwardSteps;
     private Random random;
     
-    public BolaDeNeu() {
+    
+    public SnowBall() {
         this.random = new Random();
-        this.casellesRetrocedir = calcularRetroces();
+        this.backwardSteps = calculateBackwardSteps();
     }
     
     /**
-     * Llança la bola de neu a un jugador objectiu
+     * Throws the snowball at a target player.
+     * @param target The player who will be hit by the snowball.
      */
-    public void llançar(Jugador objectiu) {
-        int posicioActual = objectiu.getPosicio();
-        int novaPosicio = Math.max(0, posicioActual - casellesRetrocedir);
+    public void throwSnowball(Player target) {
+        int currentPosition = target.getPosition();
+        int newPosition = Math.max(0, currentPosition - backwardSteps);
         
-        objectiu.actualitzarPosicio(novaPosicio);
+        target.updatePosition(newPosition);
         
-        System.out.println(objectiu.getNom() + " retrocedeix " + casellesRetrocedir + 
-                          " caselles (posició: " + novaPosicio + ")");
+        System.out.println(target.getName() + " moves back " + backwardSteps + 
+                          " spaces (position: " + newPosition + ")");
     }
     
     /**
-     * Calcula el retrocés aleatori (1-3 caselles)
+     * Calculates the random backward steps (1-3 spaces).
      */
-    private int calcularRetroces() {
-        return random.nextInt(3) + 1; // 1, 2 o 3
+    private int calculateBackwardSteps() {
+        return random.nextInt(3) + 1; // 1, 2 or 3
     }
     
-    public int getCasellesRetrocedir() {
-        return casellesRetrocedir;
+    public int getBackwardSteps() {
+        return backwardSteps;
+    }
+    
+    public ObjectType getObjectType() {
+        return objectType;
     }
 }
