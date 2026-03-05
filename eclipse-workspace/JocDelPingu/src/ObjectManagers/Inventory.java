@@ -45,6 +45,31 @@ public class Inventory {
 	///////////////////
 	///   METHODS   ///
 	///////////////////
+	
+	
+	public int getObjectQuantity(ObjectType object) {
+		
+		switch(object) {
+		
+		case SNOWBALL:
+			return this.snowballQuantity;
+			
+		case FISH:
+			return this.fishQuantity;
+			
+		case DICE:
+			return this.diceQuantity;
+			
+		case FASTDICE:
+			return this.fastdiceQuantity;
+			
+		case SLOWDICE:
+			return this.slowdiceQuantity;
+		}
+		
+		return -1;
+	}
+	
 	public void addObject(Object object) {
 		
 		switch(object.getType()) {
@@ -75,5 +100,40 @@ public class Inventory {
 			break;
 		}
 		
+	}
+	
+	public boolean useObject(ObjectType object, int quantity) {
+		
+		switch(object) {
+
+		case FISH:
+			if (fishQuantity >= quantity) {
+				fishQuantity -= quantity;
+				return true;
+			}
+			
+			
+			break;
+			
+		case SNOWBALL:
+			if (snowballQuantity >= quantity) {
+				snowballQuantity -= quantity;
+				return true;
+			}
+			
+			
+			break;
+
+		case DICE:
+			if (diceQuantity >= quantity) {
+				diceQuantity -= quantity;
+				return true;
+			}
+			
+			
+			break;
+		}
+		
+		return false;
 	}
 }
