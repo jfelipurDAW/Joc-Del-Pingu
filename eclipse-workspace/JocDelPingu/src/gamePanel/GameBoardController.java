@@ -2,6 +2,9 @@ package gamePanel;
 
 import board.Board;
 import board.SquareType;
+import board.TurnController;
+import entity.EntityType;
+import entity.Player;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
@@ -21,8 +24,13 @@ public class GameBoardController {
     public void initialize() {
     	gameBoard = new Board();
     	gameBoard.createNewBoard();
-
+    	
         drawBoard();
+
+    }
+
+	public Board getCurrentGameBoard() {
+    	return this.gameBoard;
     }
 
     private void drawBoard() {
