@@ -5,32 +5,101 @@ import board.SquareType;
 import board.TurnController;
 import entity.EntityType;
 import entity.Player;
+import ObjectManagers.objects.Dice;
+import ObjectManagers.ObjectType;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
 
 public class GameBoardController {
 
     @FXML
     private GridPane grid;
 
+    @FXML
+    private Button rollDiceButton;
+
     private Board gameBoard;
+    private TurnController turnController;
+    private Dice slowDice;
 
     @FXML
     public void initialize() {
     	gameBoard = new Board();
     	gameBoard.createNewBoard();
     	
+    	// Initialize turn controller and players
+    	turnController = new TurnController();
+    	initializePlayers();
+    	
+    	// Initialize dice
+    	slowDice = new Dice(ObjectType.SLOWDICE);
+    	
         drawBoard();
+    }
 
+    /**
+     * Initialize the players for the game
+     */
+    private void initializePlayers() {
+    	// Create players with different colors
+    	Player player1 = new Player("Player 1", "red");
+    	Player player2 = new Player("Player 2", "blue");
+    	Player player3 = new Player("Player 3", "green");
+    	Player player4 = new Player("Player 4", "yellow");
+    	
+    	// Add players to turn controller
+    	turnController.addPlayer(player1);
+    	turnController.addPlayer(player2);
+    	turnController.addPlayer(player3);
+    	turnController.addPlayer(player4);
+    }
+
+    /**
+     * Handle the roll dice button click
+     * Rolls the slow dice and moves the current player
+     */
+    @FXML
+    private void rollDice() {
+    	// Get the current player
+    	Player currentPlayer = (Player) turnController.getCurrentTurn();
+    	
+    	// Roll the slow dice
+    	int diceResult = slowDice.roll();
+    	System.out.println(currentPlayer.getName() + " rolled: " + diceResult);
+    	
+    	// Move the player
+    	currentPlayer.advance(diceResult);
+    	System.out.println(currentPlayer.getName() + " moved to square: " + currentPlayer.getSquareIndex());
+    	
+    	// Redraw the board to show new positions
+    	drawBoard();
+    	
+    	// Move to next turn
+    	turnController.nextTurn();
     }
 
 	public Board getCurrentGameBoard() {
     	return this.gameBoard;
+    }
+
+    /**
+     * Get all players in the game
+     */
+    private java.util.List<Player> getAllPlayers() {
+    	java.util.List<Player> players = new java.util.ArrayList<>();
+    	for (entity.Entity e : turnController.getAllPlayers()) {
+    		if (e instanceof Player) {
+    			players.add((Player) e);
+    		}
+    	}
+    	return players;
     }
 
     private void drawBoard() {
@@ -118,7 +187,42 @@ public class GameBoardController {
             	}
             }
 
+            // Add player circles to the cell
+            addPlayerCirclesToCell(cell, i);
+
             grid.add(cell, col, row);
         }
     }
+
+    /**
+     * Add player circles to a specific cell if players are on that square
+     */
+    private void addPlayerCirclesToCell(StackPane cell, int squareIndex) {
+    	java.util.List<Player> players = getAllPlayers();
+    	int playerCount = 0;
+    	
+    	for (Player player : players) {
+    		if (player.getSquareIndex() == squareIndex) {
+    			// Create a circle for the player
+    			Circle playerCircle = new Circle(8); // Radius of 8 pixels
+    			
+    			// Set color based on player
+    			switch (player.getColour()) {
+    				case "red": playerCircle.setFill(javafx.scene.paint.Color.RED); break;
+    				case "blue": playerCircle.setFill(javafx.scene.paint.Color.BLUE); break;
+    				case "green": playerCircle.setFill(javafx.scene.paint.Color.GREEN); break;
+    				case "yellow": playerCircle.setFill(javafx.scene.paint.Color.YELLOW); break;
+    				default: playerCircle.setFill(javafx.scene.paint.Color.GRAY); break;
+    			}
+    			
+    			// Position the circle within the cell
+    			playerCircle.setTranslateX(playerCount * 15 - 15); // Offset circles horizontally
+    			playerCircle.setTranslateY(0);
+    			
+    			cell.getChildren().add(playerCircle);
+    			playerCount++;
+    		}
+    	}
+    }
+    
 }

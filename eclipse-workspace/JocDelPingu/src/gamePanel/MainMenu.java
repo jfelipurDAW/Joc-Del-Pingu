@@ -20,11 +20,11 @@ public class MainMenu extends Application {
 
         primaryStage.setScene(scene);
 
-        // Tamaño inicial
+        // Initial size
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        //  Permitir redimensionar (si quieres adaptación real)
+        //  Allow Rescale
         primaryStage.setResizable(true);
 
         primaryStage.setTitle((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));

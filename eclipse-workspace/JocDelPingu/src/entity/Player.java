@@ -28,6 +28,10 @@ public class Player extends Entity{
 		this.colour = colour;
 	}
 	
+	public String getColour() {
+		return this.colour;
+	}
+	
 	public void setID() {
 	
 	}

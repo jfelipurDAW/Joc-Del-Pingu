@@ -28,10 +28,11 @@ public class TurnController {
 	}
 	
 	public void nextTurn() {
-		turn += 1;
-		while (turn >= players.size()) {
-			turn -= turn;
-		}
+		turn = (turn + 1) % players.size();
+	}
+	
+	public ArrayList<Entity> getAllPlayers() {
+		return players;
 	}
 	
 }
