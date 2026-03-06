@@ -65,7 +65,7 @@ public class Board {
 			
 		case SLED:
 			
-			return Sled_Array.get(Sled_Array.indexOf(square.getSquareID())-1);
+			return Sled_Array.get(Sled_Array.indexOf(square.getSquareID())+1);
 			
 		}
 		

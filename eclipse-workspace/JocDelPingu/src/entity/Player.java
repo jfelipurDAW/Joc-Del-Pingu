@@ -26,8 +26,12 @@ public class Player extends Entity{
 	}
 	
 	public void setID() {
-		
+	
 	}
+	@Override
+    public String toString() {
+        return name + " (" + colour + ") - Casella: " + numSquare;
+    }
 	
 	public Player SnowballWar(Player player1, Player player2) {
 		
