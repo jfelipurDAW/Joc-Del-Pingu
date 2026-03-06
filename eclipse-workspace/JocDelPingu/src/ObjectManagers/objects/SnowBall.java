@@ -12,8 +12,7 @@ public class SnowBall extends Object {
     
     
     public SnowBall() {
-        this.random = new Random();
-        this.backwardSteps = calculateBackwardSteps();
+    	
     }
     
     /**
@@ -28,17 +27,6 @@ public class SnowBall extends Object {
         
         System.out.println(target.getName() + " moves back " + backwardSteps + 
                           " spaces (position: " + newPosition + ")");
-    }
-    
-    /**
-     * Calculates the random backward steps (1-3 spaces).
-     */
-    private int calculateBackwardSteps() {
-        return random.nextInt(3) + 1; // 1, 2 or 3
-    }
-    
-    public int getBackwardSteps() {
-        return backwardSteps;
     }
     
     public ObjectType getObjectType() {

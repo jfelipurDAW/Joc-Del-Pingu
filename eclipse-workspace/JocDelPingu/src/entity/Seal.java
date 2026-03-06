@@ -5,13 +5,10 @@ import config.LangConfig;
 
 public class Seal extends Entity{
 
-	private String name = Lang.ENTITY_SEAL.getKey();
-	
-	
-//	public Seal {
-//				
-//		//this.setNumCasella(0);		
-//		
-//	}
+	public Seal() {
+		this.name = Lang.ENTITY_SEAL.getKey();
+		this.type = EntityType.PLAYER;		
+		
+	}
 	
 }

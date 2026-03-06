@@ -1,20 +1,23 @@
 package entity;
 
 import ObjectManagers.ObjectType;
+import board.Board;
+import board.Square;
+import board.SquareType;
+import gamePanel.GameBoardController;
 
 public class Player extends Entity{
 	
 	private String colour;
-	private String name;
 	private String password;
 	
 	
 	public Player(String name, String colour) {
 		
+		this.type = EntityType.PLAYER;
 		this.setID();
 		this.setName(name);
-		this.setColour(colour);
-		//this.setNumCasella(0);		
+		this.setColour(colour);	
 		
 	}
 	
@@ -30,7 +33,7 @@ public class Player extends Entity{
 	}
 	@Override
     public String toString() {
-        return name + " (" + colour + ") - Casella: " + numSquare;
+        return name + " (" + colour + ") - Square: " + numSquare;
     }
 	
 	public Player SnowballWar(Player player1, Player player2) {
@@ -60,4 +63,29 @@ public class Player extends Entity{
 		
 	}
 
+	public void updatePosition(int newPosition) {
+		
+		Board board = new Board();
+		SquareType currentSquare = board.getSquareType(newPosition);
+		
+	}
+
+	public int getPosition() {
+		return this.numSquare;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void moveForward(int number) {
+        this.setSquare(this.getSquareIndex()+number);
+        //Play animation walking through squares
+        
+        this.updatePosition(this.getSquareIndex());
+    }
+
+	public void setSquare(int i) {
+		this.numSquare = i;
+	}
 }

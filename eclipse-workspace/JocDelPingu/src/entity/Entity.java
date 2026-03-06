@@ -9,6 +9,8 @@ public class Entity {
 	protected int entityId;
 	protected Inventory inventory;
 	protected int numSquare;
+	protected EntityType type;
+	protected String name;
 	
 	public void setInventory(Inventory inventory) {
 		this.inventory = inventory;
@@ -27,4 +29,11 @@ public class Entity {
 		return this.inventory;
 	}
 	
+	public EntityType getType() {
+		return this.type;
+	}
+	
+	public String getName() {
+		return this.name;
+	}
 }
