@@ -22,7 +22,7 @@ public class MainMenuController {
     public void initialize() {
         
 
-        addBackgroundImage();   // ← Afegit: fons pixel art
+        addBackgroundImage();
         addBitmapTitle();
     }
 
@@ -32,7 +32,7 @@ public class MainMenuController {
         InputStream is = getClass().getResourceAsStream(path);
 
         if (is == null) {
-            System.out.println("Imagen no encontrada");
+            System.out.println("404: Image Not Found");
             return;
         }
 
@@ -47,7 +47,7 @@ public class MainMenuController {
 
         rootPane.getChildren().add(0, canvas);
 
-        // Redibujar cuando cambie tamaño
+        // Redraw on resize
         rootPane.widthProperty().addListener((obs, o, n) ->
                 drawPixelPerfect(gc, canvas, bgImage)
         );
@@ -66,7 +66,7 @@ public class MainMenuController {
         double imgWidth = bgImage.getWidth();
         double imgHeight = bgImage.getHeight();
 
-        // Escala ENTERA automática
+        // Automatic scale
         double scale = Math.floor(Math.min(
                 paneWidth / imgWidth,
                 paneHeight / imgHeight

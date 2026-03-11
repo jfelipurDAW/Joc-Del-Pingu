@@ -49,10 +49,10 @@ public class GameBoardController {
      */
     private void initializePlayers() {
     	// Create players with different colors
-    	Player player1 = new Player("Player 1", "red");
-    	Player player2 = new Player("Player 2", "blue");
-    	Player player3 = new Player("Player 3", "green");
-    	Player player4 = new Player("Player 4", "yellow");
+    	Player player1 = new Player("Player 1", "ffffff");
+    	Player player2 = new Player("Player 2", "ff0000");
+    	Player player3 = new Player("Player 3", "ff77aa");
+    	Player player4 = new Player("Player 4", "444444");
     	
     	// Add players to turn controller
     	turnController.addPlayer(player1);
@@ -67,6 +67,7 @@ public class GameBoardController {
      */
     @FXML
     private void rollDice() {
+    	rollDiceButton.setDisable(true);
     	// Get the current player
     	Player currentPlayer = (Player) turnController.getCurrentTurn();
     	
@@ -83,6 +84,7 @@ public class GameBoardController {
     	
     	// Move to next turn
     	turnController.nextTurn();
+    	rollDiceButton.setDisable(false);
     }
 
 	public Board getCurrentGameBoard() {
@@ -207,13 +209,7 @@ public class GameBoardController {
     			Circle playerCircle = new Circle(8); // Radius of 8 pixels
     			
     			// Set color based on player
-    			switch (player.getColour()) {
-    				case "red": playerCircle.setFill(javafx.scene.paint.Color.RED); break;
-    				case "blue": playerCircle.setFill(javafx.scene.paint.Color.BLUE); break;
-    				case "green": playerCircle.setFill(javafx.scene.paint.Color.GREEN); break;
-    				case "yellow": playerCircle.setFill(javafx.scene.paint.Color.YELLOW); break;
-    				default: playerCircle.setFill(javafx.scene.paint.Color.GRAY); break;
-    			}
+    			playerCircle.setFill(javafx.scene.paint.Color.web(player.getColour()));
     			
     			// Position the circle within the cell
     			playerCircle.setTranslateX(playerCount * 15 - 15); // Offset circles horizontally

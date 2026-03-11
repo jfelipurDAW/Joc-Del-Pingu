@@ -40,7 +40,7 @@ public class Dice extends Object{
     }
     
     public int roll() {
-        return (int) (Math.random() * (maxValue - minValue + 1)) + minValue;
+        return (int) ((Math.random() * (maxValue - minValue + 1)) + minValue);
     }
     
     public int getMinValue() { 
