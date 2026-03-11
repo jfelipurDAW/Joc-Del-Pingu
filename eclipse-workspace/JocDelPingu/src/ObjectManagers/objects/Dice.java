@@ -25,4 +25,9 @@ public class Dice extends Object{
     public int getMaxValue() { 
     	return maxValue; 
     	}
+
+    public ObjectType getDiceType() {
+    	return this.diceType;
+    }
+    
 }

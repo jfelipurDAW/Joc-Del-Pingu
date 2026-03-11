@@ -6,6 +6,7 @@ public enum SquareType {
 	BEAR,
 	EVENT,
 	NORMAL,
+	BROKEN_FLOOR,
 	START,
 	END
 }
