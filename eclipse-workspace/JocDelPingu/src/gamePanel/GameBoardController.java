@@ -16,7 +16,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
-
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.effect.ColorAdjust;
 public class GameBoardController {
 
     @FXML
@@ -49,10 +51,10 @@ public class GameBoardController {
      */
     private void initializePlayers() {
     	// Create players with different colors
-    	Player player1 = new Player("Player 1", "red");
-    	Player player2 = new Player("Player 2", "blue");
-    	Player player3 = new Player("Player 3", "green");
-    	Player player4 = new Player("Player 4", "yellow");
+    	Player player1 = new Player("Player 1", "00FF00");
+    	Player player2 = new Player("Player 2", "0040FF");
+    	Player player3 = new Player("Player 3", "00AB00");
+    	Player player4 = new Player("Player 4", "F6FF00");
     	
     	// Add players to turn controller
     	turnController.addPlayer(player1);
@@ -112,7 +114,7 @@ public class GameBoardController {
         
         grid.getColumnConstraints().clear();
         grid.getRowConstraints().clear();
-
+        grid.getChildren().clear();
         DoubleBinding midaCella = Bindings.createDoubleBinding(
             () -> Math.min(grid.getWidth() / cols, grid.getHeight() / rows),
             grid.widthProperty(), 
@@ -188,41 +190,82 @@ public class GameBoardController {
             }
 
             // Add player circles to the cell
-            addPlayerCirclesToCell(cell, i);
+            addPlayerSpritesToCell(cell, i);
 
             grid.add(cell, col, row);
         }
     }
 
     /**
-     * Add player circles to a specific cell if players are on that square
+     * Add player sprites to a specific cell if players are on that square
      */
-    private void addPlayerCirclesToCell(StackPane cell, int squareIndex) {
-    	java.util.List<Player> players = getAllPlayers();
-    	int playerCount = 0;
-    	
-    	for (Player player : players) {
-    		if (player.getSquareIndex() == squareIndex) {
-    			// Create a circle for the player
-    			Circle playerCircle = new Circle(8); // Radius of 8 pixels
-    			
-    			// Set color based on player
-    			switch (player.getColour()) {
-    				case "red": playerCircle.setFill(javafx.scene.paint.Color.RED); break;
-    				case "blue": playerCircle.setFill(javafx.scene.paint.Color.BLUE); break;
-    				case "green": playerCircle.setFill(javafx.scene.paint.Color.GREEN); break;
-    				case "yellow": playerCircle.setFill(javafx.scene.paint.Color.YELLOW); break;
-    				default: playerCircle.setFill(javafx.scene.paint.Color.GRAY); break;
-    			}
-    			
-    			// Position the circle within the cell
-    			playerCircle.setTranslateX(playerCount * 15 - 15); // Offset circles horizontally
-    			playerCircle.setTranslateY(0);
-    			
-    			cell.getChildren().add(playerCircle);
-    			playerCount++;
-    		}
-    	}
+    private void addPlayerSpritesToCell(StackPane cell, int squareIndex) {
+        java.util.List<Player> players = getAllPlayers();
+        int playerCount = 0;
+
+        // Load images once (you can also move this to fields / initialize() for better performance)
+        Image baseImage = new Image("file:///D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/sprites/entities/player/player_idle.png");
+        Image colorImage = new Image("file:///D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/sprites/entities/player/player_idle_colour.png");
+
+        // Desired display size — adjust according to your cell size / sprite resolution
+        double spriteSize = 40;  // e.g. 32×32, 40×40, 48×48 — test what looks good
+
+        for (Player player : players) {
+            if (player.getSquareIndex() == squareIndex) {
+
+                // Container for this player's sprite (allows stacking + translation)
+                StackPane playerToken = new StackPane();
+
+                // 1. Base layer (outline / shadow / details)
+                ImageView baseView = new ImageView(baseImage);
+                baseView.setFitWidth(spriteSize);
+                baseView.setFitHeight(spriteSize);
+                baseView.setPreserveRatio(true);
+                baseView.setSmooth(false);           // nicer scaling
+
+                // 2. Color overlay layer
+                ImageView colorView = new ImageView(colorImage);
+                colorView.setFitWidth(spriteSize);
+                colorView.setFitHeight(spriteSize);
+                colorView.setPreserveRatio(true);
+                colorView.setSmooth(false);
+
+             // El tinte
+                ColorAdjust tint = new ColorAdjust();
+                double hue = getHueForColor(player.getColour());
+                tint.setHue(hue);
+
+                // Ajustes que suelen mejorar el resultado con máscaras
+                tint.setSaturation(0.8);     // ← prueba entre 0.4 y 1.0
+                tint.setBrightness(-0.05);   // ← sutil ajuste si queda muy oscuro/claro
+                // tint.setContrast(0.2);    // opcional
+
+                colorView.setEffect(tint);
+
+                playerToken.getChildren().addAll(baseView, colorView);
+
+                // Mejor distribución cuando hay varios jugadores
+                double offsetX = (playerCount - (players.size() - 1) / 2.0) * 22;
+                playerToken.setTranslateX(offsetX);
+
+                cell.getChildren().add(playerToken);
+                playerCount++;
+            }
+        }
     }
+    private static final java.util.Map<String, Double> COLOR_HUES = 
+    	    java.util.Map.of(
+    	        "FF0000", 0.0,      // rojo
+    	        "F6FF00", 0.1667,   // amarillo
+    	        "00AB00", 0.3333,   // verde
+    	        "0040FF", 0.6667    // azul
+    	    );
+
+    	private double getHueForColor(String colour) {
+    	    if (colour == null) return 0.0;
+    	    String hex = colour.toUpperCase().trim();
+    	    return COLOR_HUES.getOrDefault(hex, 0.0);
+    	}
+    
     
 }
