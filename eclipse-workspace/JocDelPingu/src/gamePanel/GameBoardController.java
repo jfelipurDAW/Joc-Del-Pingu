@@ -46,15 +46,19 @@ public class GameBoardController {
         drawBoard();
     }
 
-    /**
+    /*
      * Initialize the players for the game
      */
     private void initializePlayers() {
     	// Create players with different colors
-    	Player player1 = new Player("Player 1", "00FF00");
-    	Player player2 = new Player("Player 2", "0040FF");
-    	Player player3 = new Player("Player 3", "00AB00");
-    	Player player4 = new Player("Player 4", "F6FF00");
+    	Player player1 = new Player("Player 1", "222222");
+    	player1.setBoard(gameBoard);
+    	Player player2 = new Player("Player 2", "ff0000");
+    	player2.setBoard(gameBoard);
+    	Player player3 = new Player("Player 3", "ff77aa");
+    	player3.setBoard(gameBoard);
+    	Player player4 = new Player("Player 4", "444444");
+    	player4.setBoard(gameBoard);
     	
     	// Add players to turn controller
     	turnController.addPlayer(player1);
@@ -69,6 +73,7 @@ public class GameBoardController {
      */
     @FXML
     private void rollDice() {
+    	rollDiceButton.setDisable(true);
     	// Get the current player
     	Player currentPlayer = (Player) turnController.getCurrentTurn();
     	
@@ -85,6 +90,7 @@ public class GameBoardController {
     	
     	// Move to next turn
     	turnController.nextTurn();
+    	rollDiceButton.setDisable(false);
     }
 
 	public Board getCurrentGameBoard() {

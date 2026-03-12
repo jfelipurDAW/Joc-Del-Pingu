@@ -102,6 +102,8 @@ public class Inventory {
 		
 	}
 	
+	
+	
 	public boolean useObject(ObjectType object, int quantity) {
 		
 		switch(object) {

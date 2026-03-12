@@ -38,7 +38,8 @@ public class MainMenu extends Application {
 
     public static void main(String[] args) {
 
-        System.setProperty("prism.allowhidpi", "false");
+        // Solo esto si tienes problema con DPI en Windows
+        // System.setProperty("prism.allowhidpi", "false");
 
         LangConfig.loadLang();
         launch(args);

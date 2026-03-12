@@ -1,16 +1,17 @@
 package entity;
 
+import ObjectManagers.Inventory;
 import ObjectManagers.ObjectType;
 import board.Board;
-import board.Square;
 import board.SquareType;
-import gamePanel.GameBoardController;
 
 public class Player extends Entity{
 	
+	private String name;
 	private String colour;
 	private String password;
-	
+	private Inventory inventory;
+
 	
 	public Player(String name, String colour) {
 		
@@ -67,17 +68,11 @@ public class Player extends Entity{
 		
 	}
 
-	public void updatePosition(int newPosition) {
-		
-		Board board = new Board();
-		SquareType currentSquare = board.getSquareType(newPosition);
-		
-	}
-
 	public int getPosition() {
 		return this.numSquare;
 	}
 
+	@Override
 	public String getName() {
 		return this.name;
 	}
@@ -91,5 +86,15 @@ public class Player extends Entity{
 
 	public void setSquare(int i) {
 		this.numSquare = i;
+	}
+	
+	
+	public void setInventory(Inventory inventory) {
+		this.inventory = inventory;
+	}
+	
+	
+	public Inventory getInventory() {
+		return this.inventory;
 	}
 }
