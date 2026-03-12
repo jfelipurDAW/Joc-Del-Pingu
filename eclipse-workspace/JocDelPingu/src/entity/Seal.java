@@ -8,7 +8,8 @@ public class Seal extends Entity{
 	private boolean bribe;
 	
 	public Seal() {
-		this.type = EntityType.PLAYER;		
+		this.name = Lang.ENTITY_SEAL.getKey();
+		this.type = EntityType.SEAL;
 		
 	}
 	
