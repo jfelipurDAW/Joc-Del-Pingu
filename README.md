@@ -1,6 +1,9 @@
 <h1 align="left">Joc del Pingu</h1>
 
 ###
+![GitHub repo size](https://img.shields.io/github/repo-size/jfelipurDAW/Joc-Del-Pingu)
+![GitHub last commit](https://img.shields.io/github/last-commit/jfelipurDAW/Joc-Del-Pingu)
+![GitHub license](https://img.shields.io/github/license/jfelipurDAW/Joc-Del-Pingu)
 
 <p align="left">Projecte de DAW - Ilerna Lleida</p>
 <img src="https://upload.wikimedia.org/wikipedia/commons/8/8c/LOGO_ILERNA.png" height="40" alt="ilerna logo"  />
