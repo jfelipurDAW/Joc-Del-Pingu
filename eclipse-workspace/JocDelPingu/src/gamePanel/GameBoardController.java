@@ -203,12 +203,12 @@ public class GameBoardController {
         java.util.List<Player> players = getAllPlayers();
         int playerCount = 0;
 
-        // Load images once (you can also move this to fields / initialize() for better performance)
+        // Load images once 
         Image baseImage = new Image("file:///D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/sprites/entities/player/player_idle.png");
         Image colorImage = new Image("file:///D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/sprites/entities/player/player_idle_colour.png");
 
         // Desired display size — adjust according to your cell size / sprite resolution
-        double spriteSize = 40;  // e.g. 32×32, 40×40, 48×48 — test what looks good
+        double spriteSize = 40;  
 
         for (Player player : players) {
             if (player.getSquareIndex() == squareIndex) {
@@ -221,7 +221,7 @@ public class GameBoardController {
                 baseView.setFitWidth(spriteSize);
                 baseView.setFitHeight(spriteSize);
                 baseView.setPreserveRatio(true);
-                baseView.setSmooth(false);           // nicer scaling
+                baseView.setSmooth(false);           
 
                 // 2. Color overlay layer
                 ImageView colorView = new ImageView(colorImage);
@@ -230,21 +230,20 @@ public class GameBoardController {
                 colorView.setPreserveRatio(true);
                 colorView.setSmooth(false);
 
-             // El tinte
+             // tint
                 ColorAdjust tint = new ColorAdjust();
                 double hue = getHueForColor(player.getColour());
                 tint.setHue(hue);
 
-                // Ajustes que suelen mejorar el resultado con máscaras
-                tint.setSaturation(0.8);     // ← prueba entre 0.4 y 1.0
-                tint.setBrightness(-0.05);   // ← sutil ajuste si queda muy oscuro/claro
-                // tint.setContrast(0.2);    // opcional
-
+                
+                tint.setSaturation(0.8);    
+                tint.setBrightness(-0.05);  
+                tint.setContrast(0.2);    
                 colorView.setEffect(tint);
 
                 playerToken.getChildren().addAll(baseView, colorView);
 
-                // Mejor distribución cuando hay varios jugadores
+
                 double offsetX = (playerCount - (players.size() - 1) / 2.0) * 22;
                 playerToken.setTranslateX(offsetX);
 
@@ -255,10 +254,10 @@ public class GameBoardController {
     }
     private static final java.util.Map<String, Double> COLOR_HUES = 
     	    java.util.Map.of(
-    	        "FF0000", 0.0,      // rojo
-    	        "F6FF00", 0.1667,   // amarillo
-    	        "00AB00", 0.3333,   // verde
-    	        "0040FF", 0.6667    // azul
+    	        "FF0000", 0.0,      
+    	        "F6FF00", 0.1667,   
+    	        "00AB00", 0.3333,   
+    	        "0040FF", 0.6667    
     	    );
 
     	private double getHueForColor(String colour) {
