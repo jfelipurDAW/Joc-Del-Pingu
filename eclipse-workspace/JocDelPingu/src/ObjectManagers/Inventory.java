@@ -6,6 +6,7 @@ public class Inventory {
 	
 	
 	private ArrayList<Object> inventory;
+	private ArrayList<ObjectManagers.Object> lista;
 	
 	private int entityId;
 	
@@ -20,6 +21,7 @@ public class Inventory {
 	///   CONSTRUCTORS   ///
 	////////////////////////
 	public Inventory (int entityId) {
+		this.lista = new ArrayList<ObjectManagers.Object>();
 		this.inventory = new ArrayList<Object>();
 		this.entityId = entityId;
 		
@@ -40,6 +42,66 @@ public class Inventory {
 		this.fastdiceQuantity = fastdiceQuantity;
 		this.slowdiceQuantity = slowdiceQuantity;
 	}
+	
+		//////////////////////////////
+		///   GETTERS I SETTERS    /// 
+		//////////////////////////////
+		
+	public ArrayList<Object> getLista() {
+		return lista;
+		}
+		
+	public void setLista(ArrayList<Object> lista) {
+		this.lista = lista;
+		}
+		
+	public int getEntityId() {
+		return entityId;
+		}
+		
+	public void setEntityId(int entityId) {
+		this.entityId = entityId;
+		}
+	
+	public int getSnowballQuantity() {
+		return snowballQuantity;
+		}
+		
+	public void setSnowballQuantity(int snowballQuantity) {
+		this.snowballQuantity = snowballQuantity;
+		}
+		
+	public int getFishQuantity() {
+		return fishQuantity;
+		}
+		
+	public void setFishQuantity(int fishQuantity) {
+		this.fishQuantity = fishQuantity;
+		}
+		
+	public int getDiceQuantity() {
+		return diceQuantity;
+		}
+		
+	public void setDiceQuantity(int diceQuantity) {
+		this.diceQuantity = diceQuantity;
+		}
+		
+	public int getFastdiceQuantity() {
+		return fastdiceQuantity;
+		}
+		
+	public void setFastdiceQuantity(int fastdiceQuantity) {
+		this.fastdiceQuantity = fastdiceQuantity;
+		}
+		
+	public int getSlowdiceQuantity() {
+		return slowdiceQuantity;
+		}
+		
+	public void setSlowdiceQuantity(int slowdiceQuantity) {
+		this.slowdiceQuantity = slowdiceQuantity;
+		}
 	
 	
 	///////////////////
