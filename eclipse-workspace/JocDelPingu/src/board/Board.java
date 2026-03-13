@@ -1,7 +1,6 @@
 package board;
 
 import java.util.ArrayList;
-
 import board.squares.S_Bear;
 import board.squares.S_BrokenFloor;
 import board.squares.S_Event;

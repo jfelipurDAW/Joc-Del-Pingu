@@ -5,6 +5,7 @@ import board.SquareType;
 import board.TurnController;
 import entity.Entity;
 import entity.Player;
+import entity.Seal;
 import ObjectManagers.ObjectType;
 import ObjectManagers.objects.Dice;
 
@@ -35,6 +36,7 @@ public class GameBoardController {
     private Board gameBoard;
     private TurnController turnController;
     private Dice slowDice;
+    private Seal seal;
 
     // Imágenes cargadas una sola vez (classpath)
     private final Image baseImage;
@@ -78,6 +80,8 @@ public class GameBoardController {
         initializePlayers();
 
         slowDice = new Dice(ObjectType.SLOWDICE);
+        
+        seal = new Seal();
 
         drawBoard();
     }
@@ -123,6 +127,8 @@ public class GameBoardController {
     	// Move to next turn
     	turnController.nextTurn();
     	rollDiceButton.setDisable(false);
+    	
+    	seal.updateSealTurns();
     }
 
     public Board getCurrentGameBoard() {
