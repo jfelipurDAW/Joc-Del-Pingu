@@ -229,7 +229,7 @@ public class GameBoardController {
                     baseView.setFitWidth(spriteSize);
                     baseView.setFitHeight(spriteSize);
                     baseView.setPreserveRatio(true);
-                    baseView.setSmooth(false);  // nitidez importante para pixel art
+                    baseView.setSmooth(false);
 
                     ImageView colorView = new ImageView(colorImage);
                     colorView.setFitWidth(spriteSize);
