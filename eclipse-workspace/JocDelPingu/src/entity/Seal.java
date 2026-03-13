@@ -74,10 +74,7 @@ public class Seal extends Entity {
         player.setSquare(previousHoleSquare);
     }
     
-    /**
-     * MÈTODE ACTUALITZAR TORNS: 
-     * Debes llamar a este método desde tu clase Game/Board cada vez que todos los jugadores terminen un turno.
-     */
+   
     public void updateSealTurns() {
         if (this.blockedTurns > 0) {
             this.blockedTurns--; // Restamos 1 turno
