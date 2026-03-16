@@ -1,6 +1,12 @@
 package board;
 
 import java.util.ArrayList;
+import board.squares.S_Bear;
+import board.squares.S_BrokenFloor;
+import board.squares.S_Event;
+import board.squares.S_IceHole;
+import board.squares.S_Normal;
+import board.squares.S_Sled;
 
 public class Board {
 	
@@ -16,31 +22,31 @@ public class Board {
 	public void createNewBoard() {
 		for (int i = 0; i < board.length; i++) {
 			if ((int) (Math.random()*100+1) <= NORMAL_SQUARE_PERCENTAGE) {
-				board[i] = new Square(SquareType.NORMAL);
+				board[i] = new S_Normal(SquareType.NORMAL);
 				System.out.println("NORMAL");
 			} else {
 				int randomType = (int) (Math.random()*5+1);
 				switch(randomType) {
 				case 1: 
-					board[i] = new Square(SquareType.ICE_HOLE);
+					board[i] = new S_IceHole(SquareType.ICE_HOLE);
 					System.out.println("ICE_HOLE");
 					IceHole_Array.add(i);
 					break;
 				case 2: 
-					board[i] = new Square(SquareType.SLED);
+					board[i] = new S_Sled(SquareType.SLED);
 					System.out.println("SLED");
 					Sled_Array.add(i);
 					break;
 				case 3: 
-					board[i] = new Square(SquareType.BEAR);
+					board[i] = new S_Bear(SquareType.BEAR);
 					System.out.println("BEAR");
 					break;
 				case 4: 
-					board[i] = new Square(SquareType.EVENT);
+					board[i] = new S_Event(SquareType.EVENT);
 					System.out.println("EVENT");
 					break;
 				case 5:
-					board[i] = new Square(SquareType.BROKEN_FLOOR);
+					board[i] = new S_BrokenFloor(SquareType.BROKEN_FLOOR);
 					System.out.println("BROKEN_FLOOR");
 					break;
 				}
@@ -50,65 +56,31 @@ public class Board {
 		board[0] = new Square(SquareType.START);
 		board[board.length-1] = new Square(SquareType.END);
 		
+		
 	}
 	
 	public SquareType getSquareType(int square) {
 		return board[square].getType();
 	}
 	
-	public int getDestination(Square square) {
+	public int getDestination(int squareIndex) {
+		SquareType type = getSquareType(squareIndex);
 		
-		switch(square.getType()) {
+		switch(type) {
 		case ICE_HOLE:
-			
-			return IceHole_Array.get(IceHole_Array.indexOf(square.getSquareID())-1);
-			
+			int listIndex = IceHole_Array.indexOf(squareIndex);
+			if (listIndex > 0) {
+				return IceHole_Array.get(listIndex - 1);
+			}
+			return 0; // First ice hole, go to start
 		case SLED:
-			
-			return Sled_Array.get(Sled_Array.indexOf(square.getSquareID())+1);
-			
+			listIndex = Sled_Array.indexOf(squareIndex);
+			if (listIndex > -1 && listIndex < Sled_Array.size() - 1) {
+				return Sled_Array.get(listIndex + 1);
+			}
+			return squareIndex; // Last sled, do nothing
+		default:
+			return squareIndex;
 		}
-		
-		return square.getSquareID();
-	}
-
-	public Square[] getBoard() {
-		return board;
-	}
-
-	public void setBoard(Square[] board) {
-		this.board = board;
-	}
-
-	public ArrayList<Integer> getIceHole_Array() {
-		return IceHole_Array;
-	}
-
-	public void setIceHole_Array(ArrayList<Integer> iceHole_Array) {
-		IceHole_Array = iceHole_Array;
-	}
-
-	public ArrayList<Integer> getSled_Array() {
-		return Sled_Array;
-	}
-
-	public void setSled_Array(ArrayList<Integer> sled_Array) {
-		Sled_Array = sled_Array;
-	}
-
-	public static int getWidthboard() {
-		return widthBoard;
-	}
-
-	public static int getHeightboard() {
-		return heightBoard;
-	}
-
-	public static int getMaxSquares() {
-		return MAX_SQUARES;
-	}
-
-	public static int getNormalSquarePercentage() {
-		return NORMAL_SQUARE_PERCENTAGE;
 	}
 }
