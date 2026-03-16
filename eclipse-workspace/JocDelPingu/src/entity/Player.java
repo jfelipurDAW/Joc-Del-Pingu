@@ -19,8 +19,21 @@ public class Player extends Entity{
 		this.setID();
 		this.setName(name);
 		this.setColour(colour);	
+		this.inventory = new Inventory(entityId);
 		
 	}
+	 /**
+     * Constructor with password (for database)
+     */
+    public Player(String name, String colour, String password) {
+        super();
+        this.type = EntityType.PLAYER;
+        this.name = name;
+        this.colour = colour;
+        this.password = password;
+        this.inventory = new Inventory(entityId);
+       
+    }
 	
 	public void setName(String name) {
 		this.name = name;

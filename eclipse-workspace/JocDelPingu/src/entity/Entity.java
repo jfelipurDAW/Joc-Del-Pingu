@@ -72,4 +72,22 @@ public abstract class Entity {
 		System.out.println("...moving back to square " + destination);
 		this.setSquare(destination);
 	}
+	public int getEntityId() {
+		return entityId;
+	}
+	public void setEntityId(int entityId) {
+		this.entityId = entityId;
+	}
+	public int getNumSquare() {
+		return numSquare;
+	}
+	public void setNumSquare(int numSquare) {
+		this.numSquare = numSquare;
+	}
+	public Board getBoard() {
+		return board;
+	}
+	public void setType(EntityType type) {
+		this.type = type;
+	}
 }
