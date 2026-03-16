@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class LangConfig {
 	
-    private static final String YAML_PATH = "src/assets/lang/en_es.yml";
+    private static final String YAML_PATH = "/assets/lang/en_es.yml";
     private static LangConfig instance;
     private Map<String, String> data;
 
@@ -29,9 +29,13 @@ public class LangConfig {
 
     private void internalLoad() {
         Yaml yaml = new Yaml();
-        File yamlFile = new File(YAML_PATH);
+        //File yamlFile = new File(YAML_PATH);
 
-        try (InputStream inputStream = new FileInputStream(yamlFile)) {
+        try (InputStream inputStream = getClass().getResourceAsStream(YAML_PATH)) {
+            if (inputStream == null) {
+                System.err.println("YAML file not found: " + YAML_PATH);
+                return;
+            }
             data = yaml.load(inputStream);
         } catch (Exception e) {
             e.printStackTrace();

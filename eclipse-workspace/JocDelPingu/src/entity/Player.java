@@ -2,8 +2,6 @@ package entity;
 
 import ObjectManagers.Inventory;
 import ObjectManagers.ObjectType;
-import board.Board;
-import board.SquareType;
 
 public class Player extends Entity{
 	
@@ -27,6 +25,9 @@ public class Player extends Entity{
 	}	
 	public void setColour(String colour) {
 		this.colour = colour;
+	}
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	
 	public String getColour() {

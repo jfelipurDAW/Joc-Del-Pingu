@@ -1,17 +1,23 @@
 package gamePanel;
 
+import java.io.InputStream;
+
 import CustomBitmapFont.CustomBitmapFont;
 import config.Lang;
 import config.LangConfig;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
-import javafx.scene.CacheHint;
-import java.io.InputStream;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.stage.Stage;
+import javafx.scene.control.Button;
+import javafx.scene.text.Text;
 
 public class MainMenuController {
 
@@ -19,11 +25,24 @@ public class MainMenuController {
     private StackPane rootPane;
 
     @FXML
+    private Button newGame_button;
+
+    @FXML
+    private Button loadGame_button;
+
+    @FXML
+    private Button language_button;
+
+    @FXML
+    private Text titleText;
+
+    @FXML
     public void initialize() {
         
 
         addBackgroundImage();
-        addBitmapTitle();
+        // Removed addBitmapTitle() to use text instead of image-based font
+        titleText.setText((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
     }
 
     private void addBackgroundImage() {
@@ -94,9 +113,9 @@ public class MainMenuController {
         double drawW = imgW * scale;
         double drawH = imgH * scale;
 
-        //  Centrado (se recorta automáticamente lo que sobra)
+        //  Centrado horizontalmente, pegado al bottom
         double x = Math.floor((paneW - drawW) / 2);
-        double y = Math.floor((paneH - drawH) / 2);
+        double y = paneH - drawH;
 
         gc.setImageSmoothing(false);
 
@@ -107,22 +126,51 @@ public class MainMenuController {
         gc.drawImage(img, x, y, drawW, drawH);
     }
 
-    private void addBitmapTitle() {
-        System.out.println("Afegint text bitmap...");
+//    private void addBitmapTitle() {
+//        System.out.println("Afegint text bitmap...");
+//
+//        Group title = CustomBitmapFont.getInstance()
+//                .createText("JOC DEL PINGU", 180, 40, 4.0);
+//
+//        // Opcional: força posicions a píxels enters per evitar subpíxels
+//        title.setTranslateX(Math.round(title.getTranslateX()));
+//        title.setTranslateY(Math.round(title.getTranslateY()));
+//
+//        // Opcional: cache al grup del títol
+//        // title.setCache(true);
+//        // title.setCacheHint(CacheHint.SPEED);
+//
+//        System.out.println("Text creat amb " + title.getChildren().size() + " caràcters");
+//
+//        rootPane.getChildren().add(title);
+//    }
 
-        Group title = CustomBitmapFont.getInstance()
-                .createText("JOC DEL PINGU", 180, 40, 4.0);
+    @FXML
+    private void handleNewGame() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("playerSetup.fxml"));
+            Parent playerSetupRoot = loader.load();
 
-        // Opcional: força posicions a píxels enters per evitar subpíxels
-        title.setTranslateX(Math.round(title.getTranslateX()));
-        title.setTranslateY(Math.round(title.getTranslateY()));
+            Scene currentScene = rootPane.getScene();
+            Stage stage = (Stage) currentScene.getWindow();
 
-        // Opcional: cache al grup del títol
-        // title.setCache(true);
-        // title.setCacheHint(CacheHint.SPEED);
+            Scene setupScene = new Scene(playerSetupRoot);
+            stage.setScene(setupScene);
 
-        System.out.println("Text creat amb " + title.getChildren().size() + " caràcters");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-        rootPane.getChildren().add(title);
+    @FXML
+    private void handleLoadGame() {
+        // TODO: Implement load game functionality
+        System.out.println("Load Game clicked");
+    }
+
+    @FXML
+    private void handleLanguage() {
+        // TODO: Implement language change
+        System.out.println("Language clicked");
     }
 }
