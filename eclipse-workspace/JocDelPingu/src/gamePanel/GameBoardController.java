@@ -27,6 +27,7 @@ import javafx.geometry.Pos;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import gamePanel.GameSetupConfig;
 
 public class GameBoardController {
 
@@ -90,21 +91,21 @@ public class GameBoardController {
      * Initialize the players for the game
      */
     private void initializePlayers() {
-    	// Create players with different colors
-    	Player player1 = new Player("Player 1", "222222");
-    	player1.setBoard(gameBoard);
-    	Player player2 = new Player("Player 2", "ff0000");
-    	player2.setBoard(gameBoard);
-    	Player player3 = new Player("Player 3", "ff77aa");
-    	player3.setBoard(gameBoard);
-    	Player player4 = new Player("Player 4", "444444");
-    	player4.setBoard(gameBoard);
-    	
-    	// Add players to turn controller
-    	turnController.addPlayer(player1);
-    	turnController.addPlayer(player2);
-    	turnController.addPlayer(player3);
-    	turnController.addPlayer(player4);
+        List<Player> players = GameSetupConfig.getPlayers();
+        if (players != null && !players.isEmpty()) {
+            for (Player player : players) {
+                player.setBoard(gameBoard);
+                turnController.addPlayer(player);
+            }
+        } else {
+            // Fallback to default players if none configured
+            Player player1 = new Player("Player 1", "222222");
+            player1.setBoard(gameBoard);
+            Player player2 = new Player("Player 2", "ff0000");
+            player2.setBoard(gameBoard);
+            turnController.addPlayer(player1);
+            turnController.addPlayer(player2);
+        }
     }
 
     @FXML
