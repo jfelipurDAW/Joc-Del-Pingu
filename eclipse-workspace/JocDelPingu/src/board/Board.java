@@ -18,6 +18,10 @@ public class Board {
 	private Square[] board = new Square[MAX_SQUARES];
 	private ArrayList<Integer> IceHole_Array = new ArrayList<Integer>();
 	private ArrayList<Integer> Sled_Array = new ArrayList<Integer>();
+	private Square[] squares; 
+	public Board() {
+	        this.squares = new Square[MAX_SQUARES];
+	    }
 	
 	public void createNewBoard() {
 		for (int i = 0; i < board.length; i++) {
@@ -58,7 +62,36 @@ public class Board {
 		
 		
 	}
-	
+
+public void updateBoard() {
+	// Reset helper lists so they always reflect the current board configuration
+	IceHole_Array.clear();
+	Sled_Array.clear();
+
+	for (int i = 0; i < board.length; i++) {
+		Square sq = board[i];
+		if (sq == null) {
+			continue;
+		}
+
+		// Keep a consistent ID for each square
+		sq.SquareID = i;
+		// Mirror the internal board into the public-facing squares array
+		squares[i] = sq;
+
+		// Keep track of special square indexes for gameplay logic
+		switch (sq.getType()) {
+		case ICE_HOLE:
+			IceHole_Array.add(i);
+			break;
+		case SLED:
+			Sled_Array.add(i);
+			break;
+		default:
+			break;
+		}
+	}
+ }
 	public SquareType getSquareType(int square) {
 		return board[square].getType();
 	}
@@ -83,4 +116,51 @@ public class Board {
 			return squareIndex;
 		}
 	}
+	 public Square[] getSquares() {
+	        return squares;
+	    }
+
+	 public Square[] getBoard() {
+		 return board;
+	 }
+
+	 public void setBoard(Square[] board) {
+		 this.board = board;
+	 }
+
+	 public ArrayList<Integer> getIceHole_Array() {
+		 return IceHole_Array;
+	 }
+
+	 public void setIceHole_Array(ArrayList<Integer> iceHole_Array) {
+		 IceHole_Array = iceHole_Array;
+	 }
+
+	 public ArrayList<Integer> getSled_Array() {
+		 return Sled_Array;
+	 }
+
+	 public void setSled_Array(ArrayList<Integer> sled_Array) {
+		 Sled_Array = sled_Array;
+	 }
+
+	 public static int getWidthboard() {
+		 return widthBoard;
+	 }
+
+	 public static int getHeightboard() {
+		 return heightBoard;
+	 }
+
+	 public static int getMaxSquares() {
+		 return MAX_SQUARES;
+	 }
+
+	 public static int getNormalSquarePercentage() {
+		 return NORMAL_SQUARE_PERCENTAGE;
+	 }
+
+	 public void setSquares(Square[] squares) {
+		 this.squares = squares;
+	 }
 }
