@@ -62,36 +62,7 @@ public class Board {
 		
 		
 	}
-
-public void updateBoard() {
-	// Reset helper lists so they always reflect the current board configuration
-	IceHole_Array.clear();
-	Sled_Array.clear();
-
-	for (int i = 0; i < board.length; i++) {
-		Square sq = board[i];
-		if (sq == null) {
-			continue;
-		}
-
-		// Keep a consistent ID for each square
-		sq.SquareID = i;
-		// Mirror the internal board into the public-facing squares array
-		squares[i] = sq;
-
-		// Keep track of special square indexes for gameplay logic
-		switch (sq.getType()) {
-		case ICE_HOLE:
-			IceHole_Array.add(i);
-			break;
-		case SLED:
-			Sled_Array.add(i);
-			break;
-		default:
-			break;
-		}
-	}
- }
+	
 	public SquareType getSquareType(int square) {
 		return board[square].getType();
 	}
