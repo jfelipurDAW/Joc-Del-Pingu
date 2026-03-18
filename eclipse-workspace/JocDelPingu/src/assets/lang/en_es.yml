@@ -8,5 +8,14 @@ object.dice.fast: "Fast dice"
 object.dice.slow: "Slow dice"
 
 text.game.title: "Pingu's Game"
+text.game.setup: "Game Setup"
+text.game.startgame: "Start Game"
 
-game.main.title: "Joc del Pingu"
+#game.main.title: "Joc del Pingu"
+
+menu.button.newgame: "New Game"
+menu.button.loadgame: "Load Game"
+menu.button.language: "🌍 Language"
+
+menu.gamesetup.playernumber: "Number of players: "
+menu.gamesetup.enableseal: "Enable seal?"

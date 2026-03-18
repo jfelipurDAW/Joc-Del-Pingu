@@ -43,6 +43,9 @@ public class MainMenuController {
         addBackgroundImage();
         // Removed addBitmapTitle() to use text instead of image-based font
         titleText.setText((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
+        newGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_NEWGAME));
+        loadGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_LOADGAME));
+        language_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_LANGUAGE));
     }
 
     private void addBackgroundImage() {

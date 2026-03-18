@@ -12,9 +12,13 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
+
+import config.Lang;
+import config.LangConfig;
 
 public class PlayerSetupController {
 
@@ -29,11 +33,24 @@ public class PlayerSetupController {
 
     @FXML
     private VBox playersContainer;
+    
+    @FXML
+    private Label player_number_select;
+
+    @FXML
+    private Label enable_seal_checkbox;
+
+    @FXML
+    private Text titleText;
 
     private List<PlayerInput> playerInputs = new ArrayList<>();
 
     @FXML
     public void initialize() {
+    	titleText.setText((String) LangConfig.getLang(Lang.TEXT_SETUP_TITLE));
+    	player_number_select.setText((String) LangConfig.getLang(Lang.GAMESETUP_TEXT_PLAYERNUMBER));
+    	enable_seal_checkbox.setText((String) LangConfig.getLang(Lang.GAMESETUP_TEXT_ENABLESEAL));
+    	
         numPlayersCombo.getItems().addAll(1, 2, 3, 4);
         numPlayersCombo.setValue(2); // Default to 2 players
         sealCheckBox.setSelected(false); // Default seal unchecked

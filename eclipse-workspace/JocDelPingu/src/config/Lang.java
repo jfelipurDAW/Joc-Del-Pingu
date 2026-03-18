@@ -20,7 +20,12 @@ public enum Lang {
 	MENU_BUTTON_LOADGAME ("menu.button.loadgame"),
 	MENU_BUTTON_LANGUAGE ("menu.button.language"),
 	
-	TEXT_GAME_TITLE ("text.game.title");
+	TEXT_GAME_TITLE ("text.game.title"), 
+	
+	TEXT_SETUP_TITLE ("text.game.setup"), 
+	
+	GAMESETUP_TEXT_PLAYERNUMBER ("menu.gamesetup.playernumber"), 
+	GAMESETUP_TEXT_ENABLESEAL ("menu.gamesetup.enableseal");
 
     private final String key;
 
