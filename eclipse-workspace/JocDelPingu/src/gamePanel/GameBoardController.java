@@ -271,6 +271,7 @@ public class GameBoardController {
     private void processDiceRoll(int diceResult, String diceType) {
         disableActions();
         Player current = getCurrentPlayer();
+        int startSquare = current.getSquareIndex();
         
         // Animate dice result display
         diceResultLabel.setText("🎲 " + diceResult);
@@ -278,38 +279,66 @@ public class GameBoardController {
         
         logEvent("🎲 " + current.getName() + " rolled " + diceResult + " (" + diceType + " die)");
 
-        // Move the player
-        String moveResult = current.moveForward(diceResult);
-        logEvent(moveResult);
+        // Animate player movement step-by-step
+        animatePlayerMovement(current, diceResult, () -> {
+            // After animation finishes, execute the actual game logic
+            
+            // Reset player to start position so moveForward calculates correctly from origin
+            current.setSquare(startSquare);
+            
+            // Logical move
+            String moveResult = current.moveForward(diceResult);
+            logEvent(moveResult);
+            
+            drawBoard();
 
-        drawBoard();
-
-        // Check win
-        if (current.getSquareIndex() >= Board.MAX_SQUARES - 1) {
-            handleWin(current);
-            return;
-        }
-
-        // Check for player collisions (snowball war)
-        List<Player> collisions = turnController.getPlayersAtSquare(current.getSquareIndex(), current);
-        if (!collisions.isEmpty()) {
-            for (Player other : collisions) {
-                handlePlayerWar(current, other);
+            // Check win
+            if (current.getSquareIndex() >= Board.MAX_SQUARES - 1) {
+                handleWin(current);
+                return;
             }
-            drawBoard();
-        }
 
-        // Check seal collision
-        if (sealEnabled && seal != null && seal.getSquareIndex() == current.getSquareIndex()) {
-            String sealResult = seal.interact(current);
-            logEvent(sealResult);
-            drawBoard();
-        }
+            // Check for player collisions (snowball war)
+            List<Player> collisions = turnController.getPlayersAtSquare(current.getSquareIndex(), current);
+            if (!collisions.isEmpty()) {
+                for (Player other : collisions) {
+                    handlePlayerWar(current, other);
+                }
+                drawBoard();
+            }
 
-        updateHUD();
+            // Check seal collision
+            if (sealEnabled && seal != null && seal.getSquareIndex() == current.getSquareIndex()) {
+                String sealResult = seal.interact(current);
+                logEvent(sealResult);
+                drawBoard();
+            }
+
+            updateHUD();
+            
+            // End turn
+            endTurn();
+        });
+    }
+
+    private void animatePlayerMovement(Player player, int steps, Runnable onFinished) {
+        int startPos = player.getSquareIndex();
+        Timeline timeline = new Timeline();
+        double stepDuration = 250; // milliseconds per step
+
+        for (int i = 1; i <= steps; i++) {
+            int nextStep = i;
+            KeyFrame kf = new KeyFrame(Duration.millis(i * stepDuration), e -> {
+                // Visually update player position (clamped to board end)
+                int visualPos = Math.min(startPos + nextStep, Board.MAX_SQUARES - 1);
+                player.setSquare(visualPos);
+                drawBoard();
+            });
+            timeline.getKeyFrames().add(kf);
+        }
         
-        // End turn
-        endTurn();
+        timeline.setOnFinished(e -> onFinished.run());
+        timeline.play();
     }
 
     private void endTurn() {
@@ -473,10 +502,11 @@ public class GameBoardController {
         
         Inventory inv = player.getInventory();
         
-        slots.getChildren().add(createInventorySlot(loadImage("/assets/sprites/objects/snowball.png"), inv.getSnowballQuantity()));
-        slots.getChildren().add(createInventorySlot(loadImage("/assets/sprites/objects/fish.png"), inv.getFishQuantity()));
-        slots.getChildren().add(createInventorySlot(loadImage("/assets/sprites/objects/fastdice.png"), inv.getFastdiceQuantity()));
-        slots.getChildren().add(createInventorySlot(loadImage("/assets/sprites/objects/slowdice.png"), inv.getSlowdiceQuantity()));
+        // Priority: Snowball -> Fish -> FastDice -> SlowDice
+        addSlotIfPresent(slots, inv, ObjectType.SNOWBALL, "/assets/sprites/objects/snowball.png");
+        addSlotIfPresent(slots, inv, ObjectType.FISH, "/assets/sprites/objects/fish.png");
+        addSlotIfPresent(slots, inv, ObjectType.FASTDICE, "/assets/sprites/objects/fastdice.png");
+        addSlotIfPresent(slots, inv, ObjectType.SLOWDICE, "/assets/sprites/objects/slowdice.png");
         
         // Turn Indicator Text (replacing old label)
         Label turnLabel = new Label("IT'S YOUR TURN!");
@@ -492,14 +522,21 @@ public class GameBoardController {
         return hotbar;
     }
     
+    private void addSlotIfPresent(HBox container, Inventory inv, ObjectType type, String path) {
+        int qty = inv.getObjectQuantity(type);
+        if (qty > 0) {
+            container.getChildren().add(createInventorySlot(loadImage(path), qty));
+        }
+    }
+    
     private StackPane createInventorySlot(Image icon, int quantity) {
         StackPane slot = new StackPane();
         slot.getStyleClass().add("button"); // Use ice block style
-        slot.setPrefSize(64, 64);
-        slot.setMaxSize(64, 64);
+        slot.setPrefSize(80, 80); // Bigger slot
+        slot.setMaxSize(80, 80);
         
         if (quantity > 0 && icon != null) {
-            double targetSize = 40;
+            double targetSize = 55; // Bigger icon
             Canvas iconCanvas = new Canvas(targetSize, targetSize);
             GraphicsContext gc = iconCanvas.getGraphicsContext2D();
             gc.setImageSmoothing(false);
