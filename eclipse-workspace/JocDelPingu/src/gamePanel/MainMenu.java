@@ -3,6 +3,7 @@ package gamePanel;
 import config.Lang;
 import config.LangConfig;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -28,6 +29,13 @@ public class MainMenu extends Application {
         primaryStage.setResizable(true);
 
         primaryStage.setTitle((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
+        
+        Platform.setImplicitExit(false);
+        primaryStage.setOnCloseRequest(e -> {
+            Platform.exit();
+            System.exit(0);
+        });
+
         primaryStage.centerOnScreen();
         primaryStage.show();
     }

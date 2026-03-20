@@ -1,36 +1,3 @@
-<<<<<<< Updated upstream
-.square-normal { 
-	-fx-background-image: url("../assets/sprites/tiles/normal-square.png");
-	-fx-background-color: #e0e0e0; 
-}
-.square-ice-hole { -fx-background-color: #a0d8ef; }
-.square-sled { -fx-background-color: #8b4513; }
-.square-bear { -fx-background-color: #cd853f; }
-.square-event { -fx-background-color: #ffd700; }
-.square-start { -fx-background-color: #991111; }
-.square-end { -fx-background-color: #333333; }
-
-.square-bottom-left {
-    -fx-border-color: #ff0000;
-    -fx-border-width: 3px;
-}
-.square-bottom-right {
-    -fx-border-color: #ff0000;
-    -fx-border-width: 3px;
-}
-.square-top-left {
-    -fx-border-color: #00ff00;
-    -fx-border-width: 3px;
-}
-.square-top-right {
-	-fx-background-image: url("../assets/sprites/tiles/right-down-normal-square.png");
-    -fx-border-color: #00ff00;
-    -fx-border-width: 3px;
-}
-
-.square {
-    /*-fx-border-width: 0px;*/
-=======
 /* ============================================
    JOC DEL PINGU - Antarctic Theme CSS
    Professional UX/UI Design for JavaFX
@@ -688,5 +655,4 @@
 }
 .event-log .content {
     -fx-background-color: rgba(255, 255, 255, 0.0);
->>>>>>> Stashed changes
 }

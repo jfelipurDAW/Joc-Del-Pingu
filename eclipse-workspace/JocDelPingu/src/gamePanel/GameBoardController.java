@@ -44,13 +44,25 @@ public class GameBoardController {
 
         for (int i = 0; i < cols; i++) {
             ColumnConstraints col = new ColumnConstraints();
+<<<<<<< Updated upstream
             col.prefWidthProperty().bind(midaCella);
+=======
+            col.prefWidthProperty().bind(cellSize);
+            col.maxWidthProperty().bind(cellSize); // Don't let JavaFX stretch them
+            col.setHgrow(Priority.NEVER); // No growing
+>>>>>>> Stashed changes
             grid.getColumnConstraints().add(col);
         }
 
         for (int i = 0; i < rows; i++) {
             RowConstraints row = new RowConstraints();
+<<<<<<< Updated upstream
             row.prefHeightProperty().bind(midaCella);
+=======
+            row.prefHeightProperty().bind(cellSize);
+            row.maxHeightProperty().bind(cellSize); // Do not let JavaFX stretch them
+            row.setVgrow(Priority.NEVER); // No growing
+>>>>>>> Stashed changes
             grid.getRowConstraints().add(row);
         }
 

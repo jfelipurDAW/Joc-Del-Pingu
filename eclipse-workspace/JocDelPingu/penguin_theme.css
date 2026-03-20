@@ -1,36 +1,3 @@
-<<<<<<< Updated upstream
-.square-normal { 
-	-fx-background-image: url("../assets/sprites/tiles/normal-square.png");
-	-fx-background-color: #e0e0e0; 
-}
-.square-ice-hole { -fx-background-color: #a0d8ef; }
-.square-sled { -fx-background-color: #8b4513; }
-.square-bear { -fx-background-color: #cd853f; }
-.square-event { -fx-background-color: #ffd700; }
-.square-start { -fx-background-color: #991111; }
-.square-end { -fx-background-color: #333333; }
-
-.square-bottom-left {
-    -fx-border-color: #ff0000;
-    -fx-border-width: 3px;
-}
-.square-bottom-right {
-    -fx-border-color: #ff0000;
-    -fx-border-width: 3px;
-}
-.square-top-left {
-    -fx-border-color: #00ff00;
-    -fx-border-width: 3px;
-}
-.square-top-right {
-	-fx-background-image: url("../assets/sprites/tiles/right-down-normal-square.png");
-    -fx-border-color: #00ff00;
-    -fx-border-width: 3px;
-}
-
-.square {
-    /*-fx-border-width: 0px;*/
-=======
 /* ============================================
    JOC DEL PINGU - Antarctic Theme CSS
    Professional UX/UI Design for JavaFX
@@ -112,7 +79,8 @@
    ============================================ */
 
 /* Root Pane - Antarctic Sky Background */
-#rootPane, .root-pane {
+#rootPane,
+.root-pane {
     -fx-background-color: linear-gradient(to bottom,
             #E1F5FE 0%,
             /* Light sky blue */
@@ -144,7 +112,8 @@
    ============================================ */
 
 /* Grid Container */
-.game-grid, .board-grid {
+.game-grid,
+.board-grid {
     -fx-background-color: transparent;
     -fx-hgap: 0;
     -fx-vgap: 0;
@@ -244,7 +213,12 @@
    BUTTONS - Penguin Style
    ============================================ */
 
-.btn-roll, .btn-fast-dice, .btn-slow-dice, .btn-snowball, .btn-save, .button {
+.btn-roll,
+.btn-fast-dice,
+.btn-slow-dice,
+.btn-snowball,
+.btn-save,
+.button {
     -fx-background-color: linear-gradient(to bottom,
             #FF8A65, #FF7043);
     -fx-text-fill: white;
@@ -259,7 +233,12 @@
     -fx-cursor: hand;
 }
 
-.btn-roll:hover, .btn-fast-dice:hover, .btn-slow-dice:hover, .btn-snowball:hover, .btn-save:hover, .button:hover {
+.btn-roll,
+.btn-fast-dice,
+.btn-slow-dice,
+.btn-snowball,
+.btn-save,
+.button {
     -fx-background-color: linear-gradient(to bottom,
             #FF7043, #FF5722);
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 12, 0, 0, 4);
@@ -267,7 +246,12 @@
     -fx-scale-y: 1.05;
 }
 
-.btn-roll:pressed, .btn-fast-dice:pressed, .btn-slow-dice:pressed, .btn-snowball:pressed, .btn-save:pressed, .button:pressed {
+.btn-roll:pressed,
+.btn-fast-dice:pressed,
+.btn-slow-dice:pressed,
+.btn-snowball:pressed,
+.btn-save:pressed,
+.button:pressed {
     -fx-background-color: linear-gradient(to bottom,
             #FF5722, #F4511E);
     -fx-translate-y: 2;
@@ -280,50 +264,60 @@
 }
 
 /* Primary Button */
-.btn-roll, .btn-save, .button-primary {
+.btn-roll,
+.btn-save,
+.button-primary {
     -fx-background-color: linear-gradient(to bottom,
             #42A5F5, #2196F3);
     -fx-border-color: #1976D2;
 }
 
-.btn-roll:hover, .btn-save:hover, .button-primary:hover {
+.btn-roll:hover,
+.btn-save:hover,
+.button-primary:hover {
     -fx-background-color: linear-gradient(to bottom,
             #2196F3, #1E88E5);
 }
 
 /* Secondary Button */
-.btn-slow-dice, .button-secondary {
+.btn-slow-dice,
+.button-secondary {
     -fx-background-color: linear-gradient(to bottom,
             #90CAF9, #64B5F6);
     -fx-border-color: #42A5F5;
     -fx-text-fill: #01579B;
 }
 
-.btn-slow-dice:hover, .button-secondary:hover {
+.btn-slow-dice:hover,
+.button-secondary:hover {
     -fx-background-color: linear-gradient(to bottom,
             #64B5F6, #42A5F5);
 }
 
 /* Danger Button */
-.btn-fast-dice, .button-danger {
+.btn-fast-dice,
+.button-danger {
     -fx-background-color: linear-gradient(to bottom,
             #EF5350, #E53935);
     -fx-border-color: #C62828;
 }
 
-.btn-fast-dice:hover, .button-danger:hover {
+.btn-fast-dice:hover,
+.button-danger:hover {
     -fx-background-color: linear-gradient(to bottom,
             #E53935, #D32F2F);
 }
 
 /* Success Button */
-.btn-snowball, .button-success {
+.btn-snowball,
+.button-success {
     -fx-background-color: linear-gradient(to bottom,
             #66BB6A, #4CAF50);
     -fx-border-color: #388E3C;
 }
 
-.btn-snowball:hover, .button-success:hover {
+.btn-snowball:hover,
+.button-success:hover {
     -fx-background-color: linear-gradient(to bottom,
             #4CAF50, #43A047);
 }
@@ -347,7 +341,8 @@
 }
 
 /* Title */
-.game-title, .label-title {
+.game-title,
+.label-title {
     -fx-font-size: 32px;
     -fx-font-weight: bold;
     -fx-text-fill: white;
@@ -393,7 +388,10 @@
    ============================================ */
 
 /* Info Panel */
-.top-bar, .right-panel, .action-bar, .info-panel {
+.top-bar,
+.right-panel,
+.action-bar,
+.info-panel {
     -fx-background-color: linear-gradient(to bottom,
             rgba(255, 255, 255, 0.95),
             rgba(255, 255, 255, 0.85));
@@ -406,7 +404,9 @@
 }
 
 /* Player Panel */
-.player-card, .seal-card, .player-panel {
+.player-card,
+.seal-card,
+.player-panel {
     -fx-background-color: linear-gradient(to bottom right,
             rgba(66, 165, 245, 0.9),
             rgba(33, 150, 243, 0.9));
@@ -425,7 +425,9 @@
 }
 
 /* Inventory Panel */
-.inventory-card, .players-summary, .inventory-panel {
+.inventory-card,
+.players-summary,
+.inventory-panel {
     -fx-background-color: rgba(255, 255, 255, 0.9);
     -fx-background-radius: 10;
     -fx-border-radius: 10;
@@ -686,7 +688,7 @@
     -fx-border-radius: 10;
     -fx-background-radius: 10;
 }
+
 .event-log .content {
     -fx-background-color: rgba(255, 255, 255, 0.0);
->>>>>>> Stashed changes
 }
