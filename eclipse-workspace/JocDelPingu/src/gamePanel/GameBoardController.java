@@ -15,10 +15,11 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.Glow;
+import javafx.scene.effect.Light;
+import javafx.scene.effect.Lighting;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -27,6 +28,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.util.Duration;
 
 import java.io.InputStream;
@@ -123,6 +125,7 @@ public class GameBoardController {
         }
 
         drawBoard();
+        applyCss();
         updateHUD();
         logEvent("🐧 Game started! " + turnController.getPlayerCount() + " players.");
         logEvent("🎯 " + getCurrentPlayer().getName() + "'s turn!");
@@ -143,6 +146,15 @@ public class GameBoardController {
             player2.setBoard(gameBoard);
             turnController.addPlayer(player1);
             turnController.addPlayer(player2);
+        }
+    }
+
+    private void applyCss() {
+        try {
+            rootPane.getStylesheets().clear();
+            rootPane.getStylesheets().add(getClass().getResource("/assets/styles/penguin_theme.css").toExternalForm());
+        } catch (Exception e) {
+            System.err.println("Could not load CSS: " + e.getMessage());
         }
     }
 
@@ -385,35 +397,137 @@ public class GameBoardController {
     private void updateHUD() {
         Player current = getCurrentPlayer();
         
-        // Turn indicator
-        turnIndicatorLabel.setText("Turn: " + current.getName());
-        turnIndicatorLabel.setStyle("-fx-text-fill: #" + current.getColour() + ";");
-        
-        // Current player info
-        currentPlayerName.setText("🐧 " + current.getName());
-        currentPlayerName.setStyle("-fx-text-fill: #" + padColor(current.getColour()) + ";");
-        currentPlayerSquare.setText("📍 Square: " + current.getSquareIndex() + " / " + (Board.MAX_SQUARES - 1));
+        // Hide old HUD panels if they exist in the scene (assuming rightPanel holds them)
+        if (rightPanel != null) {
+            rightPanel.setVisible(false);
+            rightPanel.setManaged(false);
+        }
+
+        // Create Top-Left Hotbar HUD
+        HBox hotbar = createHotbar(current);
+        rootPane.setTop(hotbar);
         
         // Inventory
         Inventory inv = current.getInventory();
-        snowballCount.setText("⛄ Snowballs: " + inv.getSnowballQuantity() + " / " + Inventory.MAX_SNOWBALLS);
-        fishCount.setText("🐟 Fish: " + inv.getFishQuantity() + " / " + Inventory.MAX_FISH);
-        fastDiceCount.setText("🎲✨ Fast Dice: " + inv.getFastdiceQuantity());
-        slowDiceCount.setText("🎲 Slow Dice: " + inv.getSlowdiceQuantity());
-        totalItemCount.setText("📦 Total: " + inv.getTotalItemCount() + " items");
         
         // Dice button states
         rollFastDiceButton.setDisable(inv.getFastdiceQuantity() <= 0);
         rollSlowDiceButton.setDisable(inv.getSlowdiceQuantity() <= 0);
         throwSnowballButton.setDisable(inv.getSnowballQuantity() <= 0);
         
-        // All players summary
-        updateAllPlayersSummary();
-        
         // Seal status
         if (sealEnabled && seal != null) {
             updateSealStatus();
         }
+    }
+    
+    private HBox createHotbar(Player player) {
+        HBox hotbar = new HBox(15);
+        hotbar.setAlignment(Pos.CENTER_LEFT);
+        hotbar.setPadding(new javafx.geometry.Insets(10));
+        // Use pixel-art style background for the bar
+        hotbar.setStyle("-fx-background-color: -fx-water-dark; -fx-border-color: -fx-horizon-purple; -fx-border-width: 0 0 4px 0;");
+
+        // --- Player Info (Portrait + Name) ---
+        VBox playerInfo = new VBox(5);
+        playerInfo.setAlignment(Pos.CENTER);
+        
+        StackPane portrait = new StackPane();
+        // Crop to middle-top part (Face) for both layers
+        if (baseImage != null && colorImage != null) {
+            double w = baseImage.getWidth();
+            double h = baseImage.getHeight();
+            double sx = w * 0.25;
+            double sy = 0;
+            double sw = w * 0.5;
+            double sh = h * 0.5;
+            double targetSize = 48;
+            
+            // Render Base Layer using Canvas for crisp scaling
+            Canvas baseCanvas = new Canvas(targetSize, targetSize);
+            GraphicsContext gcBase = baseCanvas.getGraphicsContext2D();
+            gcBase.setImageSmoothing(false);
+            gcBase.drawImage(baseImage, sx, sy, sw, sh, 0, 0, targetSize, targetSize);
+
+            // Render Color Layer
+            Canvas colorCanvas = new Canvas(targetSize, targetSize);
+            GraphicsContext gcColor = colorCanvas.getGraphicsContext2D();
+            gcColor.setImageSmoothing(false);
+            gcColor.drawImage(colorImage, sx, sy, sw, sh, 0, 0, targetSize, targetSize);
+
+            Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
+            lighting.setSurfaceScale(0.0);
+            colorCanvas.setEffect(lighting);
+            
+            portrait.getChildren().addAll(baseCanvas, colorCanvas);
+        }
+        
+        Label nameLabel = new Label(player.getName());
+        nameLabel.getStyleClass().add("hotbar-player-name");
+        
+        playerInfo.getChildren().addAll(portrait, nameLabel);
+        
+        // --- Inventory Slots (Minecraft Style) ---
+        HBox slots = new HBox(8);
+        slots.setAlignment(Pos.CENTER_LEFT);
+        
+        Inventory inv = player.getInventory();
+        
+        slots.getChildren().add(createInventorySlot(loadImage("/assets/sprites/objects/snowball.png"), inv.getSnowballQuantity()));
+        slots.getChildren().add(createInventorySlot(loadImage("/assets/sprites/objects/fish.png"), inv.getFishQuantity()));
+        slots.getChildren().add(createInventorySlot(loadImage("/assets/sprites/objects/fastdice.png"), inv.getFastdiceQuantity()));
+        slots.getChildren().add(createInventorySlot(loadImage("/assets/sprites/objects/slowdice.png"), inv.getSlowdiceQuantity()));
+        
+        // Turn Indicator Text (replacing old label)
+        Label turnLabel = new Label("IT'S YOUR TURN!");
+        turnLabel.getStyleClass().add("hotbar-turn-label");
+        
+        hotbar.getChildren().add(playerInfo);
+        hotbar.getChildren().add(slots);
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        hotbar.getChildren().addAll(spacer, turnLabel);
+        
+        return hotbar;
+    }
+    
+    private StackPane createInventorySlot(Image icon, int quantity) {
+        StackPane slot = new StackPane();
+        slot.getStyleClass().add("button"); // Use ice block style
+        slot.setPrefSize(64, 64);
+        slot.setMaxSize(64, 64);
+        
+        if (quantity > 0 && icon != null) {
+            double targetSize = 40;
+            Canvas iconCanvas = new Canvas(targetSize, targetSize);
+            GraphicsContext gc = iconCanvas.getGraphicsContext2D();
+            gc.setImageSmoothing(false);
+
+            // Calculate aspect ratio safe dimensions
+            double aspect = icon.getWidth() / icon.getHeight();
+            double dw = targetSize;
+            double dh = targetSize;
+            if (aspect > 1) dh = dw / aspect;
+            else dw = dh * aspect;
+            double dx = (targetSize - dw) / 2;
+            double dy = (targetSize - dh) / 2;
+
+            gc.drawImage(icon, dx, dy, dw, dh);
+            slot.getChildren().add(iconCanvas);
+            
+            if (quantity > 1) {
+                Label qtyLabel = new Label(String.valueOf(quantity));
+                qtyLabel.getStyleClass().add("inventory-quantity");
+                StackPane.setAlignment(qtyLabel, Pos.BOTTOM_RIGHT);
+                slot.getChildren().add(qtyLabel);
+            }
+        } else {
+            // Empty slot visual
+            slot.setOpacity(0.5);
+        }
+        
+        return slot;
     }
 
     private void updateAllPlayersSummary() {
@@ -463,6 +577,10 @@ public class GameBoardController {
         grid.getColumnConstraints().clear();
         grid.getRowConstraints().clear();
         grid.getChildren().clear();
+        
+        grid.setHgap(5);
+        grid.setVgap(5);
+        grid.getStyleClass().add("game-grid");
 
         DoubleBinding cellSize = Bindings.createDoubleBinding(
             () -> Math.min(grid.getWidth() / cols, grid.getHeight() / rows),
@@ -519,7 +637,6 @@ public class GameBoardController {
         String emoji = getSquareEmoji(type);
         Label numberLabel = new Label(squareIndex + " " + emoji);
         numberLabel.getStyleClass().add("square-number");
-        numberLabel.setStyle("-fx-font-size: 9; -fx-text-fill: rgba(255,255,255,0.85);");
         StackPane.setAlignment(numberLabel, Pos.TOP_LEFT);
         cell.getChildren().add(numberLabel);
 
@@ -561,30 +678,32 @@ public class GameBoardController {
         
         if (playersHere.isEmpty()) return;
 
-        double spriteSize = 30;
+        double spriteSize = 50; // Bigger players
         int count = 0;
+        double spacing = 20; // Adjusted spacing for bigger sprites
 
         for (Player player : playersHere) {
             StackPane playerToken = new StackPane();
 
             if (baseImage != null && colorImage != null) {
-                ImageView baseView = new ImageView(baseImage);
-                baseView.setFitWidth(spriteSize);
-                baseView.setFitHeight(spriteSize);
-                baseView.setPreserveRatio(true);
-                baseView.setSmooth(false);
+                // Base layer (bottom, untinted) via Canvas
+                Canvas baseCanvas = new Canvas(spriteSize, spriteSize);
+                GraphicsContext gcBase = baseCanvas.getGraphicsContext2D();
+                gcBase.setImageSmoothing(false);
+                gcBase.drawImage(baseImage, 0, 0, spriteSize, spriteSize);
 
-                ImageView colorView = new ImageView(colorImage);
-                colorView.setFitWidth(spriteSize);
-                colorView.setFitHeight(spriteSize);
-                colorView.setPreserveRatio(true);
-                colorView.setSmooth(false);
+                // Color layer (top, tinted) via Canvas
+                Canvas colorCanvas = new Canvas(spriteSize, spriteSize);
+                GraphicsContext gcColor = colorCanvas.getGraphicsContext2D();
+                gcColor.setImageSmoothing(false);
+                gcColor.drawImage(colorImage, 0, 0, spriteSize, spriteSize);
 
-                ColorAdjust tint = new ColorAdjust();
-                tint.setHue(getHueForColor(player.getColour()));
-                colorView.setEffect(tint);
+                // Tint effect
+                Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
+                lighting.setSurfaceScale(0.0); // Flat lighting for tint effect
+                colorCanvas.setEffect(lighting);
 
-                playerToken.getChildren().addAll(baseView, colorView);
+                playerToken.getChildren().addAll(baseCanvas, colorCanvas);
             } else {
                 Circle fallback = new Circle(spriteSize / 2);
                 fallback.setFill(getColorFromHex(player.getColour()));
@@ -593,17 +712,8 @@ public class GameBoardController {
                 playerToken.getChildren().add(fallback);
             }
 
-            // Highlight current player
-            if (player == getCurrentPlayer()) {
-                DropShadow glow = new DropShadow();
-                glow.setColor(getColorFromHex(player.getColour()));
-                glow.setRadius(8);
-                glow.setSpread(0.4);
-                playerToken.setEffect(glow);
-            }
-
-            // Offset multiple players on same square
-            double offsetX = (count - (playersHere.size() - 1) / 2.0) * 18;
+            // Centered Offset for multiple players
+            double offsetX = (count - (playersHere.size() - 1) / 2.0) * spacing;
             playerToken.setTranslateX(offsetX);
 
             cell.getChildren().add(playerToken);
@@ -699,25 +809,6 @@ public class GameBoardController {
             hex = "0".repeat(6 - hex.length()) + hex;
         }
         return hex;
-    }
-
-    private double getHueForColor(String hexColor) {
-        if (hexColor == null) return 0.0;
-        String hex = hexColor.toUpperCase().trim();
-        return switch (hex) {
-            case "FF0000" -> 0.0;
-            case "F6FF00" -> 0.1667;
-            case "00AB00" -> 0.3333;
-            case "0040FF" -> 0.6667;
-            default       -> {
-                try {
-                    Color c = Color.web("#" + hex);
-                    yield c.getHue() / 360.0;
-                } catch (Exception e) {
-                    yield 0.0;
-                }
-            }
-        };
     }
 
     private Color getColorFromHex(String hex) {
