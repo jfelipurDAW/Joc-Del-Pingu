@@ -1,33 +1,303 @@
-.square-normal { 
-	-fx-background-image: url("../assets/sprites/tiles/normal-square.png");
-	-fx-background-color: #e0e0e0; 
-}
-.square-ice-hole { -fx-background-color: #a0d8ef; }
-.square-sled { -fx-background-color: #8b4513; }
-.square-bear { -fx-background-color: #cd853f; }
-.square-event { -fx-background-color: #ffd700; }
-.square-broken-floor { -fx-background-color: #6666ff; }
-.square-start { -fx-background-color: #991111; }
-.square-end { -fx-background-color: #333333; }
+/* ===================================
+   PINGU'S GAME - ARCTIC THEME CSS
+   =================================== */
 
-.square-bottom-left {
-    -fx-border-color: #ff0000;
-    -fx-border-width: 3px;
-}
-.square-bottom-right {
-    -fx-border-color: #ff0000;
-    -fx-border-width: 3px;
-}
-.square-top-left {
-    -fx-border-color: #00ff00;
-    -fx-border-width: 3px;
-}
-.square-top-right {
-	-fx-background-image: url("../assets/sprites/tiles/right-down-normal-square.png");
-    -fx-border-color: #00ff00;
-    -fx-border-width: 3px;
+/* Root */
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-background-color: linear-gradient(to bottom, #0a1628, #1a3a5c, #2a5f8f);
 }
 
+/* ===== TOP BAR ===== */
+.top-bar {
+    -fx-background-color: linear-gradient(to right, rgba(10, 22, 40, 0.9), rgba(26, 58, 92, 0.9));
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(100, 180, 255, 0.3);
+    -fx-border-width: 1;
+}
+
+.game-title {
+    -fx-fill: #e0f0ff;
+    -fx-font-weight: bold;
+}
+
+.turn-indicator {
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 12;
+}
+
+.dice-result {
+    -fx-text-fill: #ffd700;
+    -fx-font-weight: bold;
+}
+
+/* ===== GAME GRID ===== */
+.game-grid {
+    -fx-background-color: rgba(0, 20, 40, 0.5);
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: rgba(100, 180, 255, 0.2);
+    -fx-border-width: 1;
+}
+
+/* ===== SQUARE STYLES ===== */
 .square {
-    /*-fx-border-width: 0px;*/
+    -fx-border-color: rgba(100, 180, 255, 0.15);
+    -fx-border-width: 0.5;
+    -fx-min-width: 50;
+    -fx-min-height: 50;
+    -fx-padding: 2;
+}
+
+.square-normal {
+    -fx-background-color: linear-gradient(to bottom right, #1e3a5f, #2a4a6f);
+}
+
+.square-ice-hole {
+    -fx-background-color: linear-gradient(to bottom right, #1a5276, #2980b9);
+    -fx-border-color: rgba(52, 152, 219, 0.6);
+    -fx-border-width: 1;
+}
+
+.square-sled {
+    -fx-background-color: linear-gradient(to bottom right, #6d4c1a, #8b6914);
+    -fx-border-color: rgba(218, 165, 32, 0.5);
+    -fx-border-width: 1;
+}
+
+.square-bear {
+    -fx-background-color: linear-gradient(to bottom right, #7b3f00, #a0522d);
+    -fx-border-color: rgba(255, 100, 50, 0.6);
+    -fx-border-width: 1;
+}
+
+.square-event {
+    -fx-background-color: linear-gradient(to bottom right, #8b7500, #b8960f);
+    -fx-border-color: rgba(255, 215, 0, 0.6);
+    -fx-border-width: 1;
+}
+
+.square-broken-floor {
+    -fx-background-color: linear-gradient(to bottom right, #4a0e4e, #6a1b9a);
+    -fx-border-color: rgba(156, 39, 176, 0.5);
+    -fx-border-width: 1;
+}
+
+.square-start {
+    -fx-background-color: linear-gradient(to bottom right, #1b5e20, #2e7d32);
+    -fx-border-color: rgba(76, 175, 80, 0.7);
+    -fx-border-width: 2;
+}
+
+.square-end {
+    -fx-background-color: linear-gradient(to bottom right, #b71c1c, #e53935);
+    -fx-border-color: rgba(255, 215, 0, 0.8);
+    -fx-border-width: 2;
+}
+
+.square-number {
+    -fx-padding: 1 2;
+}
+
+/* ===== RIGHT PANEL ===== */
+.right-panel {
+    -fx-background-color: linear-gradient(to bottom, rgba(10, 22, 40, 0.85), rgba(15, 30, 50, 0.9));
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(100, 180, 255, 0.2);
+    -fx-border-width: 1;
+}
+
+.player-card {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(100, 180, 255, 0.2);
+    -fx-border-width: 1;
+}
+
+.player-name {
+    -fx-font-weight: bold;
+}
+
+.player-square {
+    -fx-text-fill: #a0c4ff;
+    -fx-font-size: 12;
+}
+
+.inventory-card {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(100, 180, 255, 0.15);
+    -fx-border-width: 1;
+}
+
+.inventory-title {
+    -fx-text-fill: #e0f0ff;
+    -fx-font-weight: bold;
+}
+
+.inventory-card .label {
+    -fx-text-fill: #c0d8f0;
+    -fx-font-size: 12;
+}
+
+.total-items {
+    -fx-text-fill: #ffd700 !important;
+    -fx-font-weight: bold;
+    -fx-font-size: 12;
+}
+
+.players-summary {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-background-radius: 8;
+    -fx-padding: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(100, 180, 255, 0.1);
+    -fx-border-width: 1;
+}
+
+.section-title {
+    -fx-text-fill: #e0f0ff;
+    -fx-font-weight: bold;
+}
+
+.seal-card {
+    -fx-background-color: rgba(100, 50, 0, 0.3);
+    -fx-background-radius: 8;
+    -fx-padding: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(255, 165, 0, 0.3);
+    -fx-border-width: 1;
+}
+
+.seal-card .label {
+    -fx-text-fill: #ffcc80;
+    -fx-font-size: 12;
+}
+
+/* ===== ACTION BAR ===== */
+.action-bar {
+    -fx-background-color: linear-gradient(to right, rgba(10, 22, 40, 0.9), rgba(26, 58, 92, 0.85));
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(100, 180, 255, 0.2);
+    -fx-border-width: 1;
+}
+
+/* Buttons base */
+.btn-roll, .btn-fast-dice, .btn-slow-dice, .btn-snowball, .btn-save {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 8 16;
+}
+
+.btn-roll {
+    -fx-background-color: linear-gradient(to bottom, #2196f3, #1565c0);
+    -fx-border-color: #42a5f5;
+    -fx-border-width: 1;
+}
+.btn-roll:hover {
+    -fx-background-color: linear-gradient(to bottom, #42a5f5, #1976d2);
+}
+.btn-roll:pressed {
+    -fx-background-color: #0d47a1;
+}
+
+.btn-fast-dice {
+    -fx-background-color: linear-gradient(to bottom, #ff9800, #e65100);
+    -fx-border-color: #ffb74d;
+    -fx-border-width: 1;
+}
+.btn-fast-dice:hover {
+    -fx-background-color: linear-gradient(to bottom, #ffb74d, #f57c00);
+}
+.btn-fast-dice:disabled {
+    -fx-opacity: 0.4;
+}
+
+.btn-slow-dice {
+    -fx-background-color: linear-gradient(to bottom, #78909c, #455a64);
+    -fx-border-color: #90a4ae;
+    -fx-border-width: 1;
+}
+.btn-slow-dice:hover {
+    -fx-background-color: linear-gradient(to bottom, #90a4ae, #546e7a);
+}
+.btn-slow-dice:disabled {
+    -fx-opacity: 0.4;
+}
+
+.btn-snowball {
+    -fx-background-color: linear-gradient(to bottom, #4caf50, #2e7d32);
+    -fx-border-color: #66bb6a;
+    -fx-border-width: 1;
+}
+.btn-snowball:hover {
+    -fx-background-color: linear-gradient(to bottom, #66bb6a, #388e3c);
+}
+.btn-snowball:disabled {
+    -fx-opacity: 0.4;
+}
+
+.btn-save {
+    -fx-background-color: linear-gradient(to bottom, #7e57c2, #4527a0);
+    -fx-border-color: #9575cd;
+    -fx-border-width: 1;
+}
+.btn-save:hover {
+    -fx-background-color: linear-gradient(to bottom, #9575cd, #5e35b1);
+}
+
+/* Disabled state for all buttons */
+.button:disabled {
+    -fx-opacity: 0.4;
+    -fx-cursor: default;
+}
+
+/* ===== EVENT LOG ===== */
+.event-log {
+    -fx-control-inner-background: rgba(0, 10, 25, 0.85);
+    -fx-text-fill: #c0d8f0;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 11;
+    -fx-border-color: rgba(100, 180, 255, 0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.event-log .content {
+    -fx-background-color: rgba(0, 10, 25, 0.85);
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+.scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(100, 180, 255, 0.3);
+    -fx-background-radius: 4;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* ===== LEGACY SUPPORT ===== */
+.square-bottom-left, .square-bottom-right, .square-top-left, .square-top-right {
+    /* Remove old red/green borders */
 }

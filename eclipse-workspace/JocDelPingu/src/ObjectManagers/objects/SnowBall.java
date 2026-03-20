@@ -1,18 +1,16 @@
 package ObjectManagers.objects;
 
 import ObjectManagers.ObjectType;
-import java.util.Random;
 import entity.Player;
 
-public class SnowBall extends Object {
+public class SnowBall extends ObjectManagers.Object {
     
-    private ObjectType objectType = ObjectType.SNOWBALL;
     private int backwardSteps;
-    private Random random;
-    
     
     public SnowBall() {
-    	
+    	super(ObjectType.SNOWBALL);
+    	this.name = "Snowball";
+    	this.backwardSteps = 1;
     }
     
     /**
@@ -21,15 +19,19 @@ public class SnowBall extends Object {
      */
     public void throwSnowball(Player target) {
         int currentPosition = target.getPosition();
-        int newPosition = Math.max(0, currentPosition - backwardSteps);
+        int newPosition = java.lang.Math.max(0, currentPosition - backwardSteps);
         
-        target.updatePosition(newPosition);
+        target.setSquare(newPosition);
         
-        System.out.println(target.getName() + " moves back " + backwardSteps + 
+        java.lang.System.out.println(target.getName() + " moves back " + backwardSteps + 
                           " spaces (position: " + newPosition + ")");
     }
     
-    public ObjectType getObjectType() {
-        return objectType;
+    public int getBackwardSteps() {
+    	return backwardSteps;
+    }
+    
+    public void setBackwardSteps(int steps) {
+    	this.backwardSteps = steps;
     }
 }

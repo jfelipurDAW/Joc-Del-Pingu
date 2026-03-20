@@ -1,13 +1,13 @@
 package ObjectManagers;
 
-public abstract class Object {
+public abstract class Object extends java.lang.Object {
     
     protected int objectId;
-    protected String name;
+    protected java.lang.String name;
     protected ObjectType type;
     
     public Object(ObjectType type) {
-        this.objectId = (int) (Math.random() * 100000);
+        this.objectId = (int) (java.lang.Math.random() * 100000);
         this.type = type;
     }
     
@@ -19,7 +19,7 @@ public abstract class Object {
         return type;
     }
     
-    public String getName() {
+    public java.lang.String getName() {
         return name;
     }
 }

@@ -5,6 +5,5 @@ public enum ObjectType {
 	FISH,
 	DICE,
 	FASTDICE,
-	BROKEN_FLOOR,
 	SLOWDICE
 }

@@ -2,7 +2,10 @@ package ObjectManagers.objects;
 
 import ObjectManagers.ObjectType;
 
-public class Fish extends Object {
+public class Fish extends ObjectManagers.Object {
 
-	private ObjectType objectType = ObjectType.FISH;
+	public Fish() {
+		super(ObjectType.FISH);
+		this.name = "Fish";
+	}
 }

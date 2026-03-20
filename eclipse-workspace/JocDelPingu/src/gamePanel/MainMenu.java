@@ -30,9 +30,6 @@ public class MainMenu extends Application {
         primaryStage.setTitle((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
         primaryStage.centerOnScreen();
         primaryStage.show();
-        
-        GameController gameController = new GameController();
-		gameController.startGame();
 
     }
 

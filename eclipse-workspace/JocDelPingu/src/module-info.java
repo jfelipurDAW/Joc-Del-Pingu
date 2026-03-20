@@ -20,9 +20,14 @@ module JocDelPingu {
     opens entity to javafx.fxml;
     opens board to javafx.fxml;
     opens ObjectManagers to javafx.fxml;
+    opens ConnectionDDBB to javafx.fxml;
+    opens main to javafx.fxml;
 
     exports gamePanel;
     exports com.fontgenerator;
     exports entity;
     exports board;
+    exports ObjectManagers;
+    exports ConnectionDDBB;
+    exports main;
 }
