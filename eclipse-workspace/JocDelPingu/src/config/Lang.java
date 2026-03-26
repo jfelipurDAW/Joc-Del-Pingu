@@ -25,7 +25,11 @@ public enum Lang {
 	TEXT_SETUP_TITLE ("text.game.setup"), 
 	
 	GAMESETUP_TEXT_PLAYERNUMBER ("menu.gamesetup.playernumber"), 
-	GAMESETUP_TEXT_ENABLESEAL ("menu.gamesetup.enableseal");
+	GAMESETUP_TEXT_ENABLESEAL ("menu.gamesetup.enableseal"),
+
+	GAMESETUP_PLAYER ("gamesetup.player"),
+	GAMESETUP_PLAYERNAME ("gamesetup.playername"),
+	GAMESETUP_PASSWORD ("gamesetup.password");
 
     private final String key;
 

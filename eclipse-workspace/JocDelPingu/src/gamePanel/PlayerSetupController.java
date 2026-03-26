@@ -80,24 +80,31 @@ public class PlayerSetupController {
         playerVBox.setSpacing(8);
         playerVBox.setStyle("-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;");
 
-        Label label = new Label("Player " + playerNumber);
+        Label label = new Label(LangConfig.getLang(Lang.GAMESETUP_PLAYER) + playerNumber);
         label.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
 
         TextField nameField = new TextField();
-        nameField.setPromptText("Player name");
+        nameField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PLAYERNAME));
         nameField.setPrefWidth(200);
 
         PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Password");
+        passwordField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PASSWORD));
         passwordField.setPrefWidth(200);
 
-        TextField colorField = new TextField();
-        colorField.setPromptText("Hex color (e.g., FF0000)");
-        colorField.setPrefWidth(200);
+        javafx.scene.control.ColorPicker colorPicker = new javafx.scene.control.ColorPicker(javafx.scene.paint.Color.RED);
+        colorPicker.setPrefWidth(200);
 
-        playerVBox.getChildren().addAll(label, nameField, passwordField, colorField);
+        // Workaround for color picker minimizing issue
+        colorPicker.setOnAction((javafx.event.ActionEvent event) -> {
+            if (rootPane != null) rootPane.requestFocus();
+        });
+        colorPicker.setOnHiding((javafx.event.Event event) -> {
+            if (rootPane != null) rootPane.requestFocus();
+        });
 
-        return new PlayerInput(playerNumber, nameField, passwordField, colorField, playerVBox);
+        playerVBox.getChildren().addAll(label, nameField, passwordField, colorPicker);
+
+        return new PlayerInput(playerNumber, nameField, passwordField, colorPicker, playerVBox);
     }
 
     @FXML
@@ -107,7 +114,7 @@ public class PlayerSetupController {
         for (PlayerInput input : playerInputs) {
             String name = input.nameField.getText().trim();
             String password = input.passwordField.getText();
-            String color = input.colorField.getText().trim();
+            String color = input.colorPicker.getValue().toString().substring(2, 8).toUpperCase();
 
             if (!name.isEmpty() && !color.isEmpty()) {
                 Player player = new Player(name, color);
@@ -146,14 +153,14 @@ public class PlayerSetupController {
         int playerNumber;
         TextField nameField;
         PasswordField passwordField;
-        TextField colorField;
+        javafx.scene.control.ColorPicker colorPicker;
         VBox vbox;
 
-        PlayerInput(int playerNumber, TextField nameField, PasswordField passwordField, TextField colorField, VBox vbox) {
+        PlayerInput(int playerNumber, TextField nameField, PasswordField passwordField, javafx.scene.control.ColorPicker colorPicker, VBox vbox) {
             this.playerNumber = playerNumber;
             this.nameField = nameField;
             this.passwordField = passwordField;
-            this.colorField = colorField;
+            this.colorPicker = colorPicker;
             this.vbox = vbox;
         }
 

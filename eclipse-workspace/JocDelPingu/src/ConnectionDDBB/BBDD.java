@@ -23,21 +23,8 @@ public class BBDD {
 	public static Connection conectarBaseDatos(Scanner scan) {
 		System.out.println("Intentando conectarse a la base de datos...");
 
-		// 1) Elegir entorno con validación
-		String entorno = "";
-		boolean valido = false;
-		while (!valido) {
-			// PODEIS HARDCODEAR ESTAS VARIABLES SI VAIS A USAR SIEMPRE LAS MISMAS
-			//VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-			System.out.println("Selecciona centro o fuera de centro (CENTRO/FUERA):");
-			entorno = scan.nextLine().trim().toLowerCase();
-
-			if (entorno.equalsIgnoreCase("centro") || entorno.equalsIgnoreCase("fuera")) {
-				valido = true;
-			} else {
-				System.out.println("Entrada no válida. Escribe CENTRO o FUERA.");
-			}
-		}
+		// Hardcoded environment
+		String entorno = "fuera"; // change to "centro" if working at Ilerna
 
 		String url = entorno.equals("centro") ? "jdbc:oracle:thin:@//192.168.3.26:1521/XEPDB2"
 				: "jdbc:oracle:thin:@//oracle.ilerna.com:1521/XEPDB2";

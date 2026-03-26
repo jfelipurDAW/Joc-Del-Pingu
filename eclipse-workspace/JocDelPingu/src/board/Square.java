@@ -17,6 +17,11 @@ public class Square {
 		return this.SquareID;
 	}
 	
+	public void action(entity.Player player) {
+	}
+
 	public void action() {
+		// TODO Auto-generated method stub
+		
 	};
 }

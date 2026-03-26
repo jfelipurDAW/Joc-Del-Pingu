@@ -107,27 +107,53 @@ public class GameBoardController {
     @FXML
     public void initialize() {
         gameBoard = new Board();
-        gameBoard.createNewBoard();
+        
+        if (GameSetupConfig.isLoadedGame()) {
+            gameBoard.loadBoard(GameSetupConfig.getLoadedBoardState());
+            turnController = new TurnController();
+            initializePlayers();
+            turnController.setCurrentTurn(GameSetupConfig.getLoadedTurnIndex());
 
-        turnController = new TurnController();
-        initializePlayers();
+            sealEnabled = GameSetupConfig.isSealEnabled();
+            if (sealEnabled) {
+                seal = new Seal();
+                seal.setBoard(gameBoard);
+                java.util.Map<String, Object> sealState = GameSetupConfig.getLoadedSealState();
+                if (sealState != null) {
+                    seal.setSquare(((Number) sealState.get("square")).intValue());
+                    seal.setBlockedTurns(((Number) sealState.get("blockedTurns")).intValue());
+                }
+                sealStatusBox.setVisible(true);
+                sealStatusBox.setManaged(true);
+            }
+        } else {
+            gameBoard.createNewBoard();
+            turnController = new TurnController();
+            initializePlayers();
+
+            sealEnabled = GameSetupConfig.isSealEnabled();
+            if (sealEnabled) {
+                seal = new Seal();
+                seal.setBoard(gameBoard);
+                sealStatusBox.setVisible(true);
+                sealStatusBox.setManaged(true);
+            }
+        }
 
         defaultDice = new Dice(ObjectType.SLOWDICE); // Default: 1-3
         fastDice = new Dice(ObjectType.FASTDICE);     // 5-10
         slowDice = new Dice(ObjectType.SLOWDICE);     // 1-3
 
-        sealEnabled = GameSetupConfig.isSealEnabled();
-        if (sealEnabled) {
-            seal = new Seal();
-            seal.setBoard(gameBoard);
-            sealStatusBox.setVisible(true);
-            sealStatusBox.setManaged(true);
-        }
-
         drawBoard();
         applyCss();
         updateHUD();
-        logEvent("🐧 Game started! " + turnController.getPlayerCount() + " players.");
+        
+        if (GameSetupConfig.isLoadedGame()) {
+            logEvent("📂 Game loaded successfully! " + turnController.getAllPlayers().size() + " players.");
+            GameSetupConfig.setLoadedGame(false); 
+        } else {
+            logEvent("🐧 Game started! " + turnController.getAllPlayers().size() + " players.");
+        }
         logEvent("🎯 " + getCurrentPlayer().getName() + "'s turn!");
     }
 
@@ -136,7 +162,9 @@ public class GameBoardController {
         if (players != null && !players.isEmpty()) {
             for (Player player : players) {
                 player.setBoard(gameBoard);
-                player.setSquare(0);
+                if (!GameSetupConfig.isLoadedGame()) {
+                    player.setSquare(0);
+                }
                 turnController.addPlayer(player);
             }
         } else {
@@ -152,7 +180,12 @@ public class GameBoardController {
     private void applyCss() {
         try {
             rootPane.getStylesheets().clear();
-            rootPane.getStylesheets().add(getClass().getResource("/assets/styles/penguin_theme.css").toExternalForm());
+            java.net.URL cssUrl = getClass().getResource("/gamePanel/style.css");
+            if (cssUrl != null) {
+                rootPane.getStylesheets().add(cssUrl.toExternalForm());
+            } else {
+                System.err.println("Could not load CSS: /gamePanel/style.css not found.");
+            }
         } catch (Exception e) {
             System.err.println("Could not load CSS: " + e.getMessage());
         }
@@ -260,8 +293,15 @@ public class GameBoardController {
 
     @FXML
     private void saveGame() {
-        logEvent("💾 Game save requested...");
-        showAlert("Save Game", "Game save feature requires Oracle DB connection.\nThis will be available when connected to the school network.");
+        logEvent("💾 Saving game state to database...");
+        boolean success = main.SaveLoadService.saveGame("SAVE_SLOT_1", gameBoard, turnController, sealEnabled ? seal : null);
+        if (success) {
+            logEvent("✅ Game saved successfully!");
+            showAlert("Save Game", "Game saved securely to the Oracle database!");
+        } else {
+            logEvent("❌ Failed to save game.");
+            showAlert("Save Error", "Failed to save the game. Check database connection.");
+        }
     }
 
     // ============================================
@@ -455,7 +495,7 @@ public class GameBoardController {
         hotbar.setAlignment(Pos.CENTER_LEFT);
         hotbar.setPadding(new javafx.geometry.Insets(10));
         // Use pixel-art style background for the bar
-        hotbar.setStyle("-fx-background-color: -fx-water-dark; -fx-border-color: -fx-horizon-purple; -fx-border-width: 0 0 4px 0;");
+        hotbar.setStyle("-fx-background-color: rgba(0,0,0,0.5); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 0 0 4px 0;");
 
         // --- Player Info (Portrait + Name) ---
         VBox playerInfo = new VBox(5);

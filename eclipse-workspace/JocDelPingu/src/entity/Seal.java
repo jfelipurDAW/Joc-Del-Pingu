@@ -47,6 +47,10 @@ public class Seal extends Entity {
     	return blockedTurns;
     }
     
+    public void setBlockedTurns(int blockedTurns) {
+    	this.blockedTurns = blockedTurns;
+    }
+    
     /**
      * Feed the seal a fish. Blocks it for 2 turns.
      */

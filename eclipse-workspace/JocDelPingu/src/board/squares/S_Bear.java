@@ -16,7 +16,14 @@ public class S_Bear extends Square {
 	
 	
 	@Override
-	public void action() {
+	public void action(entity.Player player) {
+		if (player.getInventory().getFishQuantity() > 0) {
+			player.getInventory().useObject(ObjectManagers.ObjectType.FISH, 1);
+			System.out.println(player.getName() + " feed the Bear a fish and avoided returning to start!");
+		} else {
+			player.setSquare(0);
+			System.out.println(player.getName() + " attacked by Bear! Back to start!");
+		}
 	};
 
 }

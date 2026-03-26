@@ -59,9 +59,32 @@ public class Board {
 		
 		board[0] = new Square(SquareType.START);
 		board[board.length-1] = new Square(SquareType.END);
-		
-		
 	}
+
+    public void loadBoard(java.util.List<String> boardTypes) {
+        IceHole_Array.clear();
+        Sled_Array.clear();
+        for (int i = 0; i < board.length; i++) {
+            if (i >= boardTypes.size()) break;
+            String typeStr = boardTypes.get(i);
+            SquareType type = SquareType.valueOf(typeStr);
+            switch(type) {
+                case NORMAL: board[i] = new S_Normal(type); break;
+                case ICE_HOLE: 
+                    board[i] = new S_IceHole(type); 
+                    IceHole_Array.add(i);
+                    break;
+                case SLED: 
+                    board[i] = new S_Sled(type); 
+                    Sled_Array.add(i);
+                    break;
+                case BEAR: board[i] = new S_Bear(type); break;
+                case EVENT: board[i] = new S_Event(type); break;
+                case BROKEN_FLOOR: board[i] = new S_BrokenFloor(type); break;
+                default: board[i] = new Square(type); break;
+            }
+        }
+    }
 	
 	public SquareType getSquareType(int square) {
 		return board[square].getType();

@@ -167,8 +167,26 @@ public class MainMenuController {
 
     @FXML
     private void handleLoadGame() {
-        // TODO: Implement load game functionality
         System.out.println("Load Game clicked");
+        boolean success = main.SaveLoadService.loadGame("SAVE_SLOT_1");
+        if (success) {
+            System.out.println("Load successful. Starting game...");
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("gameBoard.fxml"));
+                Parent gameBoardRoot = loader.load();
+
+                Scene currentScene = rootPane.getScene();
+                Stage stage = (Stage) currentScene.getWindow();
+
+                Scene setupScene = new Scene(gameBoardRoot);
+                stage.setScene(setupScene);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Failed to load game. Start a new one instead.");
+        }
     }
 
     @FXML

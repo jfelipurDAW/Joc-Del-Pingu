@@ -13,7 +13,7 @@
 
 <StackPane fx:id="rootPane" alignment="CENTER" prefHeight="600.0" prefWidth="800.0" styleClass="mainmenu_bg" stylesheets="@style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamePanel.PlayerSetupController">
    <children>
-      <VBox alignment="BOTTOM_CENTER" spacing="20" style="-fx-padding: 20;">
+      <VBox alignment="BOTTOM_CENTER" spacing="20" styleClass="glass-pane" style="-fx-padding: 40;">
          <children>
             <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="mainmenu_maintitle" text="">
                <font>

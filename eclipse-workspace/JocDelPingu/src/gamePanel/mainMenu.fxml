@@ -14,7 +14,7 @@
       <!-- HBox original (botons) -->
       <HBox alignment="CENTER" prefHeight="507.0" prefWidth="758.0">
          <children>
-            <VBox alignment="CENTER" prefHeight="507.0" prefWidth="474.0" spacing="10">
+            <VBox alignment="CENTER" prefHeight="507.0" prefWidth="474.0" spacing="15" styleClass="glass-pane">
                <children>
                   <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="mainmenu_maintitle" text="game.main.title" visible="true">
                      <font>

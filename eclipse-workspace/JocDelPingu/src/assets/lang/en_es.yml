@@ -19,3 +19,7 @@ menu.button.language: "🌍 Language"
 
 menu.gamesetup.playernumber: "Number of players: "
 menu.gamesetup.enableseal: "Enable seal?"
+
+gamesetup.player: "Player "
+gamesetup.playername: "Player name"
+gamesetup.password: "Password"

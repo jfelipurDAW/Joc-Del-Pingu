@@ -177,6 +177,10 @@ public abstract class Entity {
 		lastEvent = null;
 	}
 	
+	public void setLastEvent(EventManager.EventResult event) {
+		this.lastEvent = event;
+	}
+	
 	public boolean shouldSkipNextTurn() {
 		return skipNextTurn;
 	}
