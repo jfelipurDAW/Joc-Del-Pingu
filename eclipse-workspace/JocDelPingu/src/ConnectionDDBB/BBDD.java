@@ -214,4 +214,23 @@ public class BBDD {
 			return 0;
 		}
 	}
+	
+	public void registrarJugadorEnBD(Connection con, int idJugador, String nombre, String password, String color) {
+	    
+	    // 1. Construimos la sentencia SQL uniendo las variables
+	    String sql = "INSERT INTO ENTITY (ENTITYID, ENTITYTYPE, PLAYERNAME, PLAYERPASSWORD, COLOUR) " +
+	                 "VALUES (" + idJugador + ", 'PLAYER', '" + nombre + "', '" + password + "', '" + color + "')";
+	    
+	    // 2. Imprimimos el SQL por consola para comprobar que se ha montado bien (opcional pero muy útil)
+	    System.out.println("Ejecutando: " + sql);
+	    
+	    // 3. Llamamos a tu clase BBDD para hacer el insert
+	    int filas = BBDD.insert(con, sql);
+	    
+	    if (filas > 0) {
+	        System.out.println("¡El jugador " + nombre + " se ha registrado en Oracle correctamente!");
+	    } else {
+	        System.out.println("Error al registrar al jugador " + nombre);
+	    }
+	}
 }
