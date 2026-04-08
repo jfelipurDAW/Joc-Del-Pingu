@@ -12,7 +12,7 @@
     -fx-translate-y: -20;
 }
 
-.mainmenu_button_newgame, .mainmenu_button_loadgame, .mainmenu_button_language {
+.mainmenu_button_newgame, .mainmenu_button_loadgame {
     -fx-background-color: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
     -fx-background-radius: 25;
     -fx-border-radius: 25;
@@ -27,7 +27,7 @@
     -fx-min-height: 50px;
 }
 
-.mainmenu_button_newgame:hover, .mainmenu_button_loadgame:hover, .mainmenu_button_language:hover {
+.mainmenu_button_newgame:hover, .mainmenu_button_loadgame:hover {
     -fx-background-color: linear-gradient(to bottom, #00f2fe 0%, #4facfe 100%);
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 7);
     -fx-cursor: hand;
@@ -35,14 +35,68 @@
     -fx-scale-y: 1.05;
 }
 
-.mainmenu_button_newgame:pressed, .mainmenu_button_loadgame:pressed, .mainmenu_button_language:pressed {
+.mainmenu_button_newgame:pressed, .mainmenu_button_loadgame:pressed {
     -fx-scale-x: 0.95;
     -fx-scale-y: 0.95;
 }
 
-.mainmenu_button_language {
+/* Changed: language dropdown ComboBox styling (replaces old button style) */
+.mainmenu_language_combo {
+	-fx-background-color: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+	-fx-background-radius: 25;
+	-fx-border-radius: 25;
+	-fx-border-color: rgba(255,255,255,0.5);
+	-fx-border-width: 2;
+	-fx-font-family: "Segoe UI", sans-serif;
+	-fx-font-weight: 800;
 	-fx-font-size: 16px;
-	-fx-min-height: 40px;
+	-fx-min-height: 42px;
+	-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 5);
+	-fx-padding: 5 10;
+}
+
+.mainmenu_language_combo .list-cell {
+	-fx-text-fill: white;
+	-fx-font-family: "Segoe UI", sans-serif;
+	-fx-font-weight: 800;
+	-fx-font-size: 16px;
+	-fx-background-color: transparent;
+}
+
+.mainmenu_language_combo .arrow-button {
+	-fx-background-color: transparent;
+}
+
+.mainmenu_language_combo .arrow {
+	-fx-background-color: white;
+}
+
+.mainmenu_language_combo:hover {
+	-fx-background-color: linear-gradient(to bottom, #00f2fe 0%, #4facfe 100%);
+	-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 7);
+	-fx-scale-x: 1.05;
+	-fx-scale-y: 1.05;
+}
+
+/* Dropdown popup styling */
+.mainmenu_language_combo .combo-box-popup .list-view {
+	-fx-background-color: rgba(255, 255, 255, 0.95);
+	-fx-background-radius: 12;
+	-fx-border-radius: 12;
+	-fx-border-color: rgba(79, 172, 254, 0.5);
+	-fx-border-width: 2;
+	-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);
+}
+
+.mainmenu_language_combo .combo-box-popup .list-cell {
+	-fx-text-fill: #2b5876;
+	-fx-background-color: transparent;
+	-fx-padding: 8 15;
+}
+
+.mainmenu_language_combo .combo-box-popup .list-cell:hover {
+	-fx-background-color: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+	-fx-text-fill: white;
 }
 
 /* ScrollPane modern styling for player setup */

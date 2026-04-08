@@ -1,0 +1,23 @@
+entity.seal: "Тюлень"
+entity.player: "Пингвин"
+
+object.snowball: "Снежок"
+object.fish: "Рыба"
+object.dice: "Кубик"
+object.dice.fast: "Быстрый кубик"
+object.dice.slow: "Медленный кубик"
+
+text.game.title: "Игра Пингвина"
+text.game.setup: "Настройка игры"
+text.game.startgame: "Начать игру"
+
+menu.button.newgame: "Новая игра"
+menu.button.loadgame: "Загрузить игру"
+menu.button.language: "🌍 Язык"
+
+menu.gamesetup.playernumber: "Количество игроков: "
+menu.gamesetup.enableseal: "Включить тюленя?"
+
+gamesetup.player: "Игрок "
+gamesetup.playername: "Имя игрока"
+gamesetup.password: "Пароль"

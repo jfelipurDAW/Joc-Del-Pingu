@@ -1,0 +1,23 @@
+entity.seal: "Seal"
+entity.player: "Penguin"
+
+object.snowball: "Snowball"
+object.fish: "Fish"
+object.dice: "Dice"
+object.dice.fast: "Fast dice"
+object.dice.slow: "Slow dice"
+
+text.game.title: "Pingu's Game"
+text.game.setup: "Game Setup"
+text.game.startgame: "Start Game"
+
+menu.button.newgame: "New Game"
+menu.button.loadgame: "Load Game"
+menu.button.language: "🌍 Language"
+
+menu.gamesetup.playernumber: "Number of players: "
+menu.gamesetup.enableseal: "Enable seal?"
+
+gamesetup.player: "Player "
+gamesetup.playername: "Player name"
+gamesetup.password: "Password"

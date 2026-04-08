@@ -17,6 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.text.Text;
 
 public class MainMenuController {
@@ -30,8 +31,9 @@ public class MainMenuController {
     @FXML
     private Button loadGame_button;
 
+    // Changed: replaced Button with ComboBox for language dropdown
     @FXML
-    private Button language_button;
+    private ComboBox<String> language_combobox;
 
     @FXML
     private Text titleText;
@@ -45,7 +47,39 @@ public class MainMenuController {
         titleText.setText((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
         newGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_NEWGAME));
         loadGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_LOADGAME));
-        language_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_LANGUAGE));
+
+        // Changed: populate language dropdown with available languages
+        setupLanguageDropdown();
+    }
+
+    /**
+     * Added: initializes the language ComboBox with display names
+     * and wires the selection listener to switch languages.
+     */
+    private void setupLanguageDropdown() {
+        language_combobox.getItems().clear();
+        for (String code : LangConfig.getAvailableLanguages()) {
+            language_combobox.getItems().add(LangConfig.getDisplayName(code));
+        }
+
+        // Pre-select the currently active language
+        language_combobox.setValue(LangConfig.getDisplayName(LangConfig.getCurrentLang()));
+
+        // On selection change -> load the chosen language and refresh UI text
+        language_combobox.setOnAction(event -> {
+            String selectedDisplay = language_combobox.getValue();
+            if (selectedDisplay == null) return;
+
+            // Find the language code matching the selected display name
+            for (String code : LangConfig.getAvailableLanguages()) {
+                if (LangConfig.getDisplayName(code).equals(selectedDisplay)) {
+                    LangConfig.loadLang(code);
+                    System.out.println("Language changed to: " + code);
+                    refreshTexts();
+                    break;
+                }
+            }
+        });
     }
 
     private void addBackgroundImage() {
@@ -189,9 +223,17 @@ public class MainMenuController {
         }
     }
 
-    @FXML
-    private void handleLanguage() {
-        // TODO: Implement language change
-        System.out.println("Language clicked");
+    /**
+     * Changed: refreshes all translatable text after a language change.
+     * Called from the ComboBox selection listener.
+     */
+    private void refreshTexts() {
+        titleText.setText((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
+        newGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_NEWGAME));
+        loadGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_LOADGAME));
+
+        // Update window title to match selected language
+        Stage stage = (Stage) rootPane.getScene().getWindow();
+        stage.setTitle((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
     }
 }

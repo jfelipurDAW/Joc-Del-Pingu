@@ -1,0 +1,23 @@
+entity.seal: "Focă"
+entity.player: "Pinguin"
+
+object.snowball: "Bulgăre de zăpadă"
+object.fish: "Pește"
+object.dice: "Zar"
+object.dice.fast: "Zar rapid"
+object.dice.slow: "Zar lent"
+
+text.game.title: "Jocul Pinguinului"
+text.game.setup: "Configurare Joc"
+text.game.startgame: "Începe Jocul"
+
+menu.button.newgame: "Joc Nou"
+menu.button.loadgame: "Încarcă Joc"
+menu.button.language: "🌍 Limbă"
+
+menu.gamesetup.playernumber: "Număr de jucători: "
+menu.gamesetup.enableseal: "Activează foca?"
+
+gamesetup.player: "Jucător "
+gamesetup.playername: "Numele jucătorului"
+gamesetup.password: "Parolă"

@@ -1,0 +1,23 @@
+entity.seal: "Foca"
+entity.player: "Pingüí"
+
+object.snowball: "Bola de neu"
+object.fish: "Peix"
+object.dice: "Dau"
+object.dice.fast: "Dau ràpid"
+object.dice.slow: "Dau lent"
+
+text.game.title: "El Joc del Pingüí"
+text.game.setup: "Configuració de Partida"
+text.game.startgame: "Iniciar Partida"
+
+menu.button.newgame: "Nova Partida"
+menu.button.loadgame: "Carregar Partida"
+menu.button.language: "🌍 Idioma"
+
+menu.gamesetup.playernumber: "Nombre de jugadors: "
+menu.gamesetup.enableseal: "Activar foca?"
+
+gamesetup.player: "Jugador "
+gamesetup.playername: "Nom del jugador"
+gamesetup.password: "Contrasenya"

@@ -1,0 +1,23 @@
+entity.seal: "Foca"
+entity.player: "Pingüino"
+
+object.snowball: "Bola de nieve"
+object.fish: "Pez"
+object.dice: "Dado"
+object.dice.fast: "Dado rápido"
+object.dice.slow: "Dado lento"
+
+text.game.title: "El Juego del Pingüino"
+text.game.setup: "Configuración de Partida"
+text.game.startgame: "Iniciar Partida"
+
+menu.button.newgame: "Nueva Partida"
+menu.button.loadgame: "Cargar Partida"
+menu.button.language: "🌍 Idioma"
+
+menu.gamesetup.playernumber: "Número de jugadores: "
+menu.gamesetup.enableseal: "¿Activar foca?"
+
+gamesetup.player: "Jugador "
+gamesetup.playername: "Nombre del jugador"
+gamesetup.password: "Contraseña"

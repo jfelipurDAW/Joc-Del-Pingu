@@ -13,8 +13,9 @@ public enum Lang {
     OBJECT_SNOWBALL ("object.snowball"),
     OBJECT_FISH     ("object.fish"),
     OBJECT_DICE     ("object.dice"),
-    OBJECT_FASTDICE ("object.fastdice"),
-    OBJECT_SLOWDICE ("object.slowdice"),
+    // Fixed keys to match YAML structure (object.dice.fast / object.dice.slow)
+    OBJECT_FASTDICE ("object.dice.fast"),
+    OBJECT_SLOWDICE ("object.dice.slow"),
 	
 	MENU_BUTTON_NEWGAME ("menu.button.newgame"),
 	MENU_BUTTON_LOADGAME ("menu.button.loadgame"),
@@ -23,6 +24,9 @@ public enum Lang {
 	TEXT_GAME_TITLE ("text.game.title"), 
 	
 	TEXT_SETUP_TITLE ("text.game.setup"), 
+	
+	// Missing key that exists in the YAML files
+	TEXT_GAME_STARTGAME ("text.game.startgame"),
 	
 	GAMESETUP_TEXT_PLAYERNUMBER ("menu.gamesetup.playernumber"), 
 	GAMESETUP_TEXT_ENABLESEAL ("menu.gamesetup.enableseal"),

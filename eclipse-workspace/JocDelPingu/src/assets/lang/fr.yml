@@ -1,0 +1,23 @@
+entity.seal: "Phoque"
+entity.player: "Pingouin"
+
+object.snowball: "Boule de neige"
+object.fish: "Poisson"
+object.dice: "Dé"
+object.dice.fast: "Dé rapide"
+object.dice.slow: "Dé lent"
+
+text.game.title: "Le Jeu du Pingouin"
+text.game.setup: "Configuration de la Partie"
+text.game.startgame: "Commencer la Partie"
+
+menu.button.newgame: "Nouvelle Partie"
+menu.button.loadgame: "Charger la Partie"
+menu.button.language: "🌍 Langue"
+
+menu.gamesetup.playernumber: "Nombre de joueurs : "
+menu.gamesetup.enableseal: "Activer le phoque ?"
+
+gamesetup.player: "Joueur "
+gamesetup.playername: "Nom du joueur"
+gamesetup.password: "Mot de passe"

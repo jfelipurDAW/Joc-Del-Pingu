@@ -1,0 +1,23 @@
+entity.seal: "Foca"
+entity.player: "Pinguim"
+
+object.snowball: "Bola de neve"
+object.fish: "Peixe"
+object.dice: "Dado"
+object.dice.fast: "Dado rápido"
+object.dice.slow: "Dado lento"
+
+text.game.title: "O Jogo do Pinguim"
+text.game.setup: "Configuração do Jogo"
+text.game.startgame: "Iniciar Jogo"
+
+menu.button.newgame: "Novo Jogo"
+menu.button.loadgame: "Carregar Jogo"
+menu.button.language: "🌍 Idioma"
+
+menu.gamesetup.playernumber: "Número de jogadores: "
+menu.gamesetup.enableseal: "Ativar foca?"
+
+gamesetup.player: "Jogador "
+gamesetup.playername: "Nome do jogador"
+gamesetup.password: "Senha"

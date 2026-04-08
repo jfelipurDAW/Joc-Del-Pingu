@@ -1,0 +1,23 @@
+entity.seal: "فقمة"
+entity.player: "بطريق"
+
+object.snowball: "كرة ثلج"
+object.fish: "سمكة"
+object.dice: "نرد"
+object.dice.fast: "نرد سريع"
+object.dice.slow: "نرد بطيء"
+
+text.game.title: "لعبة البطريق"
+text.game.setup: "إعداد اللعبة"
+text.game.startgame: "بدء اللعبة"
+
+menu.button.newgame: "لعبة جديدة"
+menu.button.loadgame: "تحميل لعبة"
+menu.button.language: "🌍 اللغة"
+
+menu.gamesetup.playernumber: "عدد اللاعبين: "
+menu.gamesetup.enableseal: "تفعيل الفقمة؟"
+
+gamesetup.player: "اللاعب "
+gamesetup.playername: "اسم اللاعب"
+gamesetup.password: "كلمة المرور"

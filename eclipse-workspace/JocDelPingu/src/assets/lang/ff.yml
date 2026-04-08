@@ -1,0 +1,23 @@
+entity.seal: "Mbabba"
+entity.player: "Penguuwal"
+
+object.snowball: "Ƴiiƴam ndiyam"
+object.fish: "Liingu"
+object.dice: "Dees"
+object.dice.fast: "Dees jaawɗo"
+object.dice.slow: "Dees leelɗo"
+
+text.game.title: "Fijo Penguuwal"
+text.game.setup: "Teeltagol Fijo"
+text.game.startgame: "Fuɗɗo Fijo"
+
+menu.button.newgame: "Fijo Kesoo"
+menu.button.loadgame: "Loowde Fijo"
+menu.button.language: "🌍 Ɗemngal"
+
+menu.gamesetup.playernumber: "Limoore fijoowo'en: "
+menu.gamesetup.enableseal: "Hurmin mbabba?"
+
+gamesetup.player: "Fijoowo "
+gamesetup.playername: "Innde fijoowo"
+gamesetup.password: "Finnde"
