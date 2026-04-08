@@ -175,6 +175,17 @@ public class GameBoardController {
             turnController.addPlayer(player1);
             turnController.addPlayer(player2);
         }
+     // Cuando creas un jugador...
+        Player jugador1 = new Player("Marta", "BLUE"); 
+        
+        Object con = null;
+		// ... justo debajo, lo registras en la BBDD
+        // (Le pasamos una contraseña inventada o la que haya introducido en una pantalla de login)
+        registrarJugadorEnBD(con, 1, jugador1.getName(), "ClaveSecreta123", "BLUE");
+        
+        // Haces lo mismo con el jugador 2
+        Player jugador2 = new Player("Alex", "RED");
+        registrarJugadorEnBD(con, 2, jugador2.getName(), "ClaveSecreta456", "RED");
     }
 
     private void applyCss() {
@@ -360,8 +371,14 @@ public class GameBoardController {
             endTurn();
         });
     }
+    
 
-    private void animatePlayerMovement(Player player, int steps, Runnable onFinished) {
+    private void registrarJugadorEnBD(Object con, int i, String name, String string, String string2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void animatePlayerMovement(Player player, int steps, Runnable onFinished) {
         int startPos = player.getSquareIndex();
         Timeline timeline = new Timeline();
         double stepDuration = 250; // milliseconds per step
