@@ -47,10 +47,9 @@ public class PlayerSetupController {
 
     @FXML
     public void initialize() {
-    	titleText.setText((String) LangConfig.getLang(Lang.TEXT_SETUP_TITLE));
-    	player_number_select.setText((String) LangConfig.getLang(Lang.GAMESETUP_TEXT_PLAYERNUMBER));
-    	enable_seal_checkbox.setText((String) LangConfig.getLang(Lang.GAMESETUP_TEXT_ENABLESEAL));
-    	
+        LangConfig.addLanguageChangeListener(this::refreshTexts);
+        refreshTexts();
+        
         numPlayersCombo.getItems().addAll(1, 2, 3, 4);
         numPlayersCombo.setValue(2); // Default to 2 players
         sealCheckBox.setSelected(false); // Default seal unchecked
@@ -166,6 +165,26 @@ public class PlayerSetupController {
 
         VBox getVBox() {
             return vbox;
+        }
+    }
+
+    /**
+     * Refreshes all texts dynamically when the language changes.
+     */
+    private void refreshTexts() {
+        titleText.setText((String) LangConfig.getLang(Lang.TEXT_SETUP_TITLE));
+        player_number_select.setText((String) LangConfig.getLang(Lang.GAMESETUP_TEXT_PLAYERNUMBER));
+        enable_seal_checkbox.setText((String) LangConfig.getLang(Lang.GAMESETUP_TEXT_ENABLESEAL));
+        
+        for (PlayerInput input : playerInputs) {
+            if (input.vbox.getChildren().size() > 0) {
+                javafx.scene.Node node = input.vbox.getChildren().get(0);
+                if (node instanceof Label) {
+                    ((Label) node).setText(LangConfig.getLang(Lang.GAMESETUP_PLAYER) + " " + input.playerNumber);
+                }
+                input.nameField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PLAYERNAME));
+                input.passwordField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PASSWORD));
+            }
         }
     }
 }

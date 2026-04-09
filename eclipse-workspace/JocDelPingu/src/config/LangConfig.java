@@ -37,6 +37,9 @@ public class LangConfig {
     // Tracks the currently loaded language code
     private String currentLang;
 
+    // List of listeners to be notified when the language changes
+    private static final java.util.List<Runnable> listeners = new java.util.ArrayList<>();
+
     private LangConfig() {
 
     }
@@ -74,8 +77,25 @@ public class LangConfig {
             }
             data = yaml.load(inputStream);
             currentLang = langCode;
+            
+            // Notify all registered listeners that language has changed
+            notifyListeners();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+    
+    public static void addLanguageChangeListener(Runnable listener) {
+        listeners.add(listener);
+    }
+
+    public static void removeLanguageChangeListener(Runnable listener) {
+        listeners.remove(listener);
+    }
+
+    private static void notifyListeners() {
+        for (Runnable listener : listeners) {
+            listener.run();
         }
     }
     

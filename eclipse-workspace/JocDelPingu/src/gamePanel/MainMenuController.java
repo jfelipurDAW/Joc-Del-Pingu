@@ -43,10 +43,11 @@ public class MainMenuController {
         
 
         addBackgroundImage();
+        // Register listener for dynamic language updates
+        LangConfig.addLanguageChangeListener(this::refreshTexts);
+        
         // Removed addBitmapTitle() to use text instead of image-based font
-        titleText.setText((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
-        newGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_NEWGAME));
-        loadGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_LOADGAME));
+        refreshTexts(); // use the central method to set initial texts
 
         // Changed: populate language dropdown with available languages
         setupLanguageDropdown();
@@ -75,7 +76,7 @@ public class MainMenuController {
                 if (LangConfig.getDisplayName(code).equals(selectedDisplay)) {
                     LangConfig.loadLang(code);
                     System.out.println("Language changed to: " + code);
-                    refreshTexts();
+                    // UI refresh is handled automatically by the language listener
                     break;
                 }
             }
@@ -92,75 +93,31 @@ public class MainMenuController {
             return;
         }
 
-        Image bgImage = new Image(is);
+        Image bgImage = new Image(is, 0, 0, true, true); // smooth scaling
 
-        Canvas canvas = new Canvas();
-        canvas.widthProperty().bind(rootPane.widthProperty());
-        canvas.heightProperty().bind(rootPane.heightProperty());
-
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setImageSmoothing(false);
-
-        rootPane.getChildren().add(0, canvas);
-
-        // Redraw on resize
-        rootPane.widthProperty().addListener((obs, o, n) ->
-                drawPixelPerfect(gc, canvas, bgImage)
+        javafx.scene.layout.BackgroundImage backgroundImage = new javafx.scene.layout.BackgroundImage(
+                bgImage,
+                javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
+                javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
+                javafx.scene.layout.BackgroundPosition.CENTER,
+                new javafx.scene.layout.BackgroundSize(
+                        javafx.scene.layout.BackgroundSize.AUTO,
+                        javafx.scene.layout.BackgroundSize.AUTO,
+                        false, false, false, true // cover = true
+                )
         );
 
-        rootPane.heightProperty().addListener((obs, o, n) ->
-                drawPixelPerfect(gc, canvas, bgImage)
-        );
+        // Fix: Do NOT assign it to rootPane directly because mainmenu_bg CSS overwrites it.
+        // Instead, retain the background as a Node in the layout graph (just like the old Canvas was).
+        javafx.scene.layout.Region bgNode = new javafx.scene.layout.Region();
+        bgNode.setBackground(new javafx.scene.layout.Background(backgroundImage));
+        
+        // Bind the sizing accurately to the parent container
+        bgNode.prefWidthProperty().bind(rootPane.widthProperty());
+        bgNode.prefHeightProperty().bind(rootPane.heightProperty());
 
-        drawPixelPerfect(gc, canvas, bgImage);
-    }
-    private void updateScale(ImageView bgView, Image bgImage) {
-
-        double paneWidth = rootPane.getWidth();
-        double paneHeight = rootPane.getHeight();
-
-        double imgWidth = bgImage.getWidth();
-        double imgHeight = bgImage.getHeight();
-
-        // Automatic scale
-        double scale = Math.floor(Math.min(
-                paneWidth / imgWidth,
-                paneHeight / imgHeight
-        ));
-
-        if (scale < 1) scale = 1;
-
-        bgView.setFitWidth(imgWidth * scale);
-        bgView.setFitHeight(imgHeight * scale);
-    }
-
-    private void drawPixelPerfect(GraphicsContext gc, Canvas canvas, Image img) {
-
-        double paneW = canvas.getWidth();
-        double paneH = canvas.getHeight();
-
-        double imgW = img.getWidth();
-        double imgH = img.getHeight();
-
-        //  Escala ENTERA que cubra TODA la pantalla
-        double scale = Math.ceil(Math.max(paneW / imgW, paneH / imgH));
-
-        if (scale < 1) scale = 1;
-
-        double drawW = imgW * scale;
-        double drawH = imgH * scale;
-
-        //  Centrado horizontalmente, pegado al bottom
-        double x = Math.floor((paneW - drawW) / 2);
-        double y = paneH - drawH;
-
-        gc.setImageSmoothing(false);
-
-        // Limpia
-        gc.clearRect(0, 0, paneW, paneH);
-
-        //  Dibujar ocupando todo
-        gc.drawImage(img, x, y, drawW, drawH);
+        // Add to the bottom-most layer
+        rootPane.getChildren().add(0, bgNode);
     }
 
 //    private void addBitmapTitle() {
@@ -233,7 +190,9 @@ public class MainMenuController {
         loadGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_LOADGAME));
 
         // Update window title to match selected language
-        Stage stage = (Stage) rootPane.getScene().getWindow();
-        stage.setTitle((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
+        if (rootPane.getScene() != null && rootPane.getScene().getWindow() instanceof Stage) {
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            stage.setTitle((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
+        }
     }
 }

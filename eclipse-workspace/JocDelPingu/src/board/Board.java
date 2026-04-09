@@ -13,7 +13,7 @@ public class Board {
 	public static final int widthBoard = 10;
 	public static final int heightBoard = 5;
 	public static final int MAX_SQUARES = widthBoard*heightBoard;
-	public static final int NORMAL_SQUARE_PERCENTAGE = 80;
+	public static final int NORMAL_SQUARE_PERCENTAGE = 70;
 
 	private Square[] board = new Square[MAX_SQUARES];
 	private ArrayList<Integer> IceHole_Array = new ArrayList<Integer>();

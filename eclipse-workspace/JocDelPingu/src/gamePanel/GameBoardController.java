@@ -409,6 +409,9 @@ public class GameBoardController {
             playSealTurn();
         }
 
+        // If the seal won during its turn, stop here
+        if (gameOver) return;
+
         // Update seal turns
         if (seal != null) {
             seal.updateSealTurns();
@@ -473,7 +476,9 @@ public class GameBoardController {
         alert.setHeaderText(winner.getName() + " wins!");
         alert.setContentText("Congratulations! " + winner.getName() + " reached the end first!\n\n" +
                            "Final position: Square " + winner.getSquareIndex());
-        alert.showAndWait();
+        javafx.application.Platform.runLater(() -> {
+            alert.showAndWait();
+        });
     }
 
     // ============================================
