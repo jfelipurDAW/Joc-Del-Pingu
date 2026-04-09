@@ -1,0 +1,25 @@
+lang.name: "日本語"
+
+entity.seal: "シール"
+entity.player: "ペンギン"
+
+object.snowball: "雪だるま"
+object.fish: "魚"
+object.dice: "サイコロ"
+object.dice.fast: "高速ダイス"
+object.dice.slow: "スローダイス"
+
+text.game.title: "ピングーのゲーム"
+text.game.setup: "ゲームの設定"
+text.game.startgame: "ゲームを開始"
+
+menu.button.newgame: "新しいゲーム"
+menu.button.loadgame: "ゲームを読み込む"
+menu.button.language: "🌍 言語"
+
+menu.gamesetup.playernumber: "プレイヤー数: "
+menu.gamesetup.enableseal: "シールを有効にしますか？"
+
+gamesetup.player: "プレイヤー "
+gamesetup.playername: "プレイヤー名"
+gamesetup.password: "パスワード"
