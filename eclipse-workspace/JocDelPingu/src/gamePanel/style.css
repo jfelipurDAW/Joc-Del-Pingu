@@ -125,12 +125,7 @@
 
 /* Glassmorphism panel for menus over background */
 .glass-pane {
-    -fx-background-color: rgba(255, 255, 255, 0.25);
-    -fx-background-radius: 25;
-    -fx-border-radius: 25;
-    -fx-border-color: rgba(255, 255, 255, 0.4);
-    -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);
+    -fx-background-color: transparent;
     -fx-padding: 40;
 }
 
