@@ -1,9 +1,6 @@
 /**
  * 
  */
-/**
- * 
- */
 module JocDelPingu {
     requires org.yaml.snakeyaml;
     requires java.sql;
@@ -15,19 +12,25 @@ module JocDelPingu {
     requires javafx.swing;
 	requires javafx.base;
 
-    opens gamePanel to javafx.fxml;
-    opens com.fontgenerator to javafx.graphics, javafx.fxml;
-    opens entity to javafx.fxml;
-    opens board to javafx.fxml;
-    opens ObjectManagers to javafx.fxml;
-    opens ConnectionDDBB to javafx.fxml;
-    opens main to javafx.fxml;
-
-    exports gamePanel;
-    exports com.fontgenerator;
-    exports entity;
-    exports board;
-    exports ObjectManagers;
-    exports ConnectionDDBB;
-    exports main;
+    opens controller.main to javafx.graphics, javafx.fxml;
+    opens controller.ui to javafx.fxml, javafx.graphics;
+    opens view.ui to javafx.fxml, javafx.graphics;
+    opens view.font.generator to javafx.graphics, javafx.fxml;
+    opens view.fxml to javafx.fxml, javafx.graphics;
+    opens assets.css to javafx.graphics, javafx.fxml;
+    
+    exports controller.main;
+    exports controller.ui;
+    exports view.ui;
+    exports view.font;
+    exports view.font.generator;
+    
+    exports model.board;
+    exports model.board.squares;
+    exports model.config;
+    exports model.db;
+    exports model.entity;
+    exports model.game;
+    exports model.item;
+    exports model.item.objects;
 }

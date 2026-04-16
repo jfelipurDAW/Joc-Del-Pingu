@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane fx:id="rootPane" prefHeight="700.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ui.GameBoardController">
+
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+
+   <!-- TOP BAR: Title + Turn indicator -->
+   <top>
+      <HBox alignment="CENTER" spacing="20" styleClass="top-bar">
+         <padding>
+            <Insets bottom="8.0" left="15.0" right="15.0" top="8.0" />
+         </padding>
+         <Text fx:id="gameTitleText" styleClass="game-title" text="🐧 Pingu's Game">
+            <font>
+               <Font size="24.0" />
+            </font>
+         </Text>
+         <Label fx:id="turnIndicatorLabel" styleClass="turn-indicator" text="Turn: Player 1">
+            <font>
+               <Font size="16.0" />
+            </font>
+         </Label>
+         <Label fx:id="diceResultLabel" styleClass="dice-result" text="">
+            <font>
+               <Font size="18.0" />
+            </font>
+         </Label>
+      </HBox>
+   </top>
+
+   <!-- CENTER: Game Board Grid -->
+   <center>
+      <GridPane fx:id="grid" hgap="1" vgap="1" styleClass="game-grid">
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </GridPane>
+   </center>
+
+   <!-- RIGHT PANEL: Player Info + Inventory -->
+   <right>
+      <VBox fx:id="rightPanel" prefWidth="250.0" spacing="10" styleClass="right-panel">
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+
+         <!-- Current Player Info -->
+         <VBox styleClass="player-card" spacing="5">
+            <Label fx:id="currentPlayerName" styleClass="player-name" text="Current Player">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Label fx:id="currentPlayerSquare" styleClass="player-square" text="Square: 0" />
+         </VBox>
+
+         <!-- Inventory Display -->
+         <VBox styleClass="inventory-card" spacing="4">
+            <Label styleClass="inventory-title" text="📦 Inventory">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <Label fx:id="snowballCount" text="⛄ Snowballs: 0" />
+            <Label fx:id="fishCount" text="🐟 Fish: 0" />
+            <Label fx:id="fastDiceCount" text="🎲✨ Fast Dice: 0" />
+            <Label fx:id="slowDiceCount" text="🎲 Slow Dice: 0" />
+            <Label fx:id="totalItemCount" styleClass="total-items" text="Total: 0 items" />
+         </VBox>
+
+         <!-- All Players Summary -->
+         <VBox fx:id="allPlayersBox" styleClass="players-summary" spacing="3">
+            <Label styleClass="section-title" text="👥 All Players">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+         </VBox>
+
+         <!-- Seal Status (if enabled) -->
+         <VBox fx:id="sealStatusBox" styleClass="seal-card" spacing="3" visible="false" managed="false">
+            <Label styleClass="section-title" text="🦭 Seal Status">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <Label fx:id="sealPositionLabel" text="Position: 0" />
+            <Label fx:id="sealBlockedLabel" text="Status: Active" />
+         </VBox>
+      </VBox>
+   </right>
+
+   <!-- BOTTOM BAR: Action Buttons + Event Log -->
+   <bottom>
+      <VBox spacing="8">
+         <padding>
+            <Insets top="8.0" />
+         </padding>
+
+         <!-- Action Buttons -->
+         <HBox alignment="CENTER" spacing="15" styleClass="action-bar">
+            <padding>
+               <Insets bottom="8.0" left="10.0" right="10.0" top="8.0" />
+            </padding>
+            <Button fx:id="rollDiceButton" mnemonicParsing="false" onAction="#rollDice" styleClass="btn-roll" text="🎲 Roll Dice" prefWidth="150" prefHeight="40" />
+            <Button fx:id="rollFastDiceButton" mnemonicParsing="false" onAction="#rollFastDice" styleClass="btn-fast-dice" text="🎲✨ Fast Dice" prefWidth="150" prefHeight="40" />
+            <Button fx:id="rollSlowDiceButton" mnemonicParsing="false" onAction="#rollSlowDice" styleClass="btn-slow-dice" text="🎲 Slow Dice" prefWidth="150" prefHeight="40" />
+            <Button fx:id="throwSnowballButton" mnemonicParsing="false" onAction="#throwSnowball" styleClass="btn-snowball" text="⛄ Throw Snowball" prefWidth="160" prefHeight="40" />
+            <Button fx:id="saveGameButton" mnemonicParsing="false" onAction="#saveGame" styleClass="btn-save" text="💾 Save Game" prefWidth="130" prefHeight="40" />
+         </HBox>
+
+         <!-- Event Log -->
+         <TextArea fx:id="eventLog" editable="false" prefHeight="80.0" wrapText="true" styleClass="event-log" promptText="Game events will appear here..." />
+      </VBox>
+   </bottom>
+</BorderPane>
