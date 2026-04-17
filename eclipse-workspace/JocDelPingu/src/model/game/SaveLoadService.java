@@ -95,10 +95,13 @@ public class SaveLoadService {
             		st.close();
             	} catch (Exception e) {} // already exists
             	
-            	BBDD.delete(con, "DELETE FROM SAVED_GAMES WHERE GAME_ID = '" + gameId + "'");
-            	BBDD.insert(con, "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES ('" + gameId + "', '" + encrypted + "')");
-            	
+            	// 1. Generamos un ID único añadiendo los milisegundos a la palabra PARTIDA
+            	String idUnico = "PARTIDA_" + System.currentTimeMillis();
+
+            	// 2. Ya no hacemos DELETE. Directamente hacemos el INSERT con el nuevo idUnico
+            	BBDD.insert(con, "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES ('" + idUnico + "', '" + encrypted + "')");
             	BBDD.cerrar(con);
+            	
             	System.out.println("Game Saved Successfully!");
                 return true;
             } else {

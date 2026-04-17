@@ -1,6 +1,8 @@
 package model.game;
 
 import java.util.ArrayList;
+import javafx.fxml.FXML;
+import javafx.scene.control.ListView;
 import java.util.List;
 
 import model.board.Board;
@@ -112,5 +114,33 @@ public class TurnController {
 	
 	public int getPlayerCount() {
 		return players.size();
+	}
+	@FXML
+	private ListView<String> listaPartidas; // El componente de tu FXML
+
+	// Este método se ejecuta al abrir la pantalla
+	public void initialize() {
+	    // 1. Buscamos todas las partidas que hay en Oracle
+	    List<String> partidasEnBD = SaveLoadService.getAllSavedGameIds();
+	    
+	    // 2. Las metemos en la lista visual
+	    listaPartidas.getItems().addAll(partidasEnBD);
+	}
+
+	@FXML
+	private void onBotonCargarClick() {
+	    // 3. Miramos qué nombre ha seleccionado el usuario con el ratón
+	    String partidaSeleccionada = listaPartidas.getSelectionModel().getSelectedItem();
+	    
+	    if (partidaSeleccionada != null) {
+	        // 4. Cargamos ESA partida exacta
+	        boolean ok = SaveLoadService.loadGame(partidaSeleccionada);
+	        if (ok) {
+	            System.out.println("Cargando: " + partidaSeleccionada);
+	            // Aquí cambias a la pantalla del juego...
+	        }
+	    } else {
+	        System.out.println("Por favor, selecciona una partida de la lista.");
+	    }
 	}
 }
