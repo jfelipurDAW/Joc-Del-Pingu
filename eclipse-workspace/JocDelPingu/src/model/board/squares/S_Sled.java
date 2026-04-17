@@ -19,6 +19,10 @@ public class S_Sled extends Square{
 	
 	@Override
 	public void action() {
-	};
-	
+	}
+
+	@Override
+	public String action(model.entity.Player player) {
+		return null; // Handled by BoardManager
+	}
 }

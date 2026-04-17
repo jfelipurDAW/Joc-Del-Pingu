@@ -9,7 +9,7 @@ public class SnowBall extends model.item.GameObject {
     
     public SnowBall() {
     	super(ObjectType.SNOWBALL);
-    	this.name = "Snowball";
+    	this.setName("Snowball");
     	this.backwardSteps = 1;
     }
     
@@ -22,9 +22,7 @@ public class SnowBall extends model.item.GameObject {
         int newPosition = java.lang.Math.max(0, currentPosition - backwardSteps);
         
         target.setSquare(newPosition);
-        
-        java.lang.System.out.println(target.getName() + " moves back " + backwardSteps + 
-                          " spaces (position: " + newPosition + ")");
+        // Log handled by controller/manaager
     }
     
     public int getBackwardSteps() {

@@ -3,23 +3,19 @@ package model.board.squares;
 import model.board.Square;
 import model.board.SquareType;
 
-public class S_Normal extends Square {
+public class S_End extends Square {
 	
-	public S_Normal(SquareType type) {
+	public S_End(SquareType type) {
 		super(type);
 	}
 
 	@Override
 	public SquareType getType() {
-		return SquareType.NORMAL;
-	};
+		return SquareType.END;
+	}
 	
 	@Override
-	public void action() {
-	}
-
-	@Override
 	public String action(model.entity.Player player) {
-		return player.getName() + " landed on a normal square.";
+		return player.getName() + " reached the END! 🎉";
 	}
 }

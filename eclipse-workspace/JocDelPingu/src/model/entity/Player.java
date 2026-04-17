@@ -3,6 +3,7 @@ package model.entity;
 import java.util.ArrayList;
 import java.util.Random;
 
+import model.board.Board;
 import model.item.Inventory;
 import model.item.ObjectType;
 
@@ -15,27 +16,27 @@ public class Player extends Entity {
 
 	
 	public Player(String name, String colour) {
-		this.type = EntityType.PLAYER;
-		this.entityId = (int) (Math.random() * 100000);
+		this.setType(EntityType.PLAYER);
+		this.setEntityId((int) (Math.random() * 100000));
 		this.name = name;
 		this.colour = colour;
-		this.numSquare = 0;
-		this.skipNextTurn = false;
-		this.inventory = new Inventory(entityId);
+		this.setNumSquare(0);
+		this.setSkipNextTurn(false);
+		this.inventory = new Inventory(this.getEntityId());
 	}
 	
     /**
      * Constructor with password (for database)
      */
     public Player(String name, String colour, String password) {
-        this.type = EntityType.PLAYER;
-        this.entityId = (int) (Math.random() * 100000);
+        this.setType(EntityType.PLAYER);
+        this.setEntityId((int) (Math.random() * 100000));
         this.name = name;
         this.colour = colour;
         this.password = password;
-        this.numSquare = 0;
-        this.skipNextTurn = false;
-        this.inventory = new Inventory(entityId);
+        this.setNumSquare(0);
+        this.setSkipNextTurn(false);
+        this.inventory = new Inventory(this.getEntityId());
     }
 	
 	public void setName(String name) {
@@ -58,7 +59,7 @@ public class Player extends Entity {
 	
 	@Override
     public String toString() {
-        return name + " (" + colour + ") - Square: " + numSquare + " " + inventory.toString();
+        return name + " (" + colour + ") - Square: " + this.getNumSquare() + " " + inventory.toString();
     }
 	
 	/**
@@ -129,7 +130,14 @@ public class Player extends Entity {
 	}
 
 	public int getPosition() {
-		return this.numSquare;
+		return this.getNumSquare();
+	}
+
+	/**
+	 * Manage player's needs (required by spec).
+	 */
+	public void manageNeeds() {
+		// Manage needs implementation
 	}
 
 	@Override
@@ -151,7 +159,7 @@ public class Player extends Entity {
 
 	@Override
 	public void setSquare(int i) {
-		this.numSquare = Math.max(0, Math.min(i, board != null ? board.MAX_SQUARES - 1 : i));
+		this.setNumSquare(Math.max(0, Math.min(i, this.getBoard() != null ? Board.MAX_SQUARES - 1 : i)));
 	}
 	
 	

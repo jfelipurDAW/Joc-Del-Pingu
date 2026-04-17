@@ -1,38 +1,97 @@
-package model.game; 
+package model.game;
 
+import model.board.Board;
+import model.entity.Player;
+import model.entity.Seal;
 public class GameManager {
     
     private String gameId;
     private int numPlayers;
     private boolean isActive;
 
+    private Board board;
+    private TurnController turnController;
+    private Seal seal;
+    private BoardManager boardManager;
+    private PlayerManager playerManager;
+    private Game game;
+
     // Constructor
     public GameManager(String gameId, int numPlayers) {
         this.gameId = gameId;
         this.numPlayers = numPlayers;
-        this.isActive = false; // La partida empieza inactiva hasta que la arrancamos
+        this.isActive = false; 
+        this.boardManager = new BoardManager();
+        this.playerManager = new PlayerManager();
+        this.game = new Game();
     }
 
-    // Método para empezar la partida
+    public void setBoard(Board board) { 
+        this.board = board; 
+        this.game.setBoard(board);
+    }
+    
+    public void setTurnController(TurnController turnController) { 
+        this.turnController = turnController; 
+    }
+    
+    public void setSeal(Seal seal) { 
+        this.seal = seal; 
+        this.game.setSeal(seal);
+    }
+
     public void startNewGame() {
-        System.out.println("Starting game: " + gameId + " with " + numPlayers + " players.");
         this.isActive = true;
     }
 
-    // Método para jugar un turno
-    public void playTurn() {
-        System.out.println("Playing a turn...");
-        // Aquí irá más adelante la lógica de tirar los dados y mover al jugador
+    public String playTurn(int diceResult) {
+        Player current = getCurrentPlayer();
+        String moveMsg = playerManager.movePlayer(current, diceResult, board);
+        if (moveMsg != null) {
+            this.game.setGameOver(true);
+            this.game.setWinner(current);
+            return moveMsg;
+        }
+        return boardManager.executeSquareAction(current, board);
     }
 
-    // Método para comprobar si la partida sigue activa
     public boolean isGameActive() {
         return this.isActive;
     }
 
-    // Método para guardar la partida (Base de datos)
-    public void saveGame() {
-        System.out.println("Saving game state to the database...");
-        // Aquí irá más adelante el código SQL (INSERT/UPDATE) para guardar
+    public boolean saveGame() {
+        return SaveLoadService.saveGame(gameId, board, turnController, seal);
+    }
+    
+    public boolean loadGame() {
+        return SaveLoadService.loadGame(gameId);
+    }
+
+    public boolean isGameOver() {
+        return game.isGameOver() || (turnController != null && turnController.isGameWon());
+    }
+
+    public Player getWinner() {
+        if (game.getWinner() != null) return game.getWinner();
+        return turnController != null ? turnController.getWinner() : null;
+    }
+
+    public Player getCurrentPlayer() {
+        if (turnController != null && turnController.getCurrentTurn() instanceof Player) {
+            return (Player) turnController.getCurrentTurn();
+        }
+        return null;
+    }
+    
+    public PlayerManager getPlayerManager() {
+        return playerManager;
+    }
+    
+    public BoardManager getBoardManager() {
+        return boardManager;
+    }
+
+    public Seal getSeal() {
+        return seal;
     }
 }

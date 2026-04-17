@@ -16,37 +16,33 @@ public class S_Event extends Square {
 	};
 	
 	@Override
-	public void action(model.entity.Player player) {
+	public String action(model.entity.Player player) {
 		int randomEvent = (int)(Math.random() * 6);
 		switch(randomEvent) {
 			case 0:
 				player.getInventory().addFish();
-				System.out.println(player.getName() + " found a Fish!");
-				break;
+				return player.getName() + " found a Fish!";
 			case 1:
 				int snowballs = (int)(Math.random() * 3) + 1;
 				player.getInventory().addSnowballs(snowballs);
-				System.out.println(player.getName() + " found " + snowballs + " Snowballs!");
-				break;
+				return player.getName() + " found " + snowballs + " Snowballs!";
 			case 2:
 				player.getInventory().addDice(model.item.ObjectType.FASTDICE);
-				System.out.println(player.getName() + " found a Fast Dice!");
-				break;
+				return player.getName() + " found a Fast Dice!";
 			case 3:
 				player.getInventory().addDice(model.item.ObjectType.SLOWDICE);
-				System.out.println(player.getName() + " found a Slow Dice!");
-				break;
+				return player.getName() + " found a Slow Dice!";
 			case 4:
 				player.setSkipNextTurn(true);
-				System.out.println(player.getName() + " got trapped in a blizzard! Loses a turn.");
-				break;
+				return player.getName() + " got trapped in a blizzard! Loses a turn.";
 			case 5:
 				model.item.ObjectType lostItem = player.getInventory().removeRandomItem();
 				if (lostItem != null) {
-					System.out.println(player.getName() + " dropped a " + lostItem + " due to strong winds!");
+					return player.getName() + " dropped a " + lostItem + " due to strong winds!";
 				}
 				break;
 		}
+        return player.getName() + " triggered an event.";
 	}
 
 }

@@ -72,6 +72,7 @@ public class GameBoardController {
     // --- Game State ---
     private Board gameBoard;
     private TurnController turnController;
+    private model.game.GameManager gameManager;
     private Dice defaultDice;
     private Dice fastDice;
     private Dice slowDice;
@@ -107,11 +108,14 @@ public class GameBoardController {
 
     @FXML
     public void initialize() {
+        gameManager = new model.game.GameManager("LOCAL_MATCH", 0);
         gameBoard = new Board();
+        gameManager.setBoard(gameBoard);
         
         if (GameSetupConfig.isLoadedGame()) {
             gameBoard.loadBoard(GameSetupConfig.getLoadedBoardState());
             turnController = new TurnController();
+            gameManager.setTurnController(turnController);
             initializePlayers();
             turnController.setCurrentTurn(GameSetupConfig.getLoadedTurnIndex());
 
@@ -124,18 +128,21 @@ public class GameBoardController {
                     seal.setSquare(((Number) sealState.get("square")).intValue());
                     seal.setBlockedTurns(((Number) sealState.get("blockedTurns")).intValue());
                 }
+                gameManager.setSeal(seal);
                 sealStatusBox.setVisible(true);
                 sealStatusBox.setManaged(true);
             }
         } else {
             gameBoard.createNewBoard();
             turnController = new TurnController();
+            gameManager.setTurnController(turnController);
             initializePlayers();
 
             sealEnabled = GameSetupConfig.isSealEnabled();
             if (sealEnabled) {
                 seal = new Seal();
                 seal.setBoard(gameBoard);
+                gameManager.setSeal(seal);
                 sealStatusBox.setVisible(true);
                 sealStatusBox.setManaged(true);
             }
@@ -270,15 +277,7 @@ public class GameBoardController {
             int selectedIndex = targetNames.indexOf(result.get());
             Player target = targets.get(selectedIndex);
             
-            // Use 1 snowball, move target back 1-3 squares
-            current.getInventory().useObject(ObjectType.SNOWBALL, 1);
-            int backSteps = (int)(Math.random() * 3) + 1;
-            int oldPos = target.getSquareIndex();
-            int newPos = Math.max(0, oldPos - backSteps);
-            target.setSquare(newPos);
-            
-            String msg = "⛄ " + current.getName() + " threw a snowball at " + target.getName() + 
-                        "! " + target.getName() + " goes back " + backSteps + " squares (" + oldPos + " → " + newPos + ")";
+            String msg = gameManager.getPlayerManager().throwSnowball(current, target);
             logEvent(msg);
 
             // Animate snowball effect
@@ -295,7 +294,7 @@ public class GameBoardController {
     @FXML
     private void saveGame() {
         logEvent("💾 Saving game state to database...");
-        boolean success = model.game.SaveLoadService.saveGame("SAVE_SLOT_1", gameBoard, turnController, sealEnabled ? seal : null);
+        boolean success = gameManager.saveGame();
         if (success) {
             logEvent("✅ Game saved successfully!");
             showAlert("Save Game", "Game saved securely to the Oracle database!");
@@ -328,14 +327,14 @@ public class GameBoardController {
             current.setSquare(startSquare);
             
             // Logical move
-            String moveResult = current.moveForward(diceResult);
+            String moveResult = gameManager.playTurn(diceResult);
             logEvent(moveResult);
             
             drawBoard();
 
             // Check win
-            if (current.getSquareIndex() >= Board.MAX_SQUARES - 1) {
-                handleWin(current);
+            if (gameManager.isGameOver()) {
+                handleWin(gameManager.getWinner());
                 return;
             }
 
@@ -350,7 +349,7 @@ public class GameBoardController {
 
             // Check seal collision
             if (sealEnabled && seal != null && seal.getSquareIndex() == current.getSquareIndex()) {
-                String sealResult = seal.interact(current);
+                String sealResult = gameManager.getPlayerManager().handleSealInteraction(seal, current);
                 logEvent(sealResult);
                 drawBoard();
             }
@@ -441,7 +440,7 @@ public class GameBoardController {
 
         logEvent("⚔️ SNOWBALL WAR! " + attacker.getName() + " vs " + defender.getName() + "!");
         
-        Player.SnowballWarResult warResult = Player.snowballWar(attacker, defender);
+        model.game.PlayerManager.SnowballWarResult warResult = gameManager.getPlayerManager().snowballWar(attacker, defender);
         logEvent("⚔️ " + warResult.toString());
         
         // Flash animation for war

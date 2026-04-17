@@ -22,9 +22,9 @@ public class Seal extends Entity {
     
     public Seal() {
         this.name = "Seal";
-        this.type = EntityType.SEAL;
-        this.numSquare = 0;
-        this.skipNextTurn = false;
+        this.setType(EntityType.SEAL);
+        this.setNumSquare(0);
+        this.setSkipNextTurn(false);
         this.isBribed = false;
         this.blockedTurns = 0;
         this.random = new Random();
@@ -69,7 +69,7 @@ public class Seal extends Entity {
      * Seal hits a player and sends them to the previous ice hole.
      */
     public String hitPlayer(Player player) {
-        if (board != null) {
+        if (this.getBoard() != null) {
             int previousHole = findPreviousIceHole(player.getSquareIndex());
             player.setSquare(previousHole);
             return "🦭💥 The seal hits " + player.getName() + " with its tail! Sent to ice hole at square " + previousHole + "!";
@@ -106,15 +106,16 @@ public class Seal extends Entity {
     /**
      * Called at the end of each game turn to update seal's blocked state.
      */
-    public void updateSealTurns() {
+    public String updateSealTurns() {
         if (this.blockedTurns > 0) {
             this.blockedTurns--;
             
             if (this.blockedTurns == 0) {
                 this.isBribed = false;
-                System.out.println("🦭 The seal has finished eating and is dangerous again!");
+                return "🦭 The seal has finished eating and is dangerous again!";
             }
         }
+        return null;
     }
     
     /**
@@ -135,7 +136,7 @@ public class Seal extends Entity {
     	int roll = random.nextInt(6) + 1;
     	log.add("🦭 The seal rolls: " + roll);
     	
-    	int oldPos = this.numSquare;
+    	int oldPos = this.getNumSquare();
     	int newPos = Math.min(oldPos + roll, Board.MAX_SQUARES - 1);
     	
     	// Check all squares between old and new position for players to affect
@@ -147,7 +148,7 @@ public class Seal extends Entity {
     		}
     	}
     	
-    	this.numSquare = newPos;
+    	this.setNumSquare(newPos);
     	log.add("🦭 The seal moves to square " + newPos);
     	
     	// Check if seal landed on same square as any player
@@ -164,8 +165,8 @@ public class Seal extends Entity {
      * Find the previous ice hole before a given position.
      */
     private int findPreviousIceHole(int position) {
-    	if (board != null) {
-    		List<Integer> holes = board.getIceHole_Array();
+    	if (this.getBoard() != null) {
+    		List<Integer> holes = this.getBoard().getIceHole_Array();
     		int previousHole = 0;
     		for (int hole : holes) {
     			if (hole < position) {

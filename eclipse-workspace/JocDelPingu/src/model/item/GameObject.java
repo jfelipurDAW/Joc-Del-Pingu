@@ -2,9 +2,10 @@ package model.item;
 
 public abstract class GameObject {
     
-    protected int objectId;
-    protected java.lang.String name;
-    protected ObjectType type;
+    private int objectId;
+    private java.lang.String name;
+    private ObjectType type;
+    private int quantity;
     
     public GameObject(ObjectType type) {
         this.objectId = (int) (java.lang.Math.random() * 100000);
@@ -21,5 +22,17 @@ public abstract class GameObject {
     
     public java.lang.String getName() {
         return name;
+    }
+    
+    public void setName(java.lang.String name) {
+    	this.name = name;
+    }
+    
+    public int getQuantity() {
+    	return quantity;
+    }
+    
+    public void setQuantity(int quantity) {
+    	this.quantity = quantity;
     }
 }

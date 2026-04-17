@@ -6,6 +6,6 @@ public class Fish extends model.item.GameObject {
 
 	public Fish() {
 		super(ObjectType.FISH);
-		this.name = "Fish";
+		this.setName("Fish");
 	}
 }

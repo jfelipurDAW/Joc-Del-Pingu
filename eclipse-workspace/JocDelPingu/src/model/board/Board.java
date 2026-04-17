@@ -7,6 +7,8 @@ import model.board.squares.S_Event;
 import model.board.squares.S_IceHole;
 import model.board.squares.S_Normal;
 import model.board.squares.S_Sled;
+import model.board.squares.S_Start;
+import model.board.squares.S_End;
 
 public class Board {
 	
@@ -27,38 +29,32 @@ public class Board {
 		for (int i = 0; i < board.length; i++) {
 			if ((int) (Math.random()*100+1) <= NORMAL_SQUARE_PERCENTAGE) {
 				board[i] = new S_Normal(SquareType.NORMAL);
-				System.out.println("NORMAL");
 			} else {
 				int randomType = (int) (Math.random()*5+1);
 				switch(randomType) {
 				case 1: 
 					board[i] = new S_IceHole(SquareType.ICE_HOLE);
-					System.out.println("ICE_HOLE");
 					IceHole_Array.add(i);
 					break;
 				case 2: 
 					board[i] = new S_Sled(SquareType.SLED);
-					System.out.println("SLED");
 					Sled_Array.add(i);
 					break;
 				case 3: 
 					board[i] = new S_Bear(SquareType.BEAR);
-					System.out.println("BEAR");
 					break;
 				case 4: 
 					board[i] = new S_Event(SquareType.EVENT);
-					System.out.println("EVENT");
 					break;
 				case 5:
 					board[i] = new S_BrokenFloor(SquareType.BROKEN_FLOOR);
-					System.out.println("BROKEN_FLOOR");
 					break;
 				}
 			}
 		}
 		
-		board[0] = new Square(SquareType.START);
-		board[board.length-1] = new Square(SquareType.END);
+		board[0] = new S_Start(SquareType.START);
+		board[board.length-1] = new S_End(SquareType.END);
 	}
 
     public void loadBoard(java.util.List<String> boardTypes) {
@@ -81,7 +77,9 @@ public class Board {
                 case BEAR: board[i] = new S_Bear(type); break;
                 case EVENT: board[i] = new S_Event(type); break;
                 case BROKEN_FLOOR: board[i] = new S_BrokenFloor(type); break;
-                default: board[i] = new Square(type); break;
+                case START: board[i] = new S_Start(type); break;
+                case END: board[i] = new S_End(type); break;
+                default: break;
             }
         }
     }

@@ -51,7 +51,6 @@ public class TurnController {
 		// Check if next player should skip
 		Entity next = players.get(turn);
 		if (next.shouldSkipNextTurn()) {
-			System.out.println(next.getName() + " skips this turn!");
 			next.setSkipNextTurn(false);
 			// Skip to the next player again
 			turn = (turn + 1) % players.size();

@@ -10,9 +10,9 @@ public class Dice extends model.item.GameObject {
 	private static final int FASTDICE_MIN_VALUE = 5;
 	private static final int FASTDICE_MAX_VALUE = 10;
 
-	protected int minValue;
-    protected int maxValue;
-    protected ObjectType diceType;
+	private int minValue;
+    private int maxValue;
+    private ObjectType diceType;
     
     public Dice(ObjectType diceType) {
     	super(diceType);
@@ -21,19 +21,19 @@ public class Dice extends model.item.GameObject {
         switch (diceType) {
         
         case FASTDICE:
-        	this.name = "Fast Dice";
+        	this.setName("Fast Dice");
         	this.minValue = FASTDICE_MIN_VALUE;
         	this.maxValue = FASTDICE_MAX_VALUE;
         	break;
     
         case SLOWDICE:
-        	this.name = "Slow Dice";
+        	this.setName("Slow Dice");
         	this.minValue = SLOWDICE_MIN_VALUE;
         	this.maxValue = SLOWDICE_MAX_VALUE;
         	break;
         	
         default:
-        	this.name = "Dice";
+        	this.setName("Dice");
         	this.minValue = 1;
         	this.maxValue = 6;
         	break;

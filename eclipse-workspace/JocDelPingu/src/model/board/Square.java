@@ -1,9 +1,9 @@
 package model.board;
 
-public class Square {
+public abstract class Square {
 	
-	protected SquareType type;
-	protected int SquareID;
+	private SquareType type;
+	private int SquareID;
 		
 	public Square(SquareType type) {
 		this.type = type;
@@ -17,11 +17,14 @@ public class Square {
 		return this.SquareID;
 	}
 	
-	public void action(model.entity.Player player) {
+	public void setSquareID(int SquareID) {
+		this.SquareID = SquareID;
 	}
+	
+	public abstract String action(model.entity.Player player);
 
 	public void action() {
-		// TODO Auto-generated method stub
+		// // TODO Auto-generated method stub
 		
 	};
 }
