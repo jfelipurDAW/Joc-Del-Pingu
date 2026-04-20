@@ -277,8 +277,8 @@ public class GameBoardController {
             int selectedIndex = targetNames.indexOf(result.get());
             Player target = targets.get(selectedIndex);
             
-            String msg = gameManager.getPlayerManager().throwSnowball(current, target);
-            logEvent(msg);
+            model.game.ActionResult msg = gameManager.getPlayerManager().throwSnowball(current, target);
+            logEvent(formatActionMessage(msg));
 
             // Animate snowball effect
             animateSnowballThrow();
@@ -327,8 +327,8 @@ public class GameBoardController {
             current.setSquare(startSquare);
             
             // Logical move
-            String moveResult = gameManager.playTurn(diceResult);
-            logEvent(moveResult);
+            model.game.ActionResult moveResult = gameManager.playTurn(diceResult);
+            logEvent(formatActionMessage(moveResult));
             
             drawBoard();
 
@@ -349,8 +349,8 @@ public class GameBoardController {
 
             // Check seal collision
             if (sealEnabled && seal != null && seal.getSquareIndex() == current.getSquareIndex()) {
-                String sealResult = gameManager.getPlayerManager().handleSealInteraction(seal, current);
-                logEvent(sealResult);
+                model.game.ActionResult sealResult = gameManager.getPlayerManager().handleSealInteraction(seal, current);
+                logEvent(formatActionMessage(sealResult));
                 drawBoard();
             }
 
@@ -412,9 +412,9 @@ public class GameBoardController {
 
     private void playSealTurn() {
         List<Player> humanPlayers = turnController.getHumanPlayers();
-        List<String> sealLog = seal.playTurn(humanPlayers);
-        for (String msg : sealLog) {
-            logEvent(msg);
+        List<model.game.ActionResult> sealLog = seal.playTurn(humanPlayers);
+        for (model.game.ActionResult msg : sealLog) {
+            logEvent(formatActionMessage(msg));
         }
         
         // Check if seal reached end (seal wins = all players lose)
@@ -440,11 +440,48 @@ public class GameBoardController {
 
         logEvent("⚔️ SNOWBALL WAR! " + attacker.getName() + " vs " + defender.getName() + "!");
         
-        model.game.PlayerManager.SnowballWarResult warResult = gameManager.getPlayerManager().snowballWar(attacker, defender);
-        logEvent("⚔️ " + warResult.toString());
+        model.game.ActionResult warResult = gameManager.getPlayerManager().snowballWar(attacker, defender);
+        logEvent(formatActionMessage(warResult));
         
         // Flash animation for war
         animateWarFlash();
+    }
+
+    private String formatActionMessage(model.game.ActionResult res) {
+        if (res == null) return "";
+        switch(res.getType()) {
+            case ICE_HOLE: return "🕳️ " + res.getPlayerName() + " fell into an ice hole! Sent back to square " + res.getValue();
+            case SLED_FOUND: return "🛷 " + res.getPlayerName() + " found a sled! Zooming forward to square " + res.getValue();
+            case SLED_LAST: return "🛷 " + res.getPlayerName() + " found the last sled. Nothing happens.";
+            case BEAR_SAFE: return "🐻 " + res.getPlayerName() + " bribed the bear with a fish! 🐟 Safe!";
+            case BEAR_ATTACK: return "🐻💥 " + res.getPlayerName() + " was attacked by the bear! No fish to bribe! Back to START!";
+            case EVENT: return "❓ " + res.getEventMessage();
+            case BROKEN_FLOOR_FALL: return "💔 " + res.getPlayerName() + " was too heavy (" + res.getValue() + " items)! Fell through the broken floor! Back to START!";
+            case BROKEN_FLOOR_CRACK: return "⚠️ " + res.getPlayerName() + " cracked the broken floor (" + res.getValue() + " items). Loses next turn!";
+            case BROKEN_FLOOR_SAFE: return "✅ " + res.getPlayerName() + " crosses the broken floor safely (no items)!";
+            case WIN: return "🎉 " + res.getPlayerName() + " reached the END! WINNER!";
+            case START_SQUARE: return res.getPlayerName() + " is at the start.";
+            case END_SQUARE: return res.getPlayerName() + " reached the END! 🎉";
+            case NORMAL_SQUARE: 
+                if (res.getEventMessage() != null) return res.getEventMessage();
+                return res.getPlayerName() + " landed on a normal square.";
+            case SEAL_BRIBED: return "🐟 " + res.getPlayerName() + " fed the seal a fish! It's blocked for 2 turns!";
+            case SEAL_NO_FISH: return "❌ " + res.getPlayerName() + " has no fish to feed the seal!";
+            case SEAL_HIT_HOLE: return "🦭💥 The seal hits " + res.getPlayerName() + " with its tail! Sent to ice hole at square " + res.getValue() + "!";
+            case SEAL_HIT_START: return "🦭💥 The seal hits " + res.getPlayerName() + "! Sent back to start!";
+            case SEAL_PASS: return "🦭 The seal passed through " + res.getPlayerName() + "'s square! Lost half inventory!";
+            case SEAL_EATING: return "🦭😴 The seal is eating a fish and can't move. (" + res.getValue() + " turns left)";
+            case SEAL_ACTIVE: return "🦭 The seal has finished eating and is dangerous again!";
+            case SEAL_ROLL: return "🦭 The seal rolls: " + res.getValue();
+            case SEAL_MOVE: return "🦭 The seal moves to square " + res.getValue();
+            case SNOWBALL_WAR_EMPTY: return "⚔️ It's a tie! Both " + res.getPlayerName() + " and " + res.getTargetName() + " have no snowballs!";
+            case SNOWBALL_WAR_WIN: return "⚔️ " + res.getPlayerName() + " wins! (" + res.getValue() + " balls) " + res.getTargetName() + " retreats " + res.getValue2() + " squares!";
+            case SNOWBALL_WAR_TIE: return "⚔️ It's a tie! Both spend all snowballs. No one retreats.";
+            case SNOWBALL_THROW: return "⛄ " + res.getPlayerName() + " threw a snowball at " + res.getTargetName() + "! " + res.getTargetName() + " goes back " + res.getValue() + " squares to " + res.getValue2() + "!";
+            case DICE_ROLL: return "🎲 " + res.getPlayerName() + " rolled " + res.getValue();
+            case MOVE: return "🚶 " + res.getPlayerName() + " moved to " + res.getValue();
+            default: return "Activity from " + res.getPlayerName();
+        }
     }
 
     private void handleWin(Player winner) {

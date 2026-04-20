@@ -51,10 +51,13 @@ public class Board {
 					break;
 				}
 			}
+			board[i].setSquareID(i);
 		}
 		
 		board[0] = new S_Start(SquareType.START);
+		board[0].setSquareID(0);
 		board[board.length-1] = new S_End(SquareType.END);
+		board[board.length-1].setSquareID(board.length-1);
 	}
 
     public void loadBoard(java.util.List<String> boardTypes) {
@@ -80,6 +83,9 @@ public class Board {
                 case START: board[i] = new S_Start(type); break;
                 case END: board[i] = new S_End(type); break;
                 default: break;
+            }
+            if (board[i] != null) {
+                board[i].setSquareID(i);
             }
         }
     }

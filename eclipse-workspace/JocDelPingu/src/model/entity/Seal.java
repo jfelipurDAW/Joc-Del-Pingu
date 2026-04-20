@@ -54,45 +54,47 @@ public class Seal extends Entity {
     /**
      * Feed the seal a fish. Blocks it for 2 turns.
      */
-    public String bribeSeal(Player player) {
+    public ActionResult bribeSeal(Player player) {
         if (player.getInventory().getObjectQuantity(ObjectType.FISH) > 0) {
             player.getInventory().useObject(ObjectType.FISH, 1);
             this.isBribed = true;
             this.blockedTurns = 2;
-            return "🐟 " + player.getName() + " fed the seal a fish! It's blocked for 2 turns!";
+            return new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_BRIBED, player.getName());
         } else {
-            return "❌ " + player.getName() + " has no fish to feed the seal!";
+            return new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_NO_FISH, player.getName());
         }
     }
     
     /**
      * Seal hits a player and sends them to the previous ice hole.
      */
-    public String hitPlayer(Player player) {
+    public model.game.ActionResult hitPlayer(Player player) {
         if (this.getBoard() != null) {
             int previousHole = findPreviousIceHole(player.getSquareIndex());
             player.setSquare(previousHole);
-            return "🦭💥 The seal hits " + player.getName() + " with its tail! Sent to ice hole at square " + previousHole + "!";
+            model.game.ActionResult res = new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_HIT_HOLE, player.getName());
+            res.setValue(previousHole);
+            return res;
         }
         player.setSquare(0);
-        return "🦭💥 The seal hits " + player.getName() + "! Sent back to start!";
+        return new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_HIT_START, player.getName());
     }
     
     /**
      * When seal passes through a player's square, they lose half inventory.
      */
-    public String passThrough(Player player) {
+    public model.game.ActionResult passThrough(Player player) {
     	player.loseHalfInventory();
-    	return "🦭 The seal passed through " + player.getName() + "'s square! Lost half inventory!";
+    	return new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_PASS, player.getName());
     }
     
     /**
      * Seal interaction when a player lands on the seal's square.
      */
-    public String interact(Player player) {
+    public model.game.ActionResult interact(Player player) {
         // If seal is eating (blocked), player is safe
         if (this.blockedTurns > 0) {
-            return "🦭😴 The seal is still eating the fish. " + player.getName() + " is safe!";
+            return new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_EATING, player.getName());
         }
         
         // Check if player has a fish to bribe
@@ -106,13 +108,13 @@ public class Seal extends Entity {
     /**
      * Called at the end of each game turn to update seal's blocked state.
      */
-    public String updateSealTurns() {
+    public model.game.ActionResult updateSealTurns() {
         if (this.blockedTurns > 0) {
             this.blockedTurns--;
             
             if (this.blockedTurns == 0) {
                 this.isBribed = false;
-                return "🦭 The seal has finished eating and is dangerous again!";
+                return new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_ACTIVE, this.getName());
             }
         }
         return null;
@@ -123,18 +125,23 @@ public class Seal extends Entity {
      * Rolls a dice, moves, and affects players.
      * Returns a list of log messages describing what happened.
      */
-    public List<String> playTurn(List<Player> allPlayers) {
-    	List<String> log = new java.util.ArrayList<>();
+    public List<model.game.ActionResult> playTurn(List<Player> allPlayers) {
+    	List<model.game.ActionResult> log = new java.util.ArrayList<>();
     	
     	if (isBlocked()) {
-    		log.add("🦭😴 The seal is eating a fish and can't move. (" + blockedTurns + " turns left)");
-    		updateSealTurns();
+    		model.game.ActionResult res = new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_EATING, this.getName());
+    		res.setValue(blockedTurns);
+    		log.add(res);
+    		model.game.ActionResult updateRes = updateSealTurns();
+    		if (updateRes != null) log.add(updateRes);
     		return log;
     	}
     	
     	// Roll dice (1-6)
     	int roll = random.nextInt(6) + 1;
-    	log.add("🦭 The seal rolls: " + roll);
+    	model.game.ActionResult rollRes = new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_ROLL, this.getName());
+    	rollRes.setValue(roll);
+    	log.add(rollRes);
     	
     	int oldPos = this.getNumSquare();
     	int newPos = Math.min(oldPos + roll, Board.MAX_SQUARES - 1);
@@ -149,7 +156,9 @@ public class Seal extends Entity {
     	}
     	
     	this.setNumSquare(newPos);
-    	log.add("🦭 The seal moves to square " + newPos);
+    	model.game.ActionResult moveRes = new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_MOVE, this.getName());
+    	moveRes.setValue(newPos);
+    	log.add(moveRes);
     	
     	// Check if seal landed on same square as any player
     	for (Player p : allPlayers) {

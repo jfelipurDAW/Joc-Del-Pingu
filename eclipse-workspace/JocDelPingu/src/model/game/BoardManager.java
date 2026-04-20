@@ -8,8 +8,12 @@ import model.board.EventManager;
 
 public class BoardManager {
     
-    public String executeSquareAction(Player player, Board board) {
-        if (board == null) return "Error: board not set";
+    public ActionResult executeSquareAction(Player player, Board board) {
+        if (board == null) {
+            ActionResult err = new ActionResult(ActionResult.ActionType.NORMAL_SQUARE, player.getName());
+            err.setEventMessage("Error: board not set");
+            return err;
+        }
         
         int newPosition = player.getSquareIndex();
         SquareType currentSquare = board.getSquareType(newPosition);
@@ -20,57 +24,67 @@ public class BoardManager {
             case BEAR: return handleBear(player, board);
             case EVENT: return handleEvent(player, board);
             case BROKEN_FLOOR: return handleBrokenFloor(player, board);
-            case START: return player.getName() + " is at the start.";
-            case END: return player.getName() + " reached the END! 🎉";
+            case START: return new ActionResult(ActionResult.ActionType.START_SQUARE, player.getName());
+            case END: return new ActionResult(ActionResult.ActionType.END_SQUARE, player.getName());
             case NORMAL:
-            default: return player.getName() + " landed on a normal square.";
+            default: return new ActionResult(ActionResult.ActionType.NORMAL_SQUARE, player.getName());
         }
     }
 
-    private String handleIceHole(Player player, Board board) {
+    private ActionResult handleIceHole(Player player, Board board) {
         int destination = board.getDestination(player.getSquareIndex());
         player.setSquare(destination);
-        return "🕳️ " + player.getName() + " fell into an ice hole! Sent back to square " + destination;
+        ActionResult res = new ActionResult(ActionResult.ActionType.ICE_HOLE, player.getName());
+        res.setValue(destination);
+        return res;
     }
 
-    private String handleSled(Player player, Board board) {
+    private ActionResult handleSled(Player player, Board board) {
         int destination = board.getDestination(player.getSquareIndex());
         if (destination != player.getSquareIndex()) {
             player.setSquare(destination);
-            return "🛷 " + player.getName() + " found a sled! Zooming forward to square " + destination;
+            ActionResult res = new ActionResult(ActionResult.ActionType.SLED_FOUND, player.getName());
+            res.setValue(destination);
+            return res;
         } else {
-            return "🛷 " + player.getName() + " found the last sled. Nothing happens.";
+            return new ActionResult(ActionResult.ActionType.SLED_LAST, player.getName());
         }
     }
 
-    private String handleBear(Player player, Board board) {
+    private ActionResult handleBear(Player player, Board board) {
         if (player.getInventory().getObjectQuantity(ObjectType.FISH) > 0) {
             player.getInventory().useObject(ObjectType.FISH, 1);
-            return "🐻 " + player.getName() + " bribed the bear with a fish! 🐟 Safe!";
+            return new ActionResult(ActionResult.ActionType.BEAR_SAFE, player.getName());
         } else {
             player.setSquare(0);
-            return "🐻💥 " + player.getName() + " was attacked by the bear! No fish to bribe! Back to START!";
+            return new ActionResult(ActionResult.ActionType.BEAR_ATTACK, player.getName());
         }
     }
 
-    private String handleEvent(Player player, Board board) {
+    private ActionResult handleEvent(Player player, Board board) {
         player.setLastEvent(EventManager.triggerEvent(player, board));
         if (player.getLastEvent().getNewPosition() >= 0) {
             player.setNumSquare(player.getLastEvent().getNewPosition());
         }
-        return "❓ " + player.getLastEvent().toString();
+        ActionResult res = new ActionResult(ActionResult.ActionType.EVENT, player.getName());
+        res.setEventMessage(player.getLastEvent().toString());
+        return res;
     }
 
-    private String handleBrokenFloor(Player player, Board board) {
+    private ActionResult handleBrokenFloor(Player player, Board board) {
         int totalItems = player.getInventory().getTotalItemCount();
         if (totalItems > 5) {
             player.setSquare(0);
-            return "💔 " + player.getName() + " was too heavy (" + totalItems + " items)! Fell through the broken floor! Back to START!";
+            ActionResult res = new ActionResult(ActionResult.ActionType.BROKEN_FLOOR_FALL, player.getName());
+            res.setValue(totalItems);
+            return res;
         } else if (totalItems > 0) {
             player.setSkipNextTurn(true);
-            return "⚠️ " + player.getName() + " cracked the broken floor (" + totalItems + " items). Loses next turn!";
+            ActionResult res = new ActionResult(ActionResult.ActionType.BROKEN_FLOOR_CRACK, player.getName());
+            res.setValue(totalItems);
+            return res;
         } else {
-            return "✅ " + player.getName() + " crosses the broken floor safely (no items)!";
+            return new ActionResult(ActionResult.ActionType.BROKEN_FLOOR_SAFE, player.getName());
         }
     }
 

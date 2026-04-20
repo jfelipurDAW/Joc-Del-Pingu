@@ -42,27 +42,17 @@ public class BBDD {
 
 		// 3) Conectar
 		try {
-			// En muchos casos con JDBC moderno no hace falta, pero lo dejamos por si acaso
 			Class.forName("oracle.jdbc.driver.OracleDriver");
-
 			Connection con = DriverManager.getConnection(url, user, pwd);
-
-			// 4) Comprobar que la conexión es válida (timeout 5 s)
 			if (con.isValid(5)) {
-				System.out.println("Conectados a la base de datos (" + entorno.toUpperCase() + ").");
-			} else {
-				System.out.println("Conexión creada, pero no parece válida. Revisa red/URL.");
+				// Conectados
 			}
-
 			return con;
-
 		} catch (ClassNotFoundException e) {
-			System.out.println("No se ha encontrado el driver de Oracle. ¿Está el ojdbc en el proyecto?");
+			// error loading driver
 		} catch (SQLException e) {
-			System.out.println("No se pudo conectar. Revisa URL/usuario/contraseña.");
-			System.out.println("Detalle: " + e.getMessage());
+			// error connecting
 		}
-
 		return null;
 	}
 
@@ -123,7 +113,6 @@ public class BBDD {
 		ArrayList<LinkedHashMap<String, String>> resultados = new ArrayList<>();
 
 		if (con == null) {
-			System.out.println("No hay conexión. Llama antes a conectarBaseDatos().");
 			return resultados;
 		}
 
@@ -145,7 +134,7 @@ public class BBDD {
 			}
 
 		} catch (SQLException e) {
-			System.out.println("Error en SELECT: " + e.getMessage());
+			// Error managed downstream
 		}
 
 		return resultados;
@@ -163,7 +152,6 @@ public class BBDD {
 	 */
 	public static void print(Connection con, String sql, String[] listaElementosSeleccionados) {
 		if (con == null) {
-			System.out.println("No hay conexión. Llama antes a conectarBaseDatos().");
 			return;
 		}
 
@@ -181,12 +169,8 @@ public class BBDD {
 				}
 			}
 
-			if (!hayResultados) {
-				System.out.println("No se ha encontrado nada");
-			}
-
 		} catch (SQLException e) {
-			System.out.println("Error en SELECT: " + e.getMessage());
+			// error in SELECT execution
 		}
 	}
 
@@ -201,36 +185,50 @@ public class BBDD {
 	 */
 	public static int executeInsUpDel(Connection con, String sql, String etiqueta) {
 		if (con == null) {
-			System.out.println("No hay conexión. Llama antes a conectarBaseDatos().");
 			return 0;
 		}
 
 		try (Statement st = con.createStatement()) {
 			int filas = st.executeUpdate(sql);
-			System.out.println(etiqueta + " hecho correctamente. Filas afectadas: " + filas);
 			return filas;
 		} catch (SQLException e) {
-			System.out.println("Ha habido un error en " + etiqueta + ": " + e.getMessage());
 			return 0;
 		}
 	}
 	
 	public void registrarJugadorEnBD(Connection con, int idJugador, String nombre, String password, String color) {
-	    
-	    // 1. Construimos la sentencia SQL uniendo las variables
 	    String sql = "INSERT INTO ENTITY (ENTITYID, ENTITYTYPE, PLAYERNAME, PLAYERPASSWORD, COLOUR) " +
 	                 "VALUES (" + idJugador + ", 'PLAYER', '" + nombre + "', '" + password + "', '" + color + "')";
-	    
-	    // 2. Imprimimos el SQL por consola para comprobar que se ha montado bien (opcional pero muy útil)
-	    System.out.println("Ejecutando: " + sql);
-	    
-	    // 3. Llamamos a tu clase BBDD para hacer el insert
 	    int filas = BBDD.insert(con, sql);
-	    
-	    if (filas > 0) {
-	        System.out.println("¡El jugador " + nombre + " se ha registrado en Oracle correctamente!");
-	    } else {
-	        System.out.println("Error al registrar al jugador " + nombre);
-	    }
 	}
+
+    public static String encriptarTexto(String textoNormal) {
+        return java.util.Base64.getEncoder().encodeToString(textoNormal.getBytes());
+    }
+
+    public static boolean guardarPartida(java.util.List<model.entity.Player> listaJugadores) {
+        Connection con = conectarBaseDatos(null);
+        if (con == null) return false;
+
+        StringBuilder textoDatos = new StringBuilder();
+        
+        for (model.entity.Player p : listaJugadores) {
+            textoDatos.append("Jugador:").append(p.getName())
+                      .append(",Casilla:").append(p.getSquareIndex())
+                      .append(",Bolas:").append(p.getInventory().getSnowballQuantity())
+                      .append(",Peces:").append(p.getInventory().getFishQuantity())
+                      .append("; ");
+        }
+        
+        String datosFinales = textoDatos.toString();
+        String datosEncriptados = encriptarTexto(datosFinales);
+        String idUnico = "PARTIDA_" + System.currentTimeMillis();
+        
+        String sql = "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) " +
+                     "VALUES ('" + idUnico + "', '" + datosEncriptados + "')";
+        
+        int filas = insert(con, sql);
+        cerrar(con);
+        return filas > 0;
+    }
 }

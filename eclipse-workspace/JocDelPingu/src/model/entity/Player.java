@@ -135,9 +135,16 @@ public class Player extends Entity {
 
 	/**
 	 * Manage player's needs (required by spec).
+	 * Returns true if needs met (consumed 1 fish), false otherwise (skips next turn).
 	 */
-	public void manageNeeds() {
-		// Manage needs implementation
+	public boolean manageNeeds() {
+		if (this.inventory.getObjectQuantity(ObjectType.FISH) > 0) {
+			this.inventory.useObject(ObjectType.FISH, 1);
+			return true;
+		} else {
+			this.setSkipNextTurn(true);
+			return false;
+		}
 	}
 
 	@Override
