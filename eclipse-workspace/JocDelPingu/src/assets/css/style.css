@@ -5,98 +5,106 @@
 }
 
 .mainmenu_maintitle {
-    -fx-font-family: "Segoe UI", "Arial Rounded MT Bold", sans-serif;
+    -fx-font-family: "Pixel Game";
     -fx-font-weight: 900;
-    -fx-fill: linear-gradient(to right, #2b5876 0%, #4e4376 100%);
-    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.8), 5, 0, 0, 2);
+    -fx-font-size: 100px;
+    -fx-fill: #ffffff;
     -fx-translate-y: -20;
 }
-
-.mainmenu_button_newgame, .mainmenu_button_loadgame {
+.mainmenu_title_shadow {
+    -fx-font-family: "Pixel Game Extrude";
+    -fx-font-weight: 900;
+    -fx-font-size: 100px;
+    -fx-fill: linear-gradient(to right, #2b5876 0%, #4e4376 100%);
+	-fx-translate-y: -18;
+	-fx-translate-x: 0;
+	-fx-font-kerning: off; 
+	-fx-letter-spacing: -5px;
+}
+.mainmenu_button_newgame,
+.mainmenu_button_loadgame {
     -fx-background-color: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
     -fx-background-radius: 25;
     -fx-border-radius: 25;
-    -fx-border-color: rgba(255,255,255,0.5);
+    -fx-border-color: rgba(255, 255, 255, 0.5);
     -fx-border-width: 2;
-    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-family: "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
     -fx-font-weight: 800;
-    -fx-font-size: 20px;
+    -fx-font-size: 40px;
     -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 5);
-    -fx-padding: 10 20;
+    -fx-padding: 0 20;
     -fx-min-height: 50px;
+
 }
 
-.mainmenu_button_newgame:hover, .mainmenu_button_loadgame:hover {
+.mainmenu_button_newgame:hover,
+.mainmenu_button_loadgame:hover {
     -fx-background-color: linear-gradient(to bottom, #00f2fe 0%, #4facfe 100%);
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 7);
     -fx-cursor: hand;
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
 }
 
-.mainmenu_button_newgame:pressed, .mainmenu_button_loadgame:pressed {
+.mainmenu_button_newgame:pressed,
+.mainmenu_button_loadgame:pressed {
     -fx-scale-x: 0.95;
     -fx-scale-y: 0.95;
 }
 
 /* Changed: language dropdown ComboBox styling (replaces old button style) */
 .mainmenu_language_combo {
-	-fx-background-color: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
-	-fx-background-radius: 25;
-	-fx-border-radius: 25;
-	-fx-border-color: rgba(255,255,255,0.5);
-	-fx-border-width: 2;
-	-fx-font-family: "Segoe UI", sans-serif;
-	-fx-font-weight: 800;
-	-fx-font-size: 16px;
-	-fx-min-height: 42px;
-	-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 5);
-	-fx-padding: 5 10;
+    -fx-background-color: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+    -fx-background-radius: 25;
+    -fx-border-radius: 25;
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-width: 2;
+    -fx-font-family: "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 40px;
+    -fx-min-height: 42px;
+    -fx-padding: 0 10;
 }
 
 .mainmenu_language_combo .list-cell {
-	-fx-text-fill: white;
-	-fx-font-family: "Segoe UI", sans-serif;
-	-fx-font-weight: 800;
-	-fx-font-size: 16px;
-	-fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-family: "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 20px;
+    -fx-background-color: transparent;
 }
 
 .mainmenu_language_combo .arrow-button {
-	-fx-background-color: transparent;
+    -fx-background-color: transparent;
 }
 
 .mainmenu_language_combo .arrow {
-	-fx-background-color: white;
+    -fx-background-color: white;
 }
 
 .mainmenu_language_combo:hover {
-	-fx-background-color: linear-gradient(to bottom, #00f2fe 0%, #4facfe 100%);
-	-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 7);
-	-fx-scale-x: 1.05;
-	-fx-scale-y: 1.05;
+    -fx-background-color: linear-gradient(to bottom, #00f2fe 0%, #4facfe 100%);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
 }
 
 /* Dropdown popup styling */
 .mainmenu_language_combo .combo-box-popup .list-view {
-	-fx-background-color: rgba(255, 255, 255, 0.95);
-	-fx-background-radius: 12;
-	-fx-border-radius: 12;
-	-fx-border-color: rgba(79, 172, 254, 0.5);
-	-fx-border-width: 2;
-	-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(79, 172, 254, 0.5);
+    -fx-border-width: 2;
 }
 
 .mainmenu_language_combo .combo-box-popup .list-cell {
-	-fx-text-fill: #2b5876;
-	-fx-background-color: transparent;
-	-fx-padding: 8 15;
+    -fx-text-fill: #2b5876;
+    -fx-background-color: transparent;
+    -fx-padding: 8 15;
 }
 
 .mainmenu_language_combo .combo-box-popup .list-cell:hover {
-	-fx-background-color: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-	-fx-text-fill: white;
+    -fx-background-color: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+    -fx-text-fill: white;
 }
 
 /* ScrollPane modern styling for player setup */
@@ -105,20 +113,26 @@
     -fx-background-insets: 0;
     -fx-padding: 0;
 }
+
 .scroll-pane .viewport {
     -fx-background-color: transparent;
 }
-.scroll-bar:vertical, .scroll-bar:horizontal {
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
     -fx-background-color: transparent;
 }
-.scroll-bar:vertical .thumb, .scroll-bar:horizontal .thumb {
-    -fx-background-color: rgba(0,0,0,0.2);
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
     -fx-background-radius: 5em;
 }
 
 /* Elegant combos and checks */
-.combo-box, .check-box {
-    -fx-font-family: "Segoe UI", sans-serif;
+.combo-box,
+.check-box {
+    -fx-font-family: "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
     -fx-font-size: 14px;
     -fx-text-fill: #333333;
 }
@@ -131,39 +145,64 @@
 
 /* GAME BOARD SURROUNDINGS */
 .game-grid {
-    -fx-background-color: rgba(255,255,255,0.1);
+    -fx-background-color: rgba(255, 255, 255, 0.1);
     -fx-padding: 10;
 }
+
 .square {
     -fx-background-radius: 10;
     -fx-border-radius: 10;
-    -fx-border-color: rgba(255,255,255,0.7);
+    -fx-border-color: rgba(255, 255, 255, 0.7);
     -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
 }
-.square-normal { -fx-background-color: linear-gradient(to bottom, #d6e8f5, #b8d2e8); }
-.square-ice-hole { -fx-background-color: linear-gradient(to bottom, #1e3c72, #2a5298); }
-.square-sled { -fx-background-color: linear-gradient(to bottom, #ff9966, #ff5e62); }
-.square-bear { -fx-background-color: linear-gradient(to bottom, #8e9eab, #eef2f3); }
-.square-event { -fx-background-color: linear-gradient(to bottom, #f3e7e9, #e3eeff); }
-.square-broken-floor { -fx-background-color: linear-gradient(to bottom, #434343, #000000); }
-.square-start { -fx-background-color: linear-gradient(to bottom, #00b09b, #96c93d); }
-.square-end { -fx-background-color: linear-gradient(to bottom, #f12711, #f5af19); }
+
+.square-normal {
+    -fx-background-color: linear-gradient(to bottom, #d6e8f5, #b8d2e8);
+}
+
+.square-ice-hole {
+    -fx-background-color: linear-gradient(to bottom, #1e3c72, #2a5298);
+}
+
+.square-sled {
+    -fx-background-color: linear-gradient(to bottom, #ff9966, #ff5e62);
+}
+
+.square-bear {
+    -fx-background-color: linear-gradient(to bottom, #8e9eab, #eef2f3);
+}
+
+.square-event {
+    -fx-background-color: linear-gradient(to bottom, #f3e7e9, #e3eeff);
+}
+
+.square-broken-floor {
+    -fx-background-color: linear-gradient(to bottom, #434343, #000000);
+}
+
+.square-start {
+    -fx-background-color: linear-gradient(to bottom, #00b09b, #96c93d);
+}
+
+.square-end {
+    -fx-background-color: linear-gradient(to bottom, #f12711, #f5af19);
+}
 
 .square-number {
-    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-family: "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
     -fx-font-weight: bold;
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-padding: 5;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 2, 0, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 2, 0, 0, 1);
 }
 
 .hotbar-player-name {
     -fx-font-family: "Segoe UI", sans-serif;
     -fx-font-weight: 800;
     -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0, 0, 1);
 }
 
 .hotbar-turn-label {
@@ -171,5 +210,5 @@
     -fx-font-weight: 900;
     -fx-font-size: 20px;
     -fx-text-fill: #ffeb3b;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 4, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 4, 0, 0, 2);
 }

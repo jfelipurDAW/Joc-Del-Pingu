@@ -15,15 +15,12 @@ module JocDelPingu {
     opens controller.main to javafx.graphics, javafx.fxml;
     opens controller.ui to javafx.fxml, javafx.graphics;
     opens view.ui to javafx.fxml, javafx.graphics;
-    opens view.font.generator to javafx.graphics, javafx.fxml;
     opens view.fxml to javafx.fxml, javafx.graphics;
     opens assets.css to javafx.graphics, javafx.fxml;
     
     exports controller.main;
     exports controller.ui;
     exports view.ui;
-    exports view.font;
-    exports view.font.generator;
     
     exports model.board;
     exports model.board.squares;

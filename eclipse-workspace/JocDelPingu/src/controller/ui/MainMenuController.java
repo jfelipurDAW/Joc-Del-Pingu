@@ -2,7 +2,6 @@ package controller.ui;
 
 import java.io.InputStream;
 
-import view.font.CustomBitmapFont;
 import model.config.Lang;
 import model.config.LangConfig;
 import javafx.fxml.FXML;
@@ -37,6 +36,9 @@ public class MainMenuController {
 
     @FXML
     private Text titleText;
+
+    @FXML
+    private Text titleShadowText;
 
     @FXML
     public void initialize() {
@@ -188,14 +190,16 @@ public class MainMenuController {
      * Called from the ComboBox selection listener.
      */
     private void refreshTexts() {
-        titleText.setText((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
+        String title = (String) LangConfig.getLang(Lang.TEXT_GAME_TITLE);
+        titleText.setText(title);
+        titleShadowText.setText(title);
         newGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_NEWGAME));
         loadGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_LOADGAME));
 
         // Update window title to match selected language
         if (rootPane.getScene() != null && rootPane.getScene().getWindow() instanceof Stage) {
             Stage stage = (Stage) rootPane.getScene().getWindow();
-            stage.setTitle((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
+            stage.setTitle(title);
         }
     }
 }

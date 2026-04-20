@@ -17,11 +17,12 @@
          <children>
             <VBox alignment="CENTER" prefHeight="507.0" prefWidth="474.0" spacing="15">
                <children>
-                  <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="mainmenu_maintitle" text="game.main.title" visible="true">
-                     <font>
-                        <Font size="45.0" />
-                     </font>
-                  </Text>
+                  <StackPane>
+                     <children>
+                        <Text fx:id="titleShadowText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="mainmenu_title_shadow" text="game.main.title" visible="true"></Text>
+                        <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="mainmenu_maintitle" text="game.main.title" visible="true"></Text>
+                     </children>
+                  </StackPane>
                   
                   <Button fx:id="newGame_button" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleNewGame" prefHeight="42.0" prefWidth="422.0" styleClass="mainmenu_button_newgame" text="new.game" textAlignment="CENTER" textFill="WHITE">
                      <cursor>

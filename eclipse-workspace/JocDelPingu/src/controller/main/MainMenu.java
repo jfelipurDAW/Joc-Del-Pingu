@@ -6,12 +6,37 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class MainMenu extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        // Load custom fonts
+        try {
+            Font pixelFont = Font.loadFont(getClass().getResource("/assets/font/pixel-game.regular.otf").toExternalForm(), 10);
+            Font extrudeFont = Font.loadFont(getClass().getResource("/assets/font/pixel-game.extrude.otf").toExternalForm(), 10);
+            Font unicodeFont = Font.loadFont(getClass().getResource("/assets/font/pixel-unicode-regular.ttf").toExternalForm(), 10);
+            if (pixelFont == null) {
+                System.out.println("Pixel font not loaded");
+            } else {
+                System.out.println("Pixel font loaded: " + pixelFont.getFamily());
+            }
+            if (extrudeFont == null) {
+                System.out.println("Extrude font not loaded");
+            } else {
+                System.out.println("Extrude font loaded: " + extrudeFont.getFamily());
+            }
+            if (unicodeFont == null) {
+                System.out.println("Unicode font not loaded");
+            } else {
+                System.out.println("Unicode font loaded: " + unicodeFont.getFamily());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/mainMenu.fxml"));
         Parent root = loader.load();
