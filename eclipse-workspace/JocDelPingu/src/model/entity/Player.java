@@ -12,6 +12,7 @@ public class Player extends Entity {
 	private String name;
 	private String colour;
 	private String password;
+    private String avatarPath;
 	private Inventory inventory;
 
 	
@@ -48,6 +49,9 @@ public class Player extends Entity {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = avatarPath;
+    }
 	
 	public String getColour() {
 		return this.colour;
@@ -56,6 +60,10 @@ public class Player extends Entity {
 	public String getPassword() {
 		return this.password;
 	}
+
+    public String getAvatarPath() {
+        return this.avatarPath;
+    }
 	
 	@Override
     public String toString() {
@@ -163,6 +171,11 @@ public class Player extends Entity {
 		}
         return this.updatePosition(this.getSquareIndex());
     }
+
+	private String updatePosition(int squareIndex) {
+		// TODO Auto-generated method stub
+		return this.getName() + " is now at square " + squareIndex;
+	}
 
 	@Override
 	public void setSquare(int i) {

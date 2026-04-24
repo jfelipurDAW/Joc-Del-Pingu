@@ -40,6 +40,7 @@ import java.util.Optional;
 public class GameBoardController {
 
     // --- FXML Bindings ---
+    @FXML private StackPane mainStack;
     @FXML private BorderPane rootPane;
     @FXML private GridPane grid;
     @FXML private Button rollDiceButton;
@@ -79,6 +80,7 @@ public class GameBoardController {
     private Seal seal;
     private boolean sealEnabled;
     private boolean gameOver;
+    private StackPane animationOverlay;
 
     // --- Sprites ---
     private final Image baseImage;
@@ -163,6 +165,15 @@ public class GameBoardController {
             logEvent("🐧 Game started! " + turnController.getAllPlayers().size() + " players.");
         }
         logEvent("🎯 " + getCurrentPlayer().getName() + "'s turn!");
+        
+        // Start background music
+        model.game.SoundManager.getInstance().startBackgroundMusic();
+        
+        // Setup Animation Overlay
+        animationOverlay = new StackPane();
+        animationOverlay.setMouseTransparent(true);
+        animationOverlay.setStyle("-fx-background-color: transparent;");
+        mainStack.getChildren().add(animationOverlay);
     }
 
     private void initializePlayers() {
@@ -187,10 +198,10 @@ public class GameBoardController {
 
     private void applyCss() {
         try {
-            rootPane.getStylesheets().clear();
+            mainStack.getStylesheets().clear();
             java.net.URL cssUrl = getClass().getResource("/assets/css/gameBoardStyle.css");
             if (cssUrl != null) {
-                rootPane.getStylesheets().add(cssUrl.toExternalForm());
+                mainStack.getStylesheets().add(cssUrl.toExternalForm());
             } else {
                 System.err.println("Could not load CSS: /assets/css/gameBoardStyle.css not found.");
             }
@@ -281,6 +292,7 @@ public class GameBoardController {
             logEvent(formatActionMessage(msg));
 
             // Animate snowball effect
+            model.game.SoundManager.getInstance().playSnowballSound();
             animateSnowballThrow();
             
             drawBoard();
@@ -310,6 +322,7 @@ public class GameBoardController {
 
     private void processDiceRoll(int diceResult, String diceType) {
         disableActions();
+        model.game.SoundManager.getInstance().playDiceSound();
         Player current = getCurrentPlayer();
         int startSquare = current.getSquareIndex();
         
@@ -338,6 +351,21 @@ public class GameBoardController {
                 return;
             }
 
+            // Cinematic check based on result
+            if (moveResult != null) {
+                switch(moveResult.getType()) {
+                    case BEAR_ATTACK:
+                        model.game.SoundManager.getInstance().playBearSound();
+                        showBearAnimation();
+                        break;
+                    case EVENT:
+                        model.game.SoundManager.getInstance().playEventSound();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             // Check for player collisions (snowball war)
             List<Player> collisions = turnController.getPlayersAtSquare(current.getSquareIndex(), current);
             if (!collisions.isEmpty()) {
@@ -349,6 +377,8 @@ public class GameBoardController {
 
             // Check seal collision
             if (sealEnabled && seal != null && seal.getSquareIndex() == current.getSquareIndex()) {
+                model.game.SoundManager.getInstance().playSealSound();
+                showSealAnimation();
                 model.game.ActionResult sealResult = gameManager.getPlayerManager().handleSealInteraction(seal, current);
                 logEvent(formatActionMessage(sealResult));
                 drawBoard();
@@ -443,6 +473,7 @@ public class GameBoardController {
         model.game.ActionResult warResult = gameManager.getPlayerManager().snowballWar(attacker, defender);
         logEvent(formatActionMessage(warResult));
         
+        model.game.SoundManager.getInstance().playSnowballSound();
         // Flash animation for war
         animateWarFlash();
     }
@@ -484,23 +515,7 @@ public class GameBoardController {
         }
     }
 
-    private void handleWin(Player winner) {
-        gameOver = true;
-        disableActions();
-        logEvent("🎉🎉🎉 " + winner.getName() + " WINS THE GAME! 🎉🎉🎉");
-        
-        // Win animation
-        animateWin();
-        
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("🎉 Winner!");
-        alert.setHeaderText(winner.getName() + " wins!");
-        alert.setContentText("Congratulations! " + winner.getName() + " reached the end first!\n\n" +
-                           "Final position: Square " + winner.getSquareIndex());
-        javafx.application.Platform.runLater(() -> {
-            alert.showAndWait();
-        });
-    }
+    // Old handleWin removed to fix duplicate method compilation error
 
     // ============================================
     //  HUD UPDATES
@@ -545,15 +560,33 @@ public class GameBoardController {
         playerInfo.setAlignment(Pos.CENTER);
         
         StackPane portrait = new StackPane();
-        // Crop to middle-top part (Face) for both layers
-        if (baseImage != null && colorImage != null) {
+        double targetSize = 48;
+        
+        if (player.getAvatarPath() != null) {
+            try {
+                Image customAvatar = new Image(player.getAvatarPath(), targetSize, targetSize, false, true);
+                ImageView avatarView = new ImageView(customAvatar);
+                
+                // Add a nice border
+                javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(targetSize, targetSize);
+                clip.setArcWidth(10);
+                clip.setArcHeight(10);
+                avatarView.setClip(clip);
+                
+                portrait.getChildren().add(avatarView);
+            } catch (Exception e) {
+                System.out.println("Could not load custom avatar, falling back to default.");
+            }
+        }
+        
+        // Fallback to default tinted sprite if no custom avatar or loading failed
+        if (portrait.getChildren().isEmpty() && baseImage != null && colorImage != null) {
             double w = baseImage.getWidth();
             double h = baseImage.getHeight();
             double sx = w * 0.25;
             double sy = 0;
             double sw = w * 0.5;
             double sh = h * 0.5;
-            double targetSize = 48;
             
             // Render Base Layer using Canvas for crisp scaling
             Canvas baseCanvas = new Canvas(targetSize, targetSize);
@@ -915,11 +948,13 @@ public class GameBoardController {
     }
 
     private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        javafx.application.Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(content);
+            alert.showAndWait();
+        });
     }
 
     private String padColor(String hex) {
@@ -937,6 +972,78 @@ public class GameBoardController {
         } catch (Exception e) {
             return Color.GRAY;
         }
+    }
+
+    public void handleWin(Player winner) {
+        gameOver = true;
+        disableActions();
+        model.game.SoundManager.getInstance().stopBackgroundMusic();
+        logEvent("🏆 GAME OVER! " + winner.getName() + " HAS WON THE GAME! 🏆");
+        drawBoard();
+        showWinAnimation(winner);
+        showAlert("🏆 Game Over 🏆", winner.getName() + " has reached the end and won the game!\n\nCongratulations!");
+    }
+
+    // ============================================
+    //  CINEMATIC ANIMATIONS
+    // ============================================
+
+    private void showBearAnimation() {
+        Label bearLabel = new Label("🐻");
+        bearLabel.setFont(new Font("System", 150));
+        animationOverlay.getChildren().add(bearLabel);
+        
+        ScaleTransition st = new ScaleTransition(Duration.millis(300), bearLabel);
+        st.setFromX(0); st.setFromY(0);
+        st.setToX(2); st.setToY(2);
+        
+        FadeTransition ft = new FadeTransition(Duration.millis(500), bearLabel);
+        ft.setDelay(Duration.millis(800));
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        
+        ft.setOnFinished(e -> animationOverlay.getChildren().remove(bearLabel));
+        st.play();
+        ft.play();
+    }
+
+    private void showSealAnimation() {
+        Label sealLabel = new Label("🦭");
+        sealLabel.setFont(new Font("System", 120));
+        animationOverlay.getChildren().add(sealLabel);
+        
+        TranslateTransition tt = new TranslateTransition(Duration.millis(400), sealLabel);
+        tt.setFromX(800);
+        tt.setToX(0);
+        
+        FadeTransition ft = new FadeTransition(Duration.millis(300), sealLabel);
+        ft.setDelay(Duration.millis(1000));
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        
+        ft.setOnFinished(e -> animationOverlay.getChildren().remove(sealLabel));
+        tt.play();
+        ft.play();
+    }
+
+    private void showWinAnimation(Player winner) {
+        VBox winBox = new VBox(20);
+        winBox.setAlignment(Pos.CENTER);
+        winBox.setStyle("-fx-background-color: rgba(0,0,0,0.8); -fx-padding: 50;");
+        
+        Label crown = new Label("👑");
+        crown.setFont(new Font("System", 100));
+        
+        Label title = new Label(winner.getName() + " WINS!");
+        title.setStyle("-fx-font-family: 'Courier New'; -fx-font-size: 60px; -fx-text-fill: gold; -fx-font-weight: bold;");
+        
+        winBox.getChildren().addAll(crown, title);
+        animationOverlay.getChildren().add(winBox);
+        
+        ScaleTransition st = new ScaleTransition(Duration.millis(1000), winBox);
+        st.setFromX(0.5); st.setFromY(0.5);
+        st.setToX(1.0); st.setToY(1.0);
+        st.play();
     }
 
     public Board getCurrentGameBoard() {

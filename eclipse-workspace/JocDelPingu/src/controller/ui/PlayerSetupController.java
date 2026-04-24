@@ -14,6 +14,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.scene.control.Button;
+import javafx.stage.FileChooser;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,9 +105,28 @@ public class PlayerSetupController {
             if (rootPane != null) rootPane.requestFocus();
         });
 
-        playerVBox.getChildren().addAll(label, nameField, passwordField, colorPicker);
+        // Avatar Selection
+        Button avatarBtn = new Button("Choose Avatar Image");
+        avatarBtn.setPrefWidth(200);
+        avatarBtn.getStyleClass().add("player-setup-field");
+        final String[] avatarPath = new String[1];
+        
+        avatarBtn.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select Avatar Image");
+            fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+            );
+            File selectedFile = fileChooser.showOpenDialog(rootPane.getScene().getWindow());
+            if (selectedFile != null) {
+                avatarPath[0] = selectedFile.toURI().toString();
+                avatarBtn.setText("Avatar Selected");
+            }
+        });
 
-        return new PlayerInput(playerNumber, nameField, passwordField, colorPicker, playerVBox);
+        playerVBox.getChildren().addAll(label, nameField, passwordField, colorPicker, avatarBtn);
+
+        return new PlayerInput(playerNumber, nameField, passwordField, colorPicker, avatarPath, playerVBox);
     }
 
     @FXML
@@ -119,6 +141,9 @@ public class PlayerSetupController {
             if (!name.isEmpty() && !color.isEmpty()) {
                 Player player = new Player(name, color);
                 player.setPassword(password);
+                if (input.avatarPath[0] != null) {
+                    player.setAvatarPath(input.avatarPath[0]);
+                }
                 players.add(player);
             }
         }
@@ -154,13 +179,15 @@ public class PlayerSetupController {
         TextField nameField;
         PasswordField passwordField;
         javafx.scene.control.ColorPicker colorPicker;
+        String[] avatarPath;
         VBox vbox;
 
-        PlayerInput(int playerNumber, TextField nameField, PasswordField passwordField, javafx.scene.control.ColorPicker colorPicker, VBox vbox) {
+        PlayerInput(int playerNumber, TextField nameField, PasswordField passwordField, javafx.scene.control.ColorPicker colorPicker, String[] avatarPath, VBox vbox) {
             this.playerNumber = playerNumber;
             this.nameField = nameField;
             this.passwordField = passwordField;
             this.colorPicker = colorPicker;
+            this.avatarPath = avatarPath;
             this.vbox = vbox;
         }
 

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import model.board.Board;
+import model.game.ActionResult;
 import model.item.ObjectType;
 
 /**

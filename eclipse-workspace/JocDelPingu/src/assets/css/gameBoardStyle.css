@@ -5,15 +5,15 @@
 /* Root */
 .root {
     -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-background-color: linear-gradient(to bottom, #0a1628, #1a3a5c, #2a5f8f);
+    -fx-background-color: linear-gradient(to bottom, #f3f9fa, #a2e5ff, #98ffff);
 }
 
 /* ===== TOP BAR ===== */
 .top-bar {
-    -fx-background-color: linear-gradient(to right, rgba(10, 22, 40, 0.9), rgba(26, 58, 92, 0.9));
+    -fx-background-color: linear-gradient(to right, rgb(209, 228, 255), rgb(136, 251, 255));
     -fx-background-radius: 8;
     -fx-border-radius: 8;
-    -fx-border-color: rgba(100, 180, 255, 0.3);
+    -fx-border-color: rgb(183, 218, 252);
     -fx-border-width: 1;
 }
 
@@ -25,7 +25,7 @@
 .turn-indicator {
     -fx-font-weight: bold;
     -fx-padding: 4 12;
-    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-color: rgb(178, 235, 252);
     -fx-background-radius: 12;
 }
 
@@ -45,7 +45,7 @@
 
 /* ===== SQUARE STYLES ===== */
 .square {
-    -fx-border-color: rgba(100, 180, 255, 0.15);
+    -fx-border-color: rgb(255, 255, 255);
     -fx-border-width: 0.5;
     -fx-min-width: 50;
     -fx-min-height: 50;
@@ -53,35 +53,35 @@
 }
 
 .square-normal {
-    -fx-background-color: linear-gradient(to bottom right, #1e3a5f, #2a4a6f);
+    -fx-background-color: linear-gradient(to bottom right, #8abdff, #71b3ff);
 }
 
 .square-ice-hole {
-    -fx-background-color: linear-gradient(to bottom right, #1a5276, #2980b9);
-    -fx-border-color: rgba(52, 152, 219, 0.6);
+    -fx-background-color: linear-gradient(to bottom right, #55beff, #9ad7ff);
+    -fx-border-color: rgb(160, 217, 255);
     -fx-border-width: 1;
 }
 
 .square-sled {
-    -fx-background-color: linear-gradient(to bottom right, #6d4c1a, #8b6914);
-    -fx-border-color: rgba(218, 165, 32, 0.5);
+    -fx-background-color: linear-gradient(to bottom right, #c9c6c3ec, #808080);
+    -fx-border-color: rgba(152, 165, 168, 0.884);
     -fx-border-width: 1;
 }
 
 .square-bear {
-    -fx-background-color: linear-gradient(to bottom right, #7b3f00, #a0522d);
-    -fx-border-color: rgba(255, 100, 50, 0.6);
+    -fx-background-color: linear-gradient(to bottom right, #7b3f00, #682b0f);
+    -fx-border-color: rgba(126, 50, 25, 0.6);
     -fx-border-width: 1;
 }
 
 .square-event {
     -fx-background-color: linear-gradient(to bottom right, #8b7500, #b8960f);
-    -fx-border-color: rgba(255, 215, 0, 0.6);
+    -fx-border-color: rgba(0, 81, 255, 0.6);
     -fx-border-width: 1;
 }
 
 .square-broken-floor {
-    -fx-background-color: linear-gradient(to bottom right, #4a0e4e, #6a1b9a);
+    -fx-background-color: linear-gradient(to bottom right, #1980f5, #6a88ee);
     -fx-border-color: rgba(156, 39, 176, 0.5);
     -fx-border-width: 1;
 }
@@ -130,11 +130,11 @@
 }
 
 .inventory-card {
-    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-color: rgb(130, 213, 252);
     -fx-background-radius: 8;
     -fx-padding: 10;
     -fx-border-radius: 8;
-    -fx-border-color: rgba(100, 180, 255, 0.15);
+    -fx-border-color: rgba(100, 180, 255, 0.966);
     -fx-border-width: 1;
 }
 
@@ -187,12 +187,16 @@
     -fx-background-color: linear-gradient(to right, rgba(10, 22, 40, 0.9), rgba(26, 58, 92, 0.85));
     -fx-background-radius: 8;
     -fx-border-radius: 8;
-    -fx-border-color: rgba(100, 180, 255, 0.2);
+    -fx-border-color: rgb(194, 226, 255);
     -fx-border-width: 1;
 }
 
 /* Buttons base */
-.btn-roll, .btn-fast-dice, .btn-slow-dice, .btn-snowball, .btn-save {
+.btn-roll,
+.btn-fast-dice,
+.btn-slow-dice,
+.btn-snowball,
+.btn-save {
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 13;
@@ -207,21 +211,25 @@
     -fx-border-color: #42a5f5;
     -fx-border-width: 1;
 }
+
 .btn-roll:hover {
     -fx-background-color: linear-gradient(to bottom, #42a5f5, #1976d2);
 }
+
 .btn-roll:pressed {
     -fx-background-color: #0d47a1;
 }
 
 .btn-fast-dice {
     -fx-background-color: linear-gradient(to bottom, #ff9800, #e65100);
-    -fx-border-color: #ffb74d;
+    -fx-border-color: #4bffc9;
     -fx-border-width: 1;
 }
+
 .btn-fast-dice:hover {
     -fx-background-color: linear-gradient(to bottom, #ffb74d, #f57c00);
 }
+
 .btn-fast-dice:disabled {
     -fx-opacity: 0.4;
 }
@@ -231,9 +239,11 @@
     -fx-border-color: #90a4ae;
     -fx-border-width: 1;
 }
+
 .btn-slow-dice:hover {
     -fx-background-color: linear-gradient(to bottom, #90a4ae, #546e7a);
 }
+
 .btn-slow-dice:disabled {
     -fx-opacity: 0.4;
 }
@@ -243,9 +253,11 @@
     -fx-border-color: #66bb6a;
     -fx-border-width: 1;
 }
+
 .btn-snowball:hover {
     -fx-background-color: linear-gradient(to bottom, #66bb6a, #388e3c);
 }
+
 .btn-snowball:disabled {
     -fx-opacity: 0.4;
 }
@@ -255,6 +267,7 @@
     -fx-border-color: #9575cd;
     -fx-border-width: 1;
 }
+
 .btn-save:hover {
     -fx-background-color: linear-gradient(to bottom, #9575cd, #5e35b1);
 }
@@ -267,23 +280,23 @@
 
 /* ===== EVENT LOG ===== */
 .event-log {
-    -fx-control-inner-background: rgba(0, 10, 25, 0.85);
-    -fx-text-fill: #c0d8f0;
+    -fx-control-inner-background: rgb(121, 224, 255);
+    -fx-text-fill: #0573e2;
     -fx-font-family: "Consolas", "Courier New", monospace;
     -fx-font-size: 11;
-    -fx-border-color: rgba(100, 180, 255, 0.2);
+    -fx-border-color: rgb(178, 236, 250);
     -fx-border-width: 1;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
 }
 
 .event-log .content {
-    -fx-background-color: rgba(0, 10, 25, 0.85);
+    -fx-background-color: rgb(166, 227, 255);
 }
 
 /* ===== SCROLLBAR STYLING ===== */
 .scroll-bar:vertical .thumb {
-    -fx-background-color: rgba(100, 180, 255, 0.3);
+    -fx-background-color: rgb(161, 210, 255);
     -fx-background-radius: 4;
 }
 
@@ -298,6 +311,9 @@
 }
 
 /* ===== LEGACY SUPPORT ===== */
-.square-bottom-left, .square-bottom-right, .square-top-left, .square-top-right {
+.square-bottom-left,
+.square-bottom-right,
+.square-top-left,
+.square-top-right {
     /* Remove old red/green borders */
 }

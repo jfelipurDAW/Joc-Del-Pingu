@@ -15,7 +15,7 @@
     -fx-font-family: "Pixel Game Extrude";
     -fx-font-weight: 900;
     -fx-font-size: 100px;
-    -fx-fill: linear-gradient(to right, #2b5876 0%, #4e4376 100%);
+    -fx-fill: linear-gradient(to right, #f4f4f5 0%, #77bbf3 100%);
 	-fx-translate-y: -18;
 	-fx-translate-x: 0;
 	-fx-font-kerning: off; 

@@ -44,6 +44,9 @@ public class SaveLoadService {
                 pMap.put("password", p.getPassword());
                 pMap.put("square", p.getSquareIndex());
                 pMap.put("skipNextTurn", p.shouldSkipNextTurn());
+                if (p.getAvatarPath() != null) {
+                    pMap.put("avatarPath", p.getAvatarPath());
+                }
                 
                 Inventory inv = p.getInventory();
                 Map<String, Integer> invMap = new HashMap<>();
@@ -156,6 +159,9 @@ public class SaveLoadService {
                 p.setEntityId(((Number) pMap.get("id")).intValue());
                 p.setSquare(((Number) pMap.get("square")).intValue());
                 p.setSkipNextTurn((Boolean) pMap.get("skipNextTurn"));
+                if (pMap.containsKey("avatarPath")) {
+                    p.setAvatarPath((String) pMap.get("avatarPath"));
+                }
 
                 Map<String, Integer> invMap = (Map<String, Integer>) pMap.get("inventory");
                 Inventory inv = p.getInventory();
@@ -190,4 +196,8 @@ public class SaveLoadService {
             return false;
         }
     }
+	public static List<String> getAllSavedGameIds() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
