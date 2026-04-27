@@ -1,6 +1,7 @@
 package controller.ui;
 
 import java.io.InputStream;
+import java.util.List;
 
 import model.config.Lang;
 import model.config.LangConfig;
@@ -163,26 +164,45 @@ public class MainMenuController {
 
     @FXML
     private void handleLoadGame() {
-        System.out.println("Load Game clicked");
-        boolean success = model.game.SaveLoadService.loadGame("SAVE_SLOT_1");
-        if (success) {
-            System.out.println("Load successful. Starting game...");
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/gameBoard.fxml"));
-                Parent gameBoardRoot = loader.load();
+        // 1. Buscamos todas las partidas guardadas en Oracle
+        List<String> partidas = model.game.SaveLoadService.getAllSavedGameIds();
 
-                Scene currentScene = rootPane.getScene();
-                Stage stage = (Stage) currentScene.getWindow();
-
-                Scene setupScene = new Scene(gameBoardRoot);
-                stage.setScene(setupScene);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Failed to load game. Start a new one instead.");
+        if (partidas.isEmpty()) {
+            System.out.println("No hay partidas guardadas.");
+            return;
         }
+
+        // 2. Abrimos el selector para que el usuario elija
+        javafx.scene.control.ChoiceDialog<String> dialog = new javafx.scene.control.ChoiceDialog<>(partidas.get(0), partidas);
+        dialog.setTitle("Cargar Partida");
+        dialog.setHeaderText("Selecciona la partida que quieres jugar:");
+        dialog.setContentText("ID de partida:");
+
+        java.util.Optional<String> result = dialog.showAndWait();
+
+        // 3. Si el usuario selecciona una...
+        result.ifPresent(gameId -> {
+            boolean success = model.game.SaveLoadService.loadGame(gameId);
+            if (success) {
+                System.out.println("Partida " + gameId + " cargada. Entrando al juego...");
+                try {
+                    // 4. ESTO ES LO QUE HACE QUE EL JUEGO "ENTRE"
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/gameBoard.fxml"));
+                    Parent gameBoardRoot = loader.load();
+
+                    Scene currentScene = rootPane.getScene();
+                    Stage stage = (Stage) currentScene.getWindow();
+
+                    Scene setupScene = new Scene(gameBoardRoot);
+                    stage.setScene(setupScene);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Error al cargar la partida seleccionada.");
+            }
+        });
     }
 
     /**
