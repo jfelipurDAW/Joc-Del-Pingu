@@ -5,7 +5,7 @@
 /* Root */
 .root {
     -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-background-color: linear-gradient(to bottom, #f3f9fa, #a2e5ff, #98ffff);
+    -fx-background-color: #b4e4e8;
 }
 
 /* ===== TOP BAR ===== */
@@ -34,22 +34,30 @@
     -fx-font-weight: bold;
 }
 
+/* ===== BOARD CONTAINER (1:1 Square, Responsive) ===== */
+.board-container {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
 /* ===== GAME GRID ===== */
 .game-grid {
-    -fx-background-color: rgba(0, 20, 40, 0.5);
-    -fx-background-radius: 6;
-    -fx-border-radius: 6;
-    -fx-border-color: rgba(100, 180, 255, 0.2);
-    -fx-border-width: 1;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-border-width: 0;
 }
 
 /* ===== SQUARE STYLES ===== */
 .square {
-    -fx-border-color: rgb(255, 255, 255);
-    -fx-border-width: 0.5;
-    -fx-min-width: 50;
-    -fx-min-height: 50;
-    -fx-padding: 2;
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+    -fx-max-width: Infinity;
+    -fx-max-height: Infinity;
 }
 
 .square-normal {

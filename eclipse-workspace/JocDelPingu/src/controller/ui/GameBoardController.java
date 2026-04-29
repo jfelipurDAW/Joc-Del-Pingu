@@ -34,7 +34,9 @@ import javafx.util.Duration;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class GameBoardController {
@@ -42,6 +44,7 @@ public class GameBoardController {
     // --- FXML Bindings ---
     @FXML private StackPane mainStack;
     @FXML private BorderPane rootPane;
+    @FXML private StackPane boardContainer;
     @FXML private GridPane grid;
     @FXML private Button rollDiceButton;
     @FXML private Button rollFastDiceButton;
@@ -85,6 +88,7 @@ public class GameBoardController {
     // --- Sprites ---
     private final Image baseImage;
     private final Image colorImage;
+    private final Map<String, Image> resourceCache = new HashMap<>();
 
     public GameBoardController() {
         baseImage  = loadImage("/assets/sprites/entities/player/player_idle.png");
@@ -93,14 +97,17 @@ public class GameBoardController {
     }
 
     private Image loadImage(String path) {
-        try {
-            InputStream is = getClass().getResourceAsStream(path);
+        if (resourceCache.containsKey(path)) {
+            return resourceCache.get(path);
+        }
+
+        try (InputStream is = getClass().getResourceAsStream(path)) {
             if (is == null) {
                 System.err.println("Resource not found: " + path);
                 return null;
             }
             Image img = new Image(is, 0, 0, true, false);
-            is.close();
+            resourceCache.put(path, img);
             return img;
         } catch (Exception e) {
             System.err.println("Error loading image " + path + ": " + e.getMessage());
@@ -730,30 +737,49 @@ public class GameBoardController {
         grid.getColumnConstraints().clear();
         grid.getRowConstraints().clear();
         grid.getChildren().clear();
-        
-        grid.setHgap(5);
-        grid.setVgap(5);
-        grid.getStyleClass().add("game-grid");
 
+        grid.setHgap(0);
+        grid.setVgap(0);
+        grid.setPadding(new javafx.geometry.Insets(0));
+        if (!grid.getStyleClass().contains("game-grid")) {
+            grid.getStyleClass().add("game-grid");
+        }
+
+        // Dynamic cell size that maintains square proportions
         DoubleBinding cellSize = Bindings.createDoubleBinding(
-            () -> Math.min(grid.getWidth() / cols, grid.getHeight() / rows),
-            grid.widthProperty(),
-            grid.heightProperty()
+            () -> {
+                double availableWidth = boardContainer.getWidth();
+                double availableHeight = boardContainer.getHeight();
+                if (availableWidth <= 0 || availableHeight <= 0) {
+                    return 60.0; // Default fallback
+                }
+                return Math.min(availableWidth / cols, availableHeight / rows);
+            },
+            boardContainer.widthProperty(),
+            boardContainer.heightProperty()
         );
 
         for (int i = 0; i < cols; i++) {
             ColumnConstraints col = new ColumnConstraints();
             col.prefWidthProperty().bind(cellSize);
-            col.setHgrow(Priority.ALWAYS);
+            col.minWidthProperty().bind(cellSize);
+            col.maxWidthProperty().bind(cellSize);
             grid.getColumnConstraints().add(col);
         }
 
         for (int i = 0; i < rows; i++) {
             RowConstraints row = new RowConstraints();
             row.prefHeightProperty().bind(cellSize);
-            row.setVgrow(Priority.ALWAYS);
+            row.minHeightProperty().bind(cellSize);
+            row.maxHeightProperty().bind(cellSize);
             grid.getRowConstraints().add(row);
         }
+
+        // Bind grid size to maintain proportions
+        grid.prefWidthProperty().bind(cellSize.multiply(cols));
+        grid.prefHeightProperty().bind(cellSize.multiply(rows));
+        grid.maxWidthProperty().bind(cellSize.multiply(cols));
+        grid.maxHeightProperty().bind(cellSize.multiply(rows));
 
         grid.setAlignment(Pos.CENTER);
 
@@ -770,6 +796,7 @@ public class GameBoardController {
 
     private StackPane createCell(int squareIndex) {
         StackPane cell = new StackPane();
+        cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         cell.getStyleClass().add("square");
 
         SquareType type = gameBoard.getSquareType(squareIndex);
@@ -786,17 +813,30 @@ public class GameBoardController {
             }
         }
 
-        // Square number + type emoji
-        String emoji = getSquareEmoji(type);
-        Label numberLabel = new Label(squareIndex + " " + emoji);
-        numberLabel.getStyleClass().add("square-number");
-        StackPane.setAlignment(numberLabel, Pos.TOP_LEFT);
-        cell.getChildren().add(numberLabel);
+        Image cellBackground = loadImage(getBackgroundImagePath(squareIndex));
+        if (cellBackground != null) {
+            ImageView bgView = new ImageView(cellBackground);
+            bgView.setPreserveRatio(true);
+            bgView.setSmooth(false);
+            bgView.setCache(true);
+            bgView.fitWidthProperty().bind(cell.widthProperty());
+            bgView.fitHeightProperty().bind(cell.heightProperty());
+            cell.getChildren().add(bgView);
+        }
 
-        // Add player sprites
+        Image overlayImage = getForegroundImageForType(type);
+        if (overlayImage != null) {
+            ImageView overlayView = new ImageView(overlayImage);
+            overlayView.setPreserveRatio(true);
+            overlayView.setSmooth(false);
+            overlayView.setCache(true);
+            overlayView.fitWidthProperty().bind(cell.widthProperty());
+            overlayView.fitHeightProperty().bind(cell.heightProperty());
+            cell.getChildren().add(overlayView);
+        }
+
         addPlayerSpritesToCell(cell, squareIndex);
 
-        // Add seal sprite if enabled
         if (sealEnabled && seal != null && seal.getSquareIndex() == squareIndex) {
             Label sealLabel = new Label("🦭");
             sealLabel.setStyle("-fx-font-size: 18;");
@@ -807,18 +847,45 @@ public class GameBoardController {
         return cell;
     }
 
-    private String getSquareEmoji(SquareType type) {
-        if (type == null) return "";
-        return switch (type) {
-            case NORMAL       -> "";
-            case ICE_HOLE     -> "🕳️";
-            case SLED         -> "🛷";
-            case BEAR         -> "🐻";
-            case EVENT        -> "❓";
-            case BROKEN_FLOOR -> "💔";
-            case START        -> "🏁";
-            case END          -> "🏆";
-        };
+    private String getBackgroundImagePath(int squareIndex) {
+        // Special cases
+        if (squareIndex == 0) {
+            return "/assets/sprites/squares/background/Square-0.png";
+        }
+        if (squareIndex == Board.MAX_SQUARES - 1) {
+            return "/assets/sprites/squares/background/Square-6.png";
+        }
+
+        int cols = Board.widthBoard;
+        int row = squareIndex / cols;
+        int indexInRow = squareIndex % cols;
+
+        // Check if it's first or last column in the actual row direction
+        boolean isFirstInRow = (indexInRow == 0);
+        boolean isLastInRow = (indexInRow == cols - 1);
+        boolean isEvenRow = (row % 2 == 0);
+
+        // Lateral caselles (left and right columns)
+        if (isFirstInRow) {
+            // First in row is always left column
+            return isEvenRow ? "/assets/sprites/squares/background/Square-5.png" : "/assets/sprites/squares/background/Square-4.png";
+        }
+        if (isLastInRow) {
+            // Last in row is always right column
+            return isEvenRow ? "/assets/sprites/squares/background/Square-3.png" : "/assets/sprites/squares/background/Square-2.png";
+        }
+
+        // Default: central caselles are always horizontal
+        return "/assets/sprites/squares/background/Square-1.png";
+    }
+
+    private Image getForegroundImageForType(SquareType type) {
+        if (type == null || type == SquareType.NORMAL) {
+            return null;
+        }
+
+        String imageName = "/assets/sprites/squares/foreground/" + type.name() + ".png";
+        return loadImage(imageName);
     }
 
     private void addPlayerSpritesToCell(StackPane cell, int squareIndex) {
@@ -831,46 +898,68 @@ public class GameBoardController {
         
         if (playersHere.isEmpty()) return;
 
-        double spriteSize = 50; // Bigger players
-        int count = 0;
-        double spacing = 20; // Adjusted spacing for bigger sprites
-
+        int playerCount = 0;
         for (Player player : playersHere) {
             StackPane playerToken = new StackPane();
+            final int playerIndex = playerCount;
 
             if (baseImage != null && colorImage != null) {
-                // Base layer (bottom, untinted) via Canvas
-                Canvas baseCanvas = new Canvas(spriteSize, spriteSize);
+                Canvas baseCanvas = new Canvas();
                 GraphicsContext gcBase = baseCanvas.getGraphicsContext2D();
                 gcBase.setImageSmoothing(false);
-                gcBase.drawImage(baseImage, 0, 0, spriteSize, spriteSize);
-
-                // Color layer (top, tinted) via Canvas
-                Canvas colorCanvas = new Canvas(spriteSize, spriteSize);
+                
+                Canvas colorCanvas = new Canvas();
                 GraphicsContext gcColor = colorCanvas.getGraphicsContext2D();
                 gcColor.setImageSmoothing(false);
-                gcColor.drawImage(colorImage, 0, 0, spriteSize, spriteSize);
 
-                // Tint effect
                 Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
-                lighting.setSurfaceScale(0.0); // Flat lighting for tint effect
+                lighting.setSurfaceScale(0.0);
                 colorCanvas.setEffect(lighting);
+
+                DoubleBinding spriteSize = Bindings.createDoubleBinding(
+                    () -> cell.getWidth() * 0.25,
+                    cell.widthProperty()
+                );
+
+                baseCanvas.widthProperty().bind(spriteSize);
+                baseCanvas.heightProperty().bind(spriteSize);
+                colorCanvas.widthProperty().bind(spriteSize);
+                colorCanvas.heightProperty().bind(spriteSize);
+
+                spriteSize.addListener((obs, oldVal, newVal) -> {
+                    double size = newVal.doubleValue();
+                    gcBase.clearRect(0, 0, size, size);
+                    gcBase.drawImage(baseImage, 0, 0, size, size);
+                    gcColor.clearRect(0, 0, size, size);
+                    gcColor.drawImage(colorImage, 0, 0, size, size);
+                });
 
                 playerToken.getChildren().addAll(baseCanvas, colorCanvas);
             } else {
-                Circle fallback = new Circle(spriteSize / 2);
+                Circle fallback = new Circle();
+                fallback.radiusProperty().bind(Bindings.createDoubleBinding(
+                    () -> cell.getWidth() * 0.125,
+                    cell.widthProperty()
+                ));
                 fallback.setFill(getColorFromHex(player.getColour()));
                 fallback.setStroke(Color.WHITE);
                 fallback.setStrokeWidth(2);
                 playerToken.getChildren().add(fallback);
             }
 
-            // Centered Offset for multiple players
-            double offsetX = (count - (playersHere.size() - 1) / 2.0) * spacing;
-            playerToken.setTranslateX(offsetX);
+            DoubleBinding spacing = Bindings.createDoubleBinding(
+                () -> cell.getWidth() * 0.15,
+                cell.widthProperty()
+            );
+
+            final int count = playersHere.size();
+            playerToken.translateXProperty().bind(Bindings.createDoubleBinding(
+                () -> (playerIndex - (count - 1) / 2.0) * spacing.get(),
+                spacing
+            ));
 
             cell.getChildren().add(playerToken);
-            count++;
+            playerCount++;
         }
     }
 

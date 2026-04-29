@@ -46,13 +46,11 @@
       </HBox>
    </top>
 
-   <!-- CENTER: Game Board Grid -->
+   <!-- CENTER: Game Board Grid (Square 1:1 Responsive Container) -->
    <center>
-      <GridPane fx:id="grid" hgap="1" vgap="1" styleClass="game-grid">
-         <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-         </padding>
-      </GridPane>
+      <StackPane fx:id="boardContainer" styleClass="board-container">
+         <GridPane fx:id="grid" hgap="0" vgap="0" styleClass="game-grid" />
+      </StackPane>
    </center>
 
    <!-- RIGHT PANEL: Player Info + Inventory -->
