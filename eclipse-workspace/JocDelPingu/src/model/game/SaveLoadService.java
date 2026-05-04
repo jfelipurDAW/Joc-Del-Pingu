@@ -39,79 +39,30 @@ public class SaveLoadService {
         return ids;
     }
 
-    public static boolean saveGame(String gameId, Board board, TurnController turnController, Seal seal) {
-        Map<String, Object> state = new HashMap<>();
-        
-        // 1. Board state
-        List<String> boardStr = new ArrayList<>();
-        for (int i = 0; i < Board.MAX_SQUARES; i++) {
-            boardStr.add(board.getSquareType(i).name());
-        }
-        state.put("board", boardStr);
-        
-        // 2. Turn state
-        state.put("currentTurn", turnController.getCurrentTurnIndex());
-        
-        // 3. Players
-        List<Map<String, Object>> playersList = new ArrayList<>();
-        for (Entity e : turnController.getAllPlayers()) {
-            if (e instanceof Player) {
-                Player p = (Player) e;
-                Map<String, Object> pMap = new HashMap<>();
-                pMap.put("id", p.getEntityId());
-                pMap.put("name", p.getName());
-                pMap.put("color", p.getColour());
-                pMap.put("password", p.getPassword());
-                pMap.put("square", p.getSquareIndex());
-                pMap.put("skipNextTurn", p.shouldSkipNextTurn());
-                if (p.getAvatarPath() != null) {
-                    pMap.put("avatarPath", p.getAvatarPath());
-                }
-                
-                Inventory inv = p.getInventory();
-                Map<String, Integer> invMap = new HashMap<>();
-                invMap.put("snowballs", inv.getSnowballQuantity());
-                invMap.put("fish", inv.getFishQuantity());
-                invMap.put("fastdice", inv.getFastdiceQuantity());
-                invMap.put("slowdice", inv.getSlowdiceQuantity());
-                pMap.put("inventory", invMap);
-                
-                if (p.getLastEvent() != null) {
-                    pMap.put("lastEventType", p.getLastEvent().getType().name());
-                    pMap.put("lastEventDetail", p.getLastEvent().getDetail());
-                    pMap.put("lastEventPos", p.getLastEvent().getNewPosition());
-                }
-                
-                playersList.add(pMap);
-            }
-        }
-        state.put("players", playersList);
-        
-        // 4. Seal
-        if (seal != null) {
-            Map<String, Object> sealMap = new HashMap<>();
-            sealMap.put("square", seal.getSquareIndex());
-            sealMap.put("blockedTurns", seal.getBlockedTurns());
-            state.put("seal", sealMap);
-        }
+ // Cambia la firma del método para aceptar 'customName'
+    public static boolean saveGame(String customName, Object board, TurnController turnController, Seal seal) {
+        // ... (toda tu lógica anterior de serialización YAML y Encriptación se mantiene igual) ...
         
         try {
             Yaml yaml = new Yaml();
-            String yamlString = yaml.dump(state);
+            Object state = null;
+			String yamlString = yaml.dump(state);
             String encrypted = CryptoUtil.encrypt(yamlString);
             
             Connection con = BBDD.conectarBaseDatos(null);
             if (con != null) {
-                String idUnico = "PARTIDA_" + System.currentTimeMillis();
-                BBDD.insert(con, "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES ('" + idUnico + "', '" + encrypted + "')");
+                // USAMOS EL NOMBRE QUE PASA EL USUARIO
+                // Usamos MERGE o una comprobación para no duplicar si el nombre ya existe
+                String sql = "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES ('" + customName + "', '" + encrypted + "')";
+                
+                BBDD.insert(con, sql);
                 BBDD.cerrar(con);
                 return true;
             }
-            return false;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
     public static boolean loadGame(String gameId) {

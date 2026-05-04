@@ -3,6 +3,7 @@ package controller.ui;
 import model.board.Board;
 import model.board.SquareType;
 import model.config.GameSetupConfig;
+import model.game.SaveLoadService;
 import model.game.TurnController;
 import model.entity.Entity;
 import model.entity.Player;
@@ -88,7 +89,7 @@ public class GameBoardController {
     // --- Sprites ---
     private final Image baseImage;
     private final Image colorImage;
-    private final Map<String, Image> resourceCache = new HashMap<>();
+	private Object board;
 
     public GameBoardController() {
         baseImage  = loadImage("/assets/sprites/entities/player/player_idle.png");
@@ -312,15 +313,36 @@ public class GameBoardController {
 
     @FXML
     private void saveGame() {
-        logEvent("💾 Saving game state to database...");
-        boolean success = gameManager.saveGame();
-        if (success) {
-            logEvent("✅ Game saved successfully!");
-            showAlert("Save Game", "Game saved securely to the Oracle database!");
-        } else {
-            logEvent("❌ Failed to save game.");
-            showAlert("Save Error", "Failed to save the game. Check database connection.");
-        }
+        // 1. Crear el diálogo de entrada de texto
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("MiPartida");
+        dialog.setTitle("Guardar Partida");
+        dialog.setHeaderText("Introduce un nombre para identificar tu partida:");
+        dialog.setContentText("Nombre:");
+
+        // 2. Mostrar y esperar respuesta
+        java.util.Optional<String> result = dialog.showAndWait();
+
+        // 3. Si el usuario pulsó "Aceptar" y escribió algo
+        result.ifPresent(name -> {
+            if (!name.trim().isEmpty()) {
+                // Llamamos al servicio con el nombre elegido
+                boolean ok = SaveLoadService.saveGame(name, this.board, this.turnController, this.seal);
+                
+                if (ok) {
+                    mostrarAlerta("Éxito", "Partida '" + name + "' guardada correctamente.");
+                } else {
+                    mostrarAlerta("Error", "No se pudo guardar la partida. Quizás el nombre ya existe.");
+                }
+            }
+        });
+    }
+
+    private void mostrarAlerta(String titulo, String msg) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
     }
 
     // ============================================
