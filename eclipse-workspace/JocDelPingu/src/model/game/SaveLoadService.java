@@ -44,16 +44,63 @@ public class SaveLoadService {
         // ... (toda tu lógica anterior de serialización YAML y Encriptación se mantiene igual) ...
         
         try {
+            // USAMOS EL NOMBRE QUE PASA EL USUARIO (sanitizado contra inyección básica)
+            String safeName = customName.replace("'", "''");
+
+            Map<String, Object> state = new HashMap<>();
+
+            // Serializar el tablero
+            List<String> boardState = new ArrayList<>();
+            for (model.board.Square sq : ((Board)board).getBoard()) {
+                boardState.add(sq.getType().name());
+            }
+            state.put("board", boardState);
+
+            // Turno actual
+            state.put("currentTurn", turnController.getCurrentTurnIndex());
+
+            // Jugadores
+            List<Map<String, Object>> playersList = new ArrayList<>();
+            for (Entity e : turnController.getAllPlayers()) {
+                if (e instanceof Player) {
+                    Player p = (Player) e;
+                    Map<String, Object> pMap = new HashMap<>();
+                    pMap.put("name", p.getName());
+                    pMap.put("color", p.getColour());
+                    pMap.put("password", p.getPassword() != null ? p.getPassword() : "");
+                    pMap.put("id", p.getEntityId());
+                    pMap.put("square", p.getSquareIndex());
+                    pMap.put("skipNextTurn", p.shouldSkipNextTurn());
+                    
+                    Map<String, Integer> invMap = new HashMap<>();
+                    Inventory inv = p.getInventory();
+                    invMap.put("snowballs", inv.getSnowballQuantity());
+                    invMap.put("fish", inv.getFishQuantity());
+                    invMap.put("fastdice", inv.getFastdiceQuantity());
+                    invMap.put("slowdice", inv.getSlowdiceQuantity());
+                    pMap.put("inventory", invMap);
+                    
+                    playersList.add(pMap);
+                }
+            }
+            state.put("players", playersList);
+
+            // Foca
+            if (seal != null) {
+                Map<String, Object> sealState = new HashMap<>();
+                sealState.put("square", seal.getSquareIndex());
+                sealState.put("blockedTurns", seal.getBlockedTurns());
+                state.put("seal", sealState);
+            }
+
             Yaml yaml = new Yaml();
-            Object state = null;
-			String yamlString = yaml.dump(state);
+            String yamlString = yaml.dump(state);
             String encrypted = CryptoUtil.encrypt(yamlString);
             
             Connection con = BBDD.conectarBaseDatos(null);
             if (con != null) {
-                // USAMOS EL NOMBRE QUE PASA EL USUARIO
                 // Usamos MERGE o una comprobación para no duplicar si el nombre ya existe
-                String sql = "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES ('" + customName + "', '" + encrypted + "')";
+                String sql = "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES ('" + safeName + "', '" + encrypted + "')";
                 
                 BBDD.insert(con, sql);
                 BBDD.cerrar(con);
@@ -117,5 +164,52 @@ public class SaveLoadService {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    /**
+     * Guarda un nuevo perfil de jugador en la tabla ENTITY.
+     */
+    public static boolean registerPlayer(String name, String password, String color) {
+        Connection con = null;
+        try {
+            con = BBDD.conectarBaseDatos(null);
+            if (con != null) {
+                // El ID puede ser un random o un auto-incremental
+                int id = (int) (Math.random() * 10000); 
+                String sql = "INSERT INTO ENTITY (ENTITYID, ENTITYTYPE, PLAYERNAME, PLAYERPASSWORD, COLOUR) " +
+                             "VALUES (" + id + ", 'PLAYER', '" + name + "', '" + password + "', '" + color + "')";
+                
+                BBDD.insert(con, sql);
+                BBDD.cerrar(con);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Recupera todos los jugadores registrados para poder elegirlos.
+     */
+    public static List<Player> getRegisteredPlayers() {
+        List<Player> players = new ArrayList<>();
+        Connection con = null;
+        try {
+            con = BBDD.conectarBaseDatos(null);
+            if (con != null) {
+                String sql = "SELECT PLAYERNAME, PLAYERPASSWORD, COLOUR FROM ENTITY WHERE ENTITYTYPE = 'PLAYER'";
+                java.util.ArrayList<java.util.LinkedHashMap<String, String>> result = BBDD.select(con, sql);
+                BBDD.cerrar(con);
+
+                for (java.util.LinkedHashMap<String, String> row : result) {
+                    Player p = new Player(row.get("PLAYERNAME"), row.get("COLOUR"), row.get("PLAYERPASSWORD"));
+                    players.add(p);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return players;
     }
 }

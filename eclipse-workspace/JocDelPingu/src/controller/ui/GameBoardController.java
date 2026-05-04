@@ -89,7 +89,7 @@ public class GameBoardController {
     // --- Sprites ---
     private final Image baseImage;
     private final Image colorImage;
-	private Object board;
+    private final Map<String, Image> resourceCache = new HashMap<>();
 
     public GameBoardController() {
         baseImage  = loadImage("/assets/sprites/entities/player/player_idle.png");
@@ -158,7 +158,7 @@ public class GameBoardController {
             }
         }
 
-        defaultDice = new Dice(ObjectType.SLOWDICE); // Default: 1-3
+        defaultDice = new Dice(ObjectType.DICE); // Default: 1-6
         fastDice = new Dice(ObjectType.FASTDICE);     // 5-10
         slowDice = new Dice(ObjectType.SLOWDICE);     // 1-3
 
@@ -326,7 +326,7 @@ public class GameBoardController {
         result.ifPresent(name -> {
             if (!name.trim().isEmpty()) {
                 // Llamamos al servicio con el nombre elegido
-                boolean ok = SaveLoadService.saveGame(name, this.board, this.turnController, this.seal);
+                boolean ok = SaveLoadService.saveGame(name, this.gameBoard, this.turnController, this.seal);
                 
                 if (ok) {
                     mostrarAlerta("Éxito", "Partida '" + name + "' guardada correctamente.");
@@ -454,11 +454,6 @@ public class GameBoardController {
 
         // If the seal won during its turn, stop here
         if (gameOver) return;
-
-        // Update seal turns
-        if (seal != null) {
-            seal.updateSealTurns();
-        }
 
         // Update HUD for next player
         updateHUD();

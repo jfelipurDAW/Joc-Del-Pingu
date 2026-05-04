@@ -194,6 +194,9 @@ public class MainMenuController {
                     Stage stage = (Stage) currentScene.getWindow();
 
                     Scene setupScene = new Scene(gameBoardRoot);
+                    setupScene.getStylesheets().add(
+                        getClass().getResource("/assets/css/style.css").toExternalForm()
+                    );
                     stage.setScene(setupScene);
 
                 } catch (Exception e) {

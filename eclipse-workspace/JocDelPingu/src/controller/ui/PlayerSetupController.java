@@ -1,6 +1,7 @@
 package controller.ui;
 
 import model.entity.Player;
+import model.game.SaveLoadService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -19,6 +20,7 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import model.config.GameSetupConfig;
 import model.config.Lang;
@@ -215,4 +217,68 @@ public class PlayerSetupController {
             }
         }
     }
+ // Añade este import arriba del todo si te marca error en Collectors
+    // import java.util.stream.Collectors;
+
+    @FXML
+    private void handleSelectExistingPlayer() {
+        // 1. Obtenemos los jugadores de la base de datos
+        java.util.List<Player> existentes = model.game.SaveLoadService.getRegisteredPlayers();
+        
+        if (existentes.isEmpty()) {
+            mostrarAlerta("No hay jugadores", "Debes crear un jugador nuevo primero.");
+            return;
+        }
+
+        // 2. Creamos una lista de nombres para el diálogo
+        java.util.List<String> nombres = existentes.stream().map(Player::getName).collect(java.util.stream.Collectors.toList());
+
+        javafx.scene.control.ChoiceDialog<String> dialog = new javafx.scene.control.ChoiceDialog<>(nombres.get(0), nombres);
+        dialog.setTitle("Elegir Jugador");
+        dialog.setHeaderText("Selecciona tu perfil de Pingüino:");
+        
+        java.util.Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(nombreSeleccionado -> {
+            for (Player p : existentes) {
+                if (p.getName().equals(nombreSeleccionado)) {
+                    
+                    // SOLUCIÓN: Buscamos el primer hueco de jugador que esté vacío en la pantalla
+                    boolean asignado = false;
+                    for (PlayerInput input : playerInputs) {
+                        if (input.nameField.getText().trim().isEmpty()) {
+                            // Rellenamos los campos visualmente
+                            input.nameField.setText(p.getName());
+                            if (p.getPassword() != null) {
+                                input.passwordField.setText(p.getPassword());
+                            }
+                            
+                            // Ponemos el color que tenía guardado
+                            try {
+                                input.colorPicker.setValue(javafx.scene.paint.Color.web("#" + p.getColour()));
+                            } catch (Exception e) {
+                                // Ignorar si el color guardado era inválido
+                            }
+                            
+                            asignado = true;
+                            System.out.println("Jugador " + p.getName() + " cargado en el formulario.");
+                            break; // Rompemos el bucle para que solo llene un hueco
+                        }
+                    }
+                    
+                    if (!asignado) {
+                        mostrarAlerta("Lleno", "Ya has rellenado todos los huecos de jugador.");
+                    }
+                }
+            }
+        });
+    }
+
+	private void mostrarAlerta(String string, String string2) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle(string);
+        alert.setHeaderText(null);
+        alert.setContentText(string2);
+        alert.showAndWait();
+	}
 }
