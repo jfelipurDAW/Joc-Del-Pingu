@@ -281,4 +281,32 @@ public class PlayerSetupController {
         alert.setContentText(string2);
         alert.showAndWait();
 	}
+
+    // ===== NAVIGATION =====
+
+    @FXML
+    private void handleBack() {
+        navigateToMainMenu();
+    }
+
+
+
+
+    private void navigateToMainMenu() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/mainMenu.fxml"));
+            Parent mainMenuRoot = loader.load();
+
+            Scene currentScene = rootPane.getScene();
+            Stage stage = (Stage) currentScene.getWindow();
+
+            Scene menuScene = new Scene(mainMenuRoot);
+            menuScene.getStylesheets().add(
+                getClass().getResource("/assets/css/style.css").toExternalForm()
+            );
+            stage.setScene(menuScene);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

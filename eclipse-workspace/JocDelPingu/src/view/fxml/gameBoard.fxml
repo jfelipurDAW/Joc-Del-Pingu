@@ -123,6 +123,8 @@
             <Button fx:id="rollSlowDiceButton" mnemonicParsing="false" onAction="#rollSlowDice" styleClass="btn-slow-dice" text="🎲 Slow Dice" prefWidth="150" prefHeight="40" />
             <Button fx:id="throwSnowballButton" mnemonicParsing="false" onAction="#throwSnowball" styleClass="btn-snowball" text="⛄ Throw Snowball" prefWidth="160" prefHeight="40" />
             <Button fx:id="saveGameButton" mnemonicParsing="false" onAction="#saveGame" styleClass="btn-save" text="💾 Save Game" prefWidth="130" prefHeight="40" />
+            <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" styleClass="nav-btn-back" text="◀ Back" prefHeight="40" />
+            <Button fx:id="homeButton" mnemonicParsing="false" onAction="#handleReturnToMenu" styleClass="nav-btn-home" text="🏠 Menu" prefHeight="40" />
          </HBox>
 
          <!-- Event Log -->
