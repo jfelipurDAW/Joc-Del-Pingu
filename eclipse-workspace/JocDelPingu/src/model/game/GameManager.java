@@ -64,7 +64,8 @@ public class GameManager {
     }
 
     public boolean saveGame() {
-        return SaveLoadService.saveGame(gameId, board, turnController, seal);
+        String winner = null;
+		return SaveLoadService.saveGame(gameId, board, turnController, seal, winner);
     }
     
     public boolean loadGame() {

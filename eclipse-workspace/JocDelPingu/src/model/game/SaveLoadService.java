@@ -40,7 +40,7 @@ public class SaveLoadService {
     }
 
  // Cambia la firma del método para aceptar 'customName'
-    public static boolean saveGame(String customName, Object board, TurnController turnController, Seal seal) {
+    public static boolean saveGame(String customName, Object board, TurnController turnController, Seal seal, String winner) {
         // ... (toda tu lógica anterior de serialización YAML y Encriptación se mantiene igual) ...
         
         try {
@@ -103,8 +103,31 @@ public class SaveLoadService {
                 String sql = "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES ('" + safeName + "', '" + encrypted + "')";
                 
                 BBDD.insert(con, sql);
-                BBDD.cerrar(con);
-                return true;
+
+             // Insertar partida en GAME y actualizar estadísticas
+             String sqlGame = "INSERT INTO GAME (GAMESTATE, GAMEDATE, BOARDID) VALUES ('FINISHED', SYSDATE, 1)";
+             BBDD.insert(con, sqlGame);
+
+             // Incrementar GAMES_PLAYED a todos los jugadores
+             for (Entity e : turnController.getAllPlayers()) {
+                 if (e instanceof Player) {
+                     String safePName = ((Player) e).getName().replace("'", "''");
+                     String sqlPlayed = "UPDATE ENTITY SET GAMES_PLAYED = GAMES_PLAYED + 1 " +
+                                        "WHERE PLAYERNAME = '" + safePName + "' AND ENTITYTYPE = 'PLAYER'";
+                     BBDD.update(con, sqlPlayed);
+                 }
+             }
+
+             // Incrementar GAMES_WON al ganador (dispara el trigger automáticamente)
+             if (winner != null && !winner.isEmpty()) {
+                 String safeWinner = winner.replace("'", "''");
+                 String sqlWon = "UPDATE ENTITY SET GAMES_WON = GAMES_WON + 1 " +
+                                 "WHERE PLAYERNAME = '" + safeWinner + "' AND ENTITYTYPE = 'PLAYER'";
+                 BBDD.update(con, sqlWon);
+             }
+
+             BBDD.cerrar(con);
+             return true;
             }
         } catch (Exception e) {
             e.printStackTrace();

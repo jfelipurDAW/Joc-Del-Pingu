@@ -90,6 +90,7 @@ public class GameBoardController {
     private final Image baseImage;
     private final Image colorImage;
     private final Map<String, Image> resourceCache = new HashMap<>();
+	private String winner;
 
     public GameBoardController() {
         baseImage  = loadImage("/assets/sprites/entities/player/player_idle.png");
@@ -326,7 +327,7 @@ public class GameBoardController {
         result.ifPresent(name -> {
             if (!name.trim().isEmpty()) {
                 // Llamamos al servicio con el nombre elegido
-                boolean ok = SaveLoadService.saveGame(name, this.gameBoard, this.turnController, this.seal);
+                boolean ok = SaveLoadService.saveGame(name, this.gameBoard, this.turnController, this.seal, this.winner);
                 
                 if (ok) {
                     mostrarAlerta("Éxito", "Partida '" + name + "' guardada correctamente.");
