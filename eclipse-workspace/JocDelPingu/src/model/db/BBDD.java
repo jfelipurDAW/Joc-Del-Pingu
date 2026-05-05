@@ -228,6 +228,12 @@ public class BBDD {
                      "VALUES ('" + idUnico + "', '" + datosEncriptados + "')";
         
         int filas = insert(con, sql);
+     // Esto activa el trigger TRG_GAME_FINISHED que incrementa GAMES_WON
+        if (filas > 0) {
+            String sqlFinish = "UPDATE GAME SET GAMESTATE = 'FINISHED' " +
+                               "WHERE GAMEID = (SELECT MAX(GAMEID) FROM GAME)";
+            update(con, sqlFinish);
+        }
         cerrar(con);
         return filas > 0;
     }

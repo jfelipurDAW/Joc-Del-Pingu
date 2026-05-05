@@ -11,16 +11,18 @@
     -fx-fill: #ffffff;
     -fx-translate-y: -20;
 }
+
 .mainmenu_title_shadow {
     -fx-font-family: "Pixel Game Extrude";
     -fx-font-weight: 900;
     -fx-font-size: 100px;
     -fx-fill: linear-gradient(to right, #f4f4f5 0%, #77bbf3 100%);
-	-fx-translate-y: -18;
-	-fx-translate-x: 0;
-	-fx-font-kerning: off; 
-	-fx-letter-spacing: -5px;
+    -fx-translate-y: -18;
+    -fx-translate-x: 0;
+    -fx-font-kerning: off;
+    -fx-letter-spacing: -5px;
 }
+
 .mainmenu_button_newgame,
 .mainmenu_button_loadgame {
     -fx-background-color: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
@@ -211,4 +213,54 @@
     -fx-font-size: 20px;
     -fx-text-fill: #ffeb3b;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 4, 0, 0, 2);
+}
+
+/* ===== NAVIGATION BUTTONS (Pixel-Art Style) ===== */
+.nav-btn-back,
+.nav-btn-home {
+    -fx-background-color: linear-gradient(to bottom, #5b86e5 0%, #36d1dc 100%);
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: #1a3a5c #0d2137 #0d2137 #1a3a5c;
+    -fx-border-width: 3;
+    -fx-font-family: "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+    -fx-padding: 6 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.4), 2, 0, 2, 2);
+}
+
+.nav-btn-back:hover,
+.nav-btn-home:hover {
+    -fx-background-color: linear-gradient(to bottom, #36d1dc 0%, #5b86e5 100%);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.nav-btn-back:pressed,
+.nav-btn-home:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+    -fx-border-color: #0d2137 #1a3a5c #1a3a5c #0d2137;
+}
+
+.nav-btn-home {
+    -fx-background-color: linear-gradient(to bottom, #e65c00 0%, #f9d423 100%);
+    -fx-border-color: #7a3300 #4a1f00 #4a1f00 #7a3300;
+}
+
+.nav-btn-home:hover {
+    -fx-background-color: linear-gradient(to bottom, #f9d423 0%, #e65c00 100%);
+}
+
+.nav-btn-home:pressed {
+    -fx-border-color: #4a1f00 #7a3300 #7a3300 #4a1f00;
+}
+
+/* Navigation bar container */
+.nav-bar {
+    -fx-padding: 8 12;
+    -fx-spacing: 10;
 }

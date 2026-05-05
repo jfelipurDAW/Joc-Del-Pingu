@@ -447,12 +447,16 @@ public class GameBoardController {
         // Advance turn
         turnController.nextTurn();
         
-        // If seal is enabled, play seal turn between player turns
-        if (sealEnabled && seal != null) {
-            playSealTurn();
+        // Play seal turn once per round (when we wrap back to player 0)
+        if (sealEnabled && seal != null && turnController.getCurrentTurnIndex() == 0) {
+            playSealTurnAnimated();
+            return; // playSealTurnAnimated will call startNextPlayerTurn when done
         }
 
-        // If the seal won during its turn, stop here
+        startNextPlayerTurn();
+    }
+
+    private void startNextPlayerTurn() {
         if (gameOver) return;
 
         // Update HUD for next player
@@ -464,23 +468,53 @@ public class GameBoardController {
         logEvent("🎯 " + next.getName() + "'s turn!");
     }
 
-    private void playSealTurn() {
+    /**
+     * Plays the seal turn with step-by-step animated delays so the user can
+     * see exactly what the seal does each round.
+     */
+    private void playSealTurnAnimated() {
+        disableActions();
+        logEvent("──────────────────");
+        logEvent("🦭 SEAL'S TURN!");
+
         List<Player> humanPlayers = turnController.getHumanPlayers();
         List<model.game.ActionResult> sealLog = seal.playTurn(humanPlayers);
-        for (model.game.ActionResult msg : sealLog) {
-            logEvent(formatActionMessage(msg));
+
+        // Show seal cinematic
+        showSealAnimation();
+        model.game.SoundManager.getInstance().playSealSound();
+
+        // Animate each log message with a delay so the player can read them
+        Timeline sealTimeline = new Timeline();
+        double delay = 600; // initial delay after animation starts
+
+        for (int i = 0; i < sealLog.size(); i++) {
+            final model.game.ActionResult msg = sealLog.get(i);
+            KeyFrame kf = new KeyFrame(Duration.millis(delay + i * 700), e -> {
+                logEvent(formatActionMessage(msg));
+                drawBoard();
+                updateSealStatus();
+            });
+            sealTimeline.getKeyFrames().add(kf);
         }
-        
-        // Check if seal reached end (seal wins = all players lose)
-        if (seal.getSquareIndex() >= Board.MAX_SQUARES - 1) {
-            logEvent("🦭 THE SEAL REACHED THE END! ALL PLAYERS LOSE!");
-            gameOver = true;
-            disableActions();
-            showAlert("Game Over!", "🦭 The Seal won the game! Better luck next time!");
-        }
-        
-        drawBoard();
-        updateSealStatus();
+
+        // Final frame: check win and start next player turn
+        KeyFrame finalFrame = new KeyFrame(
+            Duration.millis(delay + sealLog.size() * 700 + 300), e -> {
+                if (seal.getSquareIndex() >= Board.MAX_SQUARES - 1) {
+                    logEvent("🦭 THE SEAL REACHED THE END! ALL PLAYERS LOSE!");
+                    gameOver = true;
+                    disableActions();
+                    showAlert("Game Over!", "🦭 The Seal won the game! Better luck next time!");
+                    return;
+                }
+                drawBoard();
+                updateSealStatus();
+                startNextPlayerTurn();
+            }
+        );
+        sealTimeline.getKeyFrames().add(finalFrame);
+        sealTimeline.play();
     }
 
     private void handlePlayerWar(Player attacker, Player defender) {
@@ -1154,5 +1188,56 @@ public class GameBoardController {
 
     public Board getCurrentGameBoard() {
         return this.gameBoard;
+    }
+
+    // ===== NAVIGATION =====
+
+    @FXML
+    private void handleBack() {
+        // Back from game goes to player setup (with confirmation)
+        if (!gameOver) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Leave Game?");
+            confirm.setHeaderText("You will lose your current game progress!");
+            confirm.setContentText("Go back to Player Setup?");
+            java.util.Optional<ButtonType> result = confirm.showAndWait();
+            if (result.isEmpty() || result.get() != ButtonType.OK) return;
+        }
+        model.game.SoundManager.getInstance().stopBackgroundMusic();
+        navigateTo("/view/fxml/playerSetup.fxml", "/assets/css/style.css");
+    }
+
+    @FXML
+    private void handleReturnToMenu() {
+        // Home goes to main menu (with confirmation)
+        if (!gameOver) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Return to Menu?");
+            confirm.setHeaderText("You will lose your current game progress!");
+            confirm.setContentText("Return to Main Menu?");
+            java.util.Optional<ButtonType> result = confirm.showAndWait();
+            if (result.isEmpty() || result.get() != ButtonType.OK) return;
+        }
+        model.game.SoundManager.getInstance().stopBackgroundMusic();
+        navigateTo("/view/fxml/mainMenu.fxml", "/assets/css/style.css");
+    }
+
+    private void navigateTo(String fxmlPath, String cssPath) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource(fxmlPath));
+            javafx.scene.Parent root = loader.load();
+
+            javafx.scene.Scene currentScene = mainStack.getScene();
+            javafx.stage.Stage stage = (javafx.stage.Stage) currentScene.getWindow();
+
+            javafx.scene.Scene newScene = new javafx.scene.Scene(root);
+            if (cssPath != null) {
+                java.net.URL css = getClass().getResource(cssPath);
+                if (css != null) newScene.getStylesheets().add(css.toExternalForm());
+            }
+            stage.setScene(newScene);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
