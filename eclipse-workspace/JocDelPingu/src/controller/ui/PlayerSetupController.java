@@ -147,6 +147,9 @@ public class PlayerSetupController {
                     player.setAvatarPath(input.avatarPath[0]);
                 }
                 players.add(player);
+
+                // Guardar/actualizar perfil en BD en el momento de iniciar partida
+                model.game.SaveLoadService.registerPlayer(name, password, color);
             }
         }
 

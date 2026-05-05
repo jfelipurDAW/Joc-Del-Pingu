@@ -170,16 +170,28 @@ public class SaveLoadService {
      * Guarda un nuevo perfil de jugador en la tabla ENTITY.
      */
     public static boolean registerPlayer(String name, String password, String color) {
-        Connection con = null;
         try {
-            con = BBDD.conectarBaseDatos(null);
+            Connection con = BBDD.conectarBaseDatos(null);
             if (con != null) {
-                // El ID puede ser un random o un auto-incremental
-                int id = (int) (Math.random() * 10000); 
-                String sql = "INSERT INTO ENTITY (ENTITYID, ENTITYTYPE, PLAYERNAME, PLAYERPASSWORD, COLOUR) " +
-                             "VALUES (" + id + ", 'PLAYER', '" + name + "', '" + password + "', '" + color + "')";
-                
-                BBDD.insert(con, sql);
+                String safeName     = name.replace("'", "''");
+                String safePassword = (password != null ? password : "").replace("'", "''");
+                String safeColor    = (color != null ? color : "FFFFFF").replace("'", "''");
+                int    newId        = (int)(Math.random() * 900000 + 100000);
+
+                // MERGE: actualiza si el nombre ya existe, inserta si es nuevo
+                String sql =
+                    "MERGE INTO ENTITY e " +
+                    "USING (SELECT '" + safeName + "' AS pname FROM DUAL) src " +
+                    "ON (e.PLAYERNAME = src.pname AND e.ENTITYTYPE = 'PLAYER') " +
+                    "WHEN MATCHED THEN " +
+                    "  UPDATE SET e.PLAYERPASSWORD = '" + safePassword + "', " +
+                    "             e.COLOUR = '" + safeColor + "' " +
+                    "WHEN NOT MATCHED THEN " +
+                    "  INSERT (ENTITYID, ENTITYTYPE, PLAYERNAME, PLAYERPASSWORD, COLOUR) " +
+                    "  VALUES (" + newId + ", 'PLAYER', '" + safeName + "', '" +
+                                   safePassword + "', '" + safeColor + "')";
+
+                BBDD.executeInsUpDel(con, sql, "Merge");
                 BBDD.cerrar(con);
                 return true;
             }
