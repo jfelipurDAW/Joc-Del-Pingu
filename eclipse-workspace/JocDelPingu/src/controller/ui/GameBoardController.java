@@ -1117,12 +1117,12 @@ public class GameBoardController {
 
     public void handleWin(Player winner) {
         gameOver = true;
+        this.winner = winner.getName();
         disableActions();
         model.game.SoundManager.getInstance().stopBackgroundMusic();
         logEvent("🏆 GAME OVER! " + winner.getName() + " HAS WON THE GAME! 🏆");
         drawBoard();
         showWinAnimation(winner);
-        showAlert("🏆 Game Over 🏆", winner.getName() + " has reached the end and won the game!\n\nCongratulations!");
     }
 
     // ============================================
@@ -1168,6 +1168,9 @@ public class GameBoardController {
     }
 
     private void showWinAnimation(Player winner) {
+        // Make overlay interactive for the back button
+        animationOverlay.setMouseTransparent(false);
+
         VBox winBox = new VBox(20);
         winBox.setAlignment(Pos.CENTER);
         winBox.setStyle("-fx-background-color: rgba(0,0,0,0.8); -fx-padding: 50;");
@@ -1177,8 +1180,24 @@ public class GameBoardController {
         
         Label title = new Label(winner.getName() + " WINS!");
         title.setStyle("-fx-font-family: 'Courier New'; -fx-font-size: 60px; -fx-text-fill: gold; -fx-font-weight: bold;");
-        
-        winBox.getChildren().addAll(crown, title);
+
+        Label subtitle = new Label("🎉 Congratulations! 🎉");
+        subtitle.setStyle("-fx-font-size: 24px; -fx-text-fill: #a0d8ef;");
+
+        // Back to Menu button
+        Button backBtn = new Button(model.config.LangConfig.getLang(model.config.Lang.GAME_BACK_TO_MENU));
+        backBtn.getStyleClass().add("nav-btn-home");
+        backBtn.setStyle(
+            "-fx-font-size: 20px; -fx-padding: 12 40; " +
+            "-fx-background-color: linear-gradient(to bottom, #e65c00 0%, #f9d423 100%); " +
+            "-fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"
+        );
+        backBtn.setOnAction(e -> {
+            model.game.SoundManager.getInstance().stopBackgroundMusic();
+            navigateTo("/view/fxml/mainMenu.fxml", "/assets/css/style.css");
+        });
+
+        winBox.getChildren().addAll(crown, title, subtitle, backBtn);
         animationOverlay.getChildren().add(winBox);
         
         ScaleTransition st = new ScaleTransition(Duration.millis(1000), winBox);

@@ -36,6 +36,9 @@ public class MainMenuController {
     private ComboBox<String> language_combobox;
 
     @FXML
+    private Button stats_button;
+
+    @FXML
     private Text titleText;
 
     @FXML
@@ -96,7 +99,7 @@ public class MainMenuController {
             return;
         }
 
-        Image bgImage = new Image(is, 0, 0, true, true); // smooth scaling
+        Image bgImage = new Image(is, 0, 0, true, false); // pixel-perfect scaling
 
         javafx.scene.layout.BackgroundImage backgroundImage = new javafx.scene.layout.BackgroundImage(
                 bgImage,
@@ -163,6 +166,25 @@ public class MainMenuController {
     }
 
     @FXML
+    private void handleStats() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/playerStats.fxml"));
+            Parent statsRoot = loader.load();
+
+            Scene currentScene = rootPane.getScene();
+            Stage stage = (Stage) currentScene.getWindow();
+
+            Scene statsScene = new Scene(statsRoot);
+            statsScene.getStylesheets().add(
+                getClass().getResource("/assets/css/style.css").toExternalForm()
+            );
+            stage.setScene(statsScene);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void handleLoadGame() {
         // 1. Buscamos todas las partidas guardadas en Oracle
         List<String> partidas = model.game.SaveLoadService.getAllSavedGameIds();
@@ -218,6 +240,7 @@ public class MainMenuController {
         titleShadowText.setText(title);
         newGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_NEWGAME));
         loadGame_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_LOADGAME));
+        stats_button.setText((String) LangConfig.getLang(Lang.MENU_BUTTON_STATS));
 
         // Update window title to match selected language
         if (rootPane.getScene() != null && rootPane.getScene().getWindow() instanceof Stage) {

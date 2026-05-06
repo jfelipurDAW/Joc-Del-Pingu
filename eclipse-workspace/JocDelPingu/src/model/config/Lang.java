@@ -33,7 +33,16 @@ public enum Lang {
 
 	GAMESETUP_PLAYER ("gamesetup.player"),
 	GAMESETUP_PLAYERNAME ("gamesetup.playername"),
-	GAMESETUP_PASSWORD ("gamesetup.password");
+	GAMESETUP_PASSWORD ("gamesetup.password"),
+
+	MENU_BUTTON_STATS ("menu.button.stats"),
+	STATS_TITLE ("stats.title"),
+	STATS_PLAYER ("stats.player"),
+	STATS_COLOUR ("stats.colour"),
+	STATS_GAMES_PLAYED ("stats.gamesplayed"),
+	STATS_GAMES_WON ("stats.gameswon"),
+	STATS_NO_DATA ("stats.nodata"),
+	GAME_BACK_TO_MENU ("game.backtomenu");
 
     private final String key;
 

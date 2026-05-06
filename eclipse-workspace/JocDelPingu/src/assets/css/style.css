@@ -5,7 +5,7 @@
 }
 
 .mainmenu_maintitle {
-    -fx-font-family: "Pixel Game";
+    -fx-font-family: "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
     -fx-font-weight: 900;
     -fx-font-size: 100px;
     -fx-fill: #ffffff;
@@ -13,7 +13,7 @@
 }
 
 .mainmenu_title_shadow {
-    -fx-font-family: "Pixel Game Extrude";
+    -fx-font-family: "Pixel Game Extrude", "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
     -fx-font-weight: 900;
     -fx-font-size: 100px;
     -fx-fill: linear-gradient(to right, #f4f4f5 0%, #77bbf3 100%);

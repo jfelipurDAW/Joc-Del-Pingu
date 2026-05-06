@@ -39,6 +39,12 @@
                      </cursor>
                   </Button>
                   
+                  <Button fx:id="stats_button" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleStats" prefHeight="42.0" prefWidth="422.0" styleClass="mainmenu_button_loadgame" text="stats" textFill="WHITE">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  
                   <!-- Changed: replaced Button with ComboBox for language selection dropdown -->
                   <ComboBox fx:id="language_combobox" prefHeight="42.0" prefWidth="220.0" styleClass="mainmenu_language_combo">
                      <cursor>

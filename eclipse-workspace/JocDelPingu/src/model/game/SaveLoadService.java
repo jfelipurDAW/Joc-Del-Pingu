@@ -197,7 +197,9 @@ public class SaveLoadService {
             Connection con = BBDD.conectarBaseDatos(null);
             if (con != null) {
                 String safeName     = name.replace("'", "''");
-                String safePassword = (password != null ? password : "").replace("'", "''");
+                // Encrypt the password before storing
+                String encryptedPwd = CryptoUtil.encrypt(password != null ? password : "");
+                String safePassword = (encryptedPwd != null ? encryptedPwd : "").replace("'", "''");
                 String safeColor    = (color != null ? color : "FFFFFF").replace("'", "''");
                 int    newId        = (int)(Math.random() * 900000 + 100000);
 
@@ -210,9 +212,9 @@ public class SaveLoadService {
                     "  UPDATE SET e.PLAYERPASSWORD = '" + safePassword + "', " +
                     "             e.COLOUR = '" + safeColor + "' " +
                     "WHEN NOT MATCHED THEN " +
-                    "  INSERT (ENTITYID, ENTITYTYPE, PLAYERNAME, PLAYERPASSWORD, COLOUR) " +
+                    "  INSERT (ENTITYID, ENTITYTYPE, PLAYERNAME, PLAYERPASSWORD, COLOUR, GAMES_PLAYED, GAMES_WON) " +
                     "  VALUES (" + newId + ", 'PLAYER', '" + safeName + "', '" +
-                                   safePassword + "', '" + safeColor + "')";
+                                   safePassword + "', '" + safeColor + "', 0, 0)";
 
                 BBDD.executeInsUpDel(con, sql, "Merge");
                 BBDD.cerrar(con);
@@ -225,7 +227,61 @@ public class SaveLoadService {
     }
 
     /**
+     * Verifies a player's password against the encrypted value stored in the DB.
+     * Returns true if the password matches, false otherwise.
+     */
+    public static boolean verifyPassword(String playerName, String inputPassword) {
+        try {
+            Connection con = BBDD.conectarBaseDatos(null);
+            if (con != null) {
+                String safeName = playerName.replace("'", "''");
+                String sql = "SELECT PLAYERPASSWORD FROM ENTITY WHERE PLAYERNAME = '" + safeName + "' AND ENTITYTYPE = 'PLAYER'";
+                java.util.ArrayList<java.util.LinkedHashMap<String, String>> result = BBDD.select(con, sql);
+                BBDD.cerrar(con);
+
+                if (!result.isEmpty()) {
+                    String storedEncrypted = result.get(0).get("PLAYERPASSWORD");
+                    if (storedEncrypted == null || storedEncrypted.isEmpty()) {
+                        // No password set — allow if input is also empty
+                        return (inputPassword == null || inputPassword.isEmpty());
+                    }
+                    String decrypted = CryptoUtil.decrypt(storedEncrypted);
+                    return inputPassword != null && inputPassword.equals(decrypted);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Player not found in DB — this is a new player, allow
+        return true;
+    }
+
+    /**
+     * Retrieves player statistics from the database.
+     * Returns a list of maps with keys: PLAYERNAME, COLOUR, GAMES_PLAYED, GAMES_WON.
+     */
+    public static java.util.ArrayList<java.util.LinkedHashMap<String, String>> getPlayerStats() {
+        java.util.ArrayList<java.util.LinkedHashMap<String, String>> stats = new java.util.ArrayList<>();
+        try {
+            Connection con = BBDD.conectarBaseDatos(null);
+            if (con != null) {
+                String sql = "SELECT PLAYERNAME, COLOUR, " +
+                             "NVL(GAMES_PLAYED, 0) AS GAMES_PLAYED, " +
+                             "NVL(GAMES_WON, 0) AS GAMES_WON " +
+                             "FROM ENTITY WHERE ENTITYTYPE = 'PLAYER' " +
+                             "ORDER BY GAMES_WON DESC, GAMES_PLAYED DESC";
+                stats = BBDD.select(con, sql);
+                BBDD.cerrar(con);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return stats;
+    }
+
+    /**
      * Recupera todos los jugadores registrados para poder elegirlos.
+     * Passwords are decrypted from the DB for in-memory use.
      */
     public static List<Player> getRegisteredPlayers() {
         List<Player> players = new ArrayList<>();
@@ -238,7 +294,9 @@ public class SaveLoadService {
                 BBDD.cerrar(con);
 
                 for (java.util.LinkedHashMap<String, String> row : result) {
-                    Player p = new Player(row.get("PLAYERNAME"), row.get("COLOUR"), row.get("PLAYERPASSWORD"));
+                    String encPwd = row.get("PLAYERPASSWORD");
+                    String decPwd = (encPwd != null && !encPwd.isEmpty()) ? CryptoUtil.decrypt(encPwd) : "";
+                    Player p = new Player(row.get("PLAYERNAME"), row.get("COLOUR"), decPwd);
                     players.add(p);
                 }
             }

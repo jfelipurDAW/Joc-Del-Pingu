@@ -141,6 +141,14 @@ public class PlayerSetupController {
             String color = input.colorPicker.getValue().toString().substring(2, 8).toUpperCase();
 
             if (!name.isEmpty() && !color.isEmpty()) {
+                // Verify password against DB for existing players
+                if (!model.game.SaveLoadService.verifyPassword(name, password)) {
+                    mostrarAlerta("Wrong Password",
+                        "The password for player '" + name + "' does not match the registered account.\n" +
+                        "Please enter the correct password or choose a different name.");
+                    return;
+                }
+
                 Player player = new Player(name, color);
                 player.setPassword(password);
                 if (input.avatarPath[0] != null) {
@@ -148,7 +156,7 @@ public class PlayerSetupController {
                 }
                 players.add(player);
 
-                // Guardar/actualizar perfil en BD en el momento de iniciar partida
+                // Register/update player profile in DB
                 model.game.SaveLoadService.registerPlayer(name, password, color);
             }
         }

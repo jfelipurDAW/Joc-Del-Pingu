@@ -45,13 +45,15 @@ public class BBDD {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			Connection con = DriverManager.getConnection(url, user, pwd);
 			if (con.isValid(5)) {
-				// Conectados
+				System.out.println("Database connection established successfully.");
 			}
 			return con;
 		} catch (ClassNotFoundException e) {
-			// error loading driver
+			System.err.println("Oracle JDBC driver not found. Make sure ojdbc is in the classpath.");
+			e.printStackTrace();
 		} catch (SQLException e) {
-			// error connecting
+			System.err.println("Failed to connect to database at: " + url);
+			System.err.println("SQL Error: " + e.getMessage());
 		}
 		return null;
 	}
@@ -134,7 +136,7 @@ public class BBDD {
 			}
 
 		} catch (SQLException e) {
-			// Error managed downstream
+			System.err.println("SELECT error: " + e.getMessage());
 		}
 
 		return resultados;
@@ -192,6 +194,7 @@ public class BBDD {
 			int filas = st.executeUpdate(sql);
 			return filas;
 		} catch (SQLException e) {
+			System.err.println(etiqueta + " error: " + e.getMessage());
 			return 0;
 		}
 	}

@@ -55,6 +55,21 @@ public class MainMenu extends Application {
         //  Allow Rescale
         primaryStage.setResizable(true);
 
+        // Fix: Store dimensions before fullscreen and restore on exit
+        final double[] savedDimensions = { 800, 600 };
+        primaryStage.fullScreenProperty().addListener((obs, wasFullScreen, isFullScreen) -> {
+            if (isFullScreen) {
+                // Save current dimensions before going fullscreen
+                savedDimensions[0] = primaryStage.getWidth();
+                savedDimensions[1] = primaryStage.getHeight();
+            } else {
+                // Restore saved dimensions when exiting fullscreen
+                primaryStage.setWidth(savedDimensions[0]);
+                primaryStage.setHeight(savedDimensions[1]);
+                primaryStage.centerOnScreen();
+            }
+        });
+
         primaryStage.setTitle((String) LangConfig.getLang(Lang.TEXT_GAME_TITLE));
         primaryStage.centerOnScreen();
         primaryStage.show();
