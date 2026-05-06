@@ -161,4 +161,18 @@ public class Board {
 	 public void setSquares(Square[] squares) {
 		 this.squares = squares;
 	 }
+
+	 /**
+	  * Converts a BROKEN_FLOOR square to an ICE_HOLE once a player falls through it.
+	  * The new hole is inserted into IceHole_Array in sorted order so getDestination()
+	  * continues to work correctly (holes link in ascending-index order).
+	  */
+	 public void convertBrokenFloorToIceHole(int squareIndex) {
+		 board[squareIndex] = new S_IceHole(SquareType.ICE_HOLE);
+		 board[squareIndex].setSquareID(squareIndex);
+		 if (!IceHole_Array.contains(squareIndex)) {
+			 IceHole_Array.add(squareIndex);
+			 java.util.Collections.sort(IceHole_Array);
+		 }
+	 }
 }

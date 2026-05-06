@@ -42,7 +42,23 @@ public enum Lang {
 	STATS_GAMES_PLAYED ("stats.gamesplayed"),
 	STATS_GAMES_WON ("stats.gameswon"),
 	STATS_NO_DATA ("stats.nodata"),
-	GAME_BACK_TO_MENU ("game.backtomenu");
+	GAME_BACK_TO_MENU ("game.backtomenu"),
+
+	GAMESETUP_BUTTON_BACK           ("gamesetup.button.back"),
+	GAMESETUP_BUTTON_SELECTPLAYER   ("gamesetup.button.selectplayer"),
+	GAMESETUP_CHOOSEAVATAR          ("gamesetup.chooseavatar"),
+	GAMESETUP_AVATARSELECTED        ("gamesetup.avatarselected"),
+	GAMESETUP_FILECHOOSER_TITLE     ("gamesetup.filechooser.title"),
+
+	ALERT_WRONGPASSWORD_TITLE   ("alert.wrongpassword.title"),
+	ALERT_WRONGPASSWORD_MESSAGE ("alert.wrongpassword.message"),
+	ALERT_NOPLAYERS_TITLE       ("alert.noplayers.title"),
+	ALERT_NOPLAYERS_MESSAGE     ("alert.noplayers.message"),
+	ALERT_FULL_TITLE            ("alert.full.title"),
+	ALERT_FULL_MESSAGE          ("alert.full.message"),
+
+	DIALOG_SELECTPLAYER_TITLE  ("dialog.selectplayer.title"),
+	DIALOG_SELECTPLAYER_HEADER ("dialog.selectplayer.header");
 
     private final String key;
 

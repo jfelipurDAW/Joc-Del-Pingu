@@ -99,40 +99,47 @@ public class SaveLoadService {
             
             Connection con = BBDD.conectarBaseDatos(null);
             if (con != null) {
-                // Usamos MERGE o una comprobación para no duplicar si el nombre ya existe
                 String sql = "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES ('" + safeName + "', '" + encrypted + "')";
-                
                 BBDD.insert(con, sql);
-
-             // Insertar partida en GAME y actualizar estadísticas
-             String sqlGame = "INSERT INTO GAME (GAMESTATE, GAMEDATE, BOARDID) VALUES ('FINISHED', SYSDATE, 1)";
-             BBDD.insert(con, sqlGame);
-
-             // Incrementar GAMES_PLAYED a todos los jugadores
-             for (Entity e : turnController.getAllPlayers()) {
-                 if (e instanceof Player) {
-                     String safePName = ((Player) e).getName().replace("'", "''");
-                     String sqlPlayed = "UPDATE ENTITY SET GAMES_PLAYED = GAMES_PLAYED + 1 " +
-                                        "WHERE PLAYERNAME = '" + safePName + "' AND ENTITYTYPE = 'PLAYER'";
-                     BBDD.update(con, sqlPlayed);
-                 }
-             }
-
-             // Incrementar GAMES_WON al ganador (dispara el trigger automáticamente)
-             if (winner != null && !winner.isEmpty()) {
-                 String safeWinner = winner.replace("'", "''");
-                 String sqlWon = "UPDATE ENTITY SET GAMES_WON = GAMES_WON + 1 " +
-                                 "WHERE PLAYERNAME = '" + safeWinner + "' AND ENTITYTYPE = 'PLAYER'";
-                 BBDD.update(con, sqlWon);
-             }
-
-             BBDD.cerrar(con);
-             return true;
+                BBDD.cerrar(con);
+                return true;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * Records the result of a completed game: inserts a GAME row and increments
+     * GAMES_PLAYED for every player, plus GAMES_WON for the winner.
+     * Pass null/empty winnerName when no player wins (e.g. seal victory).
+     */
+    public static void recordGameResult(java.util.List<Entity> allPlayers, String winnerName) {
+        try {
+            Connection con = BBDD.conectarBaseDatos(null);
+            if (con != null) {
+                BBDD.insert(con, "INSERT INTO GAME (GAMESTATE, GAMEDATE, BOARDID) VALUES ('FINISHED', SYSDATE, 1)");
+
+                for (Entity e : allPlayers) {
+                    if (e instanceof Player) {
+                        String safeName = ((Player) e).getName().replace("'", "''");
+                        BBDD.update(con, "UPDATE ENTITY SET GAMES_PLAYED = GAMES_PLAYED + 1 " +
+                            "WHERE PLAYERNAME = '" + safeName + "' AND ENTITYTYPE = 'PLAYER'");
+                    }
+                }
+
+                if (winnerName != null && !winnerName.isEmpty()) {
+                    String safeWinner = winnerName.replace("'", "''");
+                    BBDD.update(con, "UPDATE ENTITY SET GAMES_WON = GAMES_WON + 1 " +
+                        "WHERE PLAYERNAME = '" + safeWinner + "' AND ENTITYTYPE = 'PLAYER'");
+                }
+
+                BBDD.cerrar(con);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static boolean loadGame(String gameId) {
@@ -152,7 +159,6 @@ public class SaveLoadService {
             Yaml yaml = new Yaml();
             Map<String, Object> state = yaml.load(yamlString);
 
-            model.config.GameSetupConfig.setLoadedGame(true);
             model.config.GameSetupConfig.setLoadedBoardState((List<String>) state.get("board"));
             model.config.GameSetupConfig.setLoadedTurnIndex(((Number) state.get("currentTurn")).intValue());
 
@@ -182,6 +188,8 @@ public class SaveLoadService {
                 model.config.GameSetupConfig.setSealEnabled(false);
             }
 
+            // Only mark as loaded game after ALL data has been successfully populated
+            model.config.GameSetupConfig.setLoadedGame(true);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -201,7 +209,13 @@ public class SaveLoadService {
                 String encryptedPwd = CryptoUtil.encrypt(password != null ? password : "");
                 String safePassword = (encryptedPwd != null ? encryptedPwd : "").replace("'", "''");
                 String safeColor    = (color != null ? color : "FFFFFF").replace("'", "''");
-                int    newId        = (int)(Math.random() * 900000 + 100000);
+                // Derive the next ID from the current max so we stay within the column's precision.
+                int newId = 1;
+                java.util.ArrayList<java.util.LinkedHashMap<String, String>> maxResult =
+                    BBDD.select(con, "SELECT NVL(MAX(ENTITYID), 0) + 1 AS NEXTID FROM ENTITY");
+                if (!maxResult.isEmpty()) {
+                    newId = Integer.parseInt(maxResult.get(0).get("NEXTID"));
+                }
 
                 // MERGE: actualiza si el nombre ya existe, inserta si es nuevo
                 String sql =

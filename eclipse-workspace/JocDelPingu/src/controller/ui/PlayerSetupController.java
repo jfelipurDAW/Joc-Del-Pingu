@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -15,7 +16,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import java.io.File;
 import java.util.ArrayList;
@@ -28,26 +28,16 @@ import model.config.LangConfig;
 
 public class PlayerSetupController {
 
-    @FXML
-    private StackPane rootPane;
-
-    @FXML
-    private ComboBox<Integer> numPlayersCombo;
-
-    @FXML
-    private CheckBox sealCheckBox;
-
-    @FXML
-    private VBox playersContainer;
-    
-    @FXML
-    private Label player_number_select;
-
-    @FXML
-    private Label enable_seal_checkbox;
-
-    @FXML
-    private Text titleText;
+    @FXML private StackPane rootPane;
+    @FXML private ComboBox<Integer> numPlayersCombo;
+    @FXML private CheckBox sealCheckBox;
+    @FXML private VBox playersContainer;
+    @FXML private Label player_number_select;
+    @FXML private Label enable_seal_checkbox;
+    @FXML private Text titleText;
+    @FXML private Button backButton;
+    @FXML private Button selectExistingButton;
+    @FXML private Button startGameButton;
 
     private List<PlayerInput> playerInputs = new ArrayList<>();
 
@@ -55,15 +45,13 @@ public class PlayerSetupController {
     public void initialize() {
         LangConfig.addLanguageChangeListener(this::refreshTexts);
         refreshTexts();
-        
+
         numPlayersCombo.getItems().addAll(1, 2, 3, 4);
-        numPlayersCombo.setValue(2); // Default to 2 players
-        sealCheckBox.setSelected(false); // Default seal unchecked
+        numPlayersCombo.setValue(2);
+        sealCheckBox.setSelected(false);
 
         numPlayersCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                updatePlayerFields(newVal);
-            }
+            if (newVal != null) updatePlayerFields(newVal);
         });
 
         updatePlayerFields(2);
@@ -99,7 +87,6 @@ public class PlayerSetupController {
         javafx.scene.control.ColorPicker colorPicker = new javafx.scene.control.ColorPicker(javafx.scene.paint.Color.RED);
         colorPicker.setPrefWidth(200);
 
-        // Workaround for color picker minimizing issue
         colorPicker.setOnAction((javafx.event.ActionEvent event) -> {
             if (rootPane != null) rootPane.requestFocus();
         });
@@ -107,32 +94,32 @@ public class PlayerSetupController {
             if (rootPane != null) rootPane.requestFocus();
         });
 
-        // Avatar Selection
-        Button avatarBtn = new Button("Choose Avatar Image");
+        Button avatarBtn = new Button(LangConfig.getLang(Lang.GAMESETUP_CHOOSEAVATAR));
         avatarBtn.setPrefWidth(200);
         avatarBtn.getStyleClass().add("player-setup-field");
         final String[] avatarPath = new String[1];
-        
+
         avatarBtn.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Select Avatar Image");
+            fileChooser.setTitle(LangConfig.getLang(Lang.GAMESETUP_FILECHOOSER_TITLE));
             fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
             );
             File selectedFile = fileChooser.showOpenDialog(rootPane.getScene().getWindow());
             if (selectedFile != null) {
                 avatarPath[0] = selectedFile.toURI().toString();
-                avatarBtn.setText("Avatar Selected");
+                avatarBtn.setText(LangConfig.getLang(Lang.GAMESETUP_AVATARSELECTED));
             }
         });
 
         playerVBox.getChildren().addAll(label, nameField, passwordField, colorPicker, avatarBtn);
 
-        return new PlayerInput(playerNumber, nameField, passwordField, colorPicker, avatarPath, playerVBox);
+        return new PlayerInput(playerNumber, nameField, passwordField, colorPicker, avatarPath, avatarBtn, playerVBox);
     }
 
     @FXML
     private void handleStartGame() {
+        GameSetupConfig.setLoadedGame(false);
         List<Player> players = new ArrayList<>();
 
         for (PlayerInput input : playerInputs) {
@@ -141,11 +128,11 @@ public class PlayerSetupController {
             String color = input.colorPicker.getValue().toString().substring(2, 8).toUpperCase();
 
             if (!name.isEmpty() && !color.isEmpty()) {
-                // Verify password against DB for existing players
-                if (!model.game.SaveLoadService.verifyPassword(name, password)) {
-                    mostrarAlerta("Wrong Password",
-                        "The password for player '" + name + "' does not match the registered account.\n" +
-                        "Please enter the correct password or choose a different name.");
+                if (!SaveLoadService.verifyPassword(name, password)) {
+                    mostrarAlerta(
+                        LangConfig.getLang(Lang.ALERT_WRONGPASSWORD_TITLE),
+                        String.format(LangConfig.getLang(Lang.ALERT_WRONGPASSWORD_MESSAGE), name)
+                    );
                     return;
                 }
 
@@ -156,161 +143,150 @@ public class PlayerSetupController {
                 }
                 players.add(player);
 
-                // Register/update player profile in DB
-                model.game.SaveLoadService.registerPlayer(name, password, color);
+                SaveLoadService.registerPlayer(name, password, color);
             }
         }
 
         if (players.isEmpty()) {
-            System.out.println("No valid players entered!");
             return;
         }
 
-        // Store configuration
         GameSetupConfig.setPlayers(players);
         GameSetupConfig.setSealEnabled(sealCheckBox.isSelected());
 
-        // Load gameBoard.fxml
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/gameBoard.fxml"));
             Parent gameBoardRoot = loader.load();
-
-            Scene currentScene = rootPane.getScene();
-            Stage stage = (Stage) currentScene.getWindow();
-
-            Scene gameScene = new Scene(gameBoardRoot);
-            stage.setScene(gameScene);
-
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            stage.setScene(new Scene(gameBoardRoot));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Inner class for player input management
     private static class PlayerInput {
         int playerNumber;
         TextField nameField;
         PasswordField passwordField;
         javafx.scene.control.ColorPicker colorPicker;
         String[] avatarPath;
+        Button avatarBtn;
         VBox vbox;
 
-        PlayerInput(int playerNumber, TextField nameField, PasswordField passwordField, javafx.scene.control.ColorPicker colorPicker, String[] avatarPath, VBox vbox) {
+        PlayerInput(int playerNumber, TextField nameField, PasswordField passwordField,
+                    javafx.scene.control.ColorPicker colorPicker, String[] avatarPath,
+                    Button avatarBtn, VBox vbox) {
             this.playerNumber = playerNumber;
             this.nameField = nameField;
             this.passwordField = passwordField;
             this.colorPicker = colorPicker;
             this.avatarPath = avatarPath;
+            this.avatarBtn = avatarBtn;
             this.vbox = vbox;
         }
 
-        VBox getVBox() {
-            return vbox;
-        }
+        VBox getVBox() { return vbox; }
     }
 
-    /**
-     * Refreshes all texts dynamically when the language changes.
-     */
     private void refreshTexts() {
-        titleText.setText((String) LangConfig.getLang(Lang.TEXT_SETUP_TITLE));
-        player_number_select.setText((String) LangConfig.getLang(Lang.GAMESETUP_TEXT_PLAYERNUMBER));
-        enable_seal_checkbox.setText((String) LangConfig.getLang(Lang.GAMESETUP_TEXT_ENABLESEAL));
-        
+        titleText.setText(LangConfig.getLang(Lang.TEXT_SETUP_TITLE));
+        player_number_select.setText(LangConfig.getLang(Lang.GAMESETUP_TEXT_PLAYERNUMBER));
+        enable_seal_checkbox.setText(LangConfig.getLang(Lang.GAMESETUP_TEXT_ENABLESEAL));
+
+        if (backButton != null)
+            backButton.setText(LangConfig.getLang(Lang.GAMESETUP_BUTTON_BACK));
+        if (selectExistingButton != null)
+            selectExistingButton.setText(LangConfig.getLang(Lang.GAMESETUP_BUTTON_SELECTPLAYER));
+        if (startGameButton != null)
+            startGameButton.setText(LangConfig.getLang(Lang.TEXT_GAME_STARTGAME));
+
         for (PlayerInput input : playerInputs) {
-            if (input.vbox.getChildren().size() > 0) {
+            if (!input.vbox.getChildren().isEmpty()) {
                 javafx.scene.Node node = input.vbox.getChildren().get(0);
                 if (node instanceof Label) {
                     ((Label) node).setText(LangConfig.getLang(Lang.GAMESETUP_PLAYER) + " " + input.playerNumber);
                 }
-                input.nameField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PLAYERNAME));
-                input.passwordField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PASSWORD));
+            }
+            input.nameField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PLAYERNAME));
+            input.passwordField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PASSWORD));
+            if (input.avatarPath[0] == null) {
+                input.avatarBtn.setText(LangConfig.getLang(Lang.GAMESETUP_CHOOSEAVATAR));
             }
         }
     }
- // Añade este import arriba del todo si te marca error en Collectors
-    // import java.util.stream.Collectors;
 
     @FXML
     private void handleSelectExistingPlayer() {
-        // 1. Obtenemos los jugadores de la base de datos
-        java.util.List<Player> existentes = model.game.SaveLoadService.getRegisteredPlayers();
-        
+        List<Player> existentes = SaveLoadService.getRegisteredPlayers();
+
         if (existentes.isEmpty()) {
-            mostrarAlerta("No hay jugadores", "Debes crear un jugador nuevo primero.");
+            mostrarAlerta(
+                LangConfig.getLang(Lang.ALERT_NOPLAYERS_TITLE),
+                LangConfig.getLang(Lang.ALERT_NOPLAYERS_MESSAGE)
+            );
             return;
         }
 
-        // 2. Creamos una lista de nombres para el diálogo
-        java.util.List<String> nombres = existentes.stream().map(Player::getName).collect(java.util.stream.Collectors.toList());
+        List<String> nombres = existentes.stream().map(Player::getName).collect(Collectors.toList());
 
-        javafx.scene.control.ChoiceDialog<String> dialog = new javafx.scene.control.ChoiceDialog<>(nombres.get(0), nombres);
-        dialog.setTitle("Elegir Jugador");
-        dialog.setHeaderText("Selecciona tu perfil de Pingüino:");
-        
+        javafx.scene.control.ChoiceDialog<String> dialog =
+            new javafx.scene.control.ChoiceDialog<>(nombres.get(0), nombres);
+        dialog.setTitle(LangConfig.getLang(Lang.DIALOG_SELECTPLAYER_TITLE));
+        dialog.setHeaderText(LangConfig.getLang(Lang.DIALOG_SELECTPLAYER_HEADER));
+
         java.util.Optional<String> result = dialog.showAndWait();
 
         result.ifPresent(nombreSeleccionado -> {
             for (Player p : existentes) {
                 if (p.getName().equals(nombreSeleccionado)) {
-                    
-                    // SOLUCIÓN: Buscamos el primer hueco de jugador que esté vacío en la pantalla
                     boolean asignado = false;
                     for (PlayerInput input : playerInputs) {
                         if (input.nameField.getText().trim().isEmpty()) {
-                            // Rellenamos los campos visualmente
                             input.nameField.setText(p.getName());
                             if (p.getPassword() != null) {
                                 input.passwordField.setText(p.getPassword());
                             }
-                            
-                            // Ponemos el color que tenía guardado
                             try {
                                 input.colorPicker.setValue(javafx.scene.paint.Color.web("#" + p.getColour()));
                             } catch (Exception e) {
-                                // Ignorar si el color guardado era inválido
+                                // ignore invalid stored color
                             }
-                            
                             asignado = true;
-                            System.out.println("Jugador " + p.getName() + " cargado en el formulario.");
-                            break; // Rompemos el bucle para que solo llene un hueco
+                            break;
                         }
                     }
-                    
+
                     if (!asignado) {
-                        mostrarAlerta("Lleno", "Ya has rellenado todos los huecos de jugador.");
+                        mostrarAlerta(
+                            LangConfig.getLang(Lang.ALERT_FULL_TITLE),
+                            LangConfig.getLang(Lang.ALERT_FULL_MESSAGE)
+                        );
                     }
                 }
             }
         });
     }
 
-	private void mostrarAlerta(String string, String string2) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-        alert.setTitle(string);
+    private void mostrarAlerta(String title, String message) {
+        javafx.scene.control.Alert alert =
+            new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText(string2);
+        alert.setContentText(message);
         alert.showAndWait();
-	}
-
-    // ===== NAVIGATION =====
+    }
 
     @FXML
     private void handleBack() {
         navigateToMainMenu();
     }
 
-
-
-
     private void navigateToMainMenu() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/mainMenu.fxml"));
             Parent mainMenuRoot = loader.load();
-
             Scene currentScene = rootPane.getScene();
             Stage stage = (Stage) currentScene.getWindow();
-
             Scene menuScene = new Scene(mainMenuRoot);
             menuScene.getStylesheets().add(
                 getClass().getResource("/assets/css/style.css").toExternalForm()

@@ -74,7 +74,9 @@ public class BoardManager {
     private ActionResult handleBrokenFloor(Player player, Board board) {
         int totalItems = player.getInventory().getTotalItemCount();
         if (totalItems > 5) {
+            int brokenSquare = player.getSquareIndex();
             player.setSquare(0);
+            board.convertBrokenFloorToIceHole(brokenSquare);
             ActionResult res = new ActionResult(ActionResult.ActionType.BROKEN_FLOOR_FALL, player.getName());
             res.setValue(totalItems);
             return res;
