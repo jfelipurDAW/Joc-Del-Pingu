@@ -6,39 +6,6 @@ import model.entity.Seal;
 import model.item.ObjectType;
 
 public class PlayerManager {
-    
-    public static class SnowballWarResult {
-        private final Player winner;
-        private final Player loser;
-        private final int winnerBalls;
-        private final int loserBalls;
-        private final int difference;
-        
-        public SnowballWarResult(Player winner, Player loser, int winnerBalls, int loserBalls, int difference) {
-            this.winner = winner;
-            this.loser = loser;
-            this.winnerBalls = winnerBalls;
-            this.loserBalls = loserBalls;
-            this.difference = difference;
-        }
-        
-        public Player getWinner() { return winner; }
-        public Player getLoser() { return loser; }
-        public int getWinnerBalls() { return winnerBalls; }
-        public int getLoserBalls() { return loserBalls; }
-        public int getDifference() { return difference; }
-        public boolean isTie() { return winner == null; }
-        
-        @Override
-        public String toString() {
-            if (isTie()) {
-                return "It's a tie! (" + winnerBalls + " vs " + loserBalls + ") Both spend all snowballs. No one retreats.";
-            } else {
-                return winner.getName() + " wins! (" + winnerBalls + " vs " + loserBalls + ") " + 
-                       loser.getName() + " retreats " + difference + " squares!";
-            }
-        }
-    }
 
     public ActionResult movePlayer(Player player, int steps, Board board) {
         int newPos = player.getSquareIndex() + steps;

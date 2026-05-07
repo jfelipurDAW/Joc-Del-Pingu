@@ -1,16 +1,12 @@
 package model.game;
-import java.util.Base64;
-import java.sql.Connection;
-import java.util.ArrayList;
-import model.db.BBDD;
 
 import model.board.Board;
 import model.entity.Player;
 import model.entity.Seal;
+
 public class GameManager {
-    
+
     private String gameId;
-    private int numPlayers;
     private boolean isActive;
 
     private Board board;
@@ -23,24 +19,23 @@ public class GameManager {
     // Constructor
     public GameManager(String gameId, int numPlayers) {
         this.gameId = gameId;
-        this.numPlayers = numPlayers;
-        this.isActive = false; 
+        this.isActive = false;
         this.boardManager = new BoardManager();
         this.playerManager = new PlayerManager();
         this.game = new Game();
     }
 
-    public void setBoard(Board board) { 
-        this.board = board; 
+    public void setBoard(Board board) {
+        this.board = board;
         this.game.setBoard(board);
     }
-    
-    public void setTurnController(TurnController turnController) { 
-        this.turnController = turnController; 
+
+    public void setTurnController(TurnController turnController) {
+        this.turnController = turnController;
     }
-    
-    public void setSeal(Seal seal) { 
-        this.seal = seal; 
+
+    public void setSeal(Seal seal) {
+        this.seal = seal;
         this.game.setSeal(seal);
     }
 
@@ -64,21 +59,19 @@ public class GameManager {
     }
 
     public boolean saveGame() {
-        String winner = null;
-		return SaveLoadService.saveGame(gameId, board, turnController, seal, winner);
+        return SaveLoadService.saveGame(gameId, board, turnController, seal, null);
     }
-    
+
     public boolean loadGame() {
         return SaveLoadService.loadGame(gameId);
     }
 
     public boolean isGameOver() {
-        return game.isGameOver() || (turnController != null && turnController.isGameWon());
+        return game.isGameOver();
     }
 
     public Player getWinner() {
-        if (game.getWinner() != null) return game.getWinner();
-        return turnController != null ? turnController.getWinner() : null;
+        return game.getWinner();
     }
 
     public Player getCurrentPlayer() {
@@ -87,11 +80,11 @@ public class GameManager {
         }
         return null;
     }
-    
+
     public PlayerManager getPlayerManager() {
         return playerManager;
     }
-    
+
     public BoardManager getBoardManager() {
         return boardManager;
     }

@@ -81,6 +81,15 @@ public class BoardManager {
             res.setValue(totalItems);
             return res;
         } else if (totalItems > 0) {
+            // Spec: additional events on broken floor → lose a turn OR lose a random object
+            // 50/50 split keeps the original behaviour viable while covering both outcomes.
+            if (Math.random() < 0.5) {
+                model.item.ObjectType lost = player.getInventory().removeRandomItem();
+                ActionResult res = new ActionResult(ActionResult.ActionType.BROKEN_FLOOR_LOSE_ITEM, player.getName());
+                res.setValue(totalItems);
+                res.setEventMessage(lost != null ? lost.name() : null);
+                return res;
+            }
             player.setSkipNextTurn(true);
             ActionResult res = new ActionResult(ActionResult.ActionType.BROKEN_FLOOR_CRACK, player.getName());
             res.setValue(totalItems);

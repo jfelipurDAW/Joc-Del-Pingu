@@ -72,26 +72,29 @@ public class EventManager {
      * @param player The player who landed on the event square
      * @param board The game board (needed for snowmobile/sled lookup)
      * @return EventResult describing what happened
+     *
+     * Spec compliance:
+     *   - SLOW_DICE  → highest probability  (30%)
+     *   - FAST_DICE  → low probability      (8%)
+     *   - SNOWMOBILE → rare extra event     (5%)
+     * Total = 100%.
      */
     public static EventResult triggerEvent(Player player, Board board) {
-        // Weighted random selection:
-        // Fish: 20%, Snowballs: 25%, FastDice: 10%, SlowDice: 20%, 
-        // LoseTurn: 10%, LoseItem: 10%, Snowmobile: 5%
         int roll = random.nextInt(100);
-        
-        if (roll < 20) {
-            return handleGetFish(player);
-        } else if (roll < 45) {
-            return handleGetSnowballs(player);
-        } else if (roll < 55) {
-            return handleGetFastDice(player);
-        } else if (roll < 75) {
+
+        if (roll < 30) {                // 30% — highest, "alta probabilitat"
             return handleGetSlowDice(player);
-        } else if (roll < 85) {
+        } else if (roll < 50) {         // 20%
+            return handleGetSnowballs(player);
+        } else if (roll < 65) {         // 15%
+            return handleGetFish(player);
+        } else if (roll < 77) {         // 12%
             return handleLoseTurn(player);
-        } else if (roll < 95) {
+        } else if (roll < 87) {         // 10%
             return handleLoseItem(player);
-        } else {
+        } else if (roll < 95) {         // 8%  — "baixa probabilitat"
+            return handleGetFastDice(player);
+        } else {                        // 5%
             return handleSnowmobile(player, board);
         }
     }

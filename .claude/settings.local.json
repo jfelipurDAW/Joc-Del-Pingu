@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find src *)",
+      "Read(//tmp/**)",
+      "Bash(javac -version)"
+    ]
+  }
+}

@@ -1,8 +1,14 @@
-/* ===================================
-   PINGU'S GAME - ARCTIC THEME CSS
-   =================================== */
+/* =================================================================
+   PINGU'S GAME — GAME-BOARD PIXEL-ART THEME
+   All action buttons share the same chunky pixel-art skeleton:
+     - dark wine outer border (#2c1535)
+     - cyan-tinted top band
+     - colored body gradient
+     - dark bottom shadow band
+     - Pixel Game font, square corners
+   Each variant only changes the body palette.
+   ================================================================= */
 
-/* Root */
 .root {
     -fx-font-family: "FS Pixel Sans Unicode Regular", "Segoe UI", "Arial", sans-serif;
     -fx-background-color: #b4e4e8;
@@ -34,14 +40,13 @@
     -fx-font-weight: bold;
 }
 
-/* ===== BOARD CONTAINER (1:1 Square, Responsive) ===== */
+/* ===== BOARD CONTAINER ===== */
 .board-container {
     -fx-background-color: transparent;
     -fx-border-width: 0;
     -fx-padding: 0;
 }
 
-/* ===== GAME GRID ===== */
 .game-grid {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
@@ -49,7 +54,7 @@
     -fx-border-width: 0;
 }
 
-/* ===== SQUARE STYLES ===== */
+/* ===== SQUARES ===== */
 .square {
     -fx-background-color: transparent;
     -fx-border-width: 0;
@@ -60,55 +65,43 @@
     -fx-max-height: Infinity;
 }
 
-.square-normal {
-    -fx-background-color: linear-gradient(to bottom right, #8abdff, #71b3ff);
-}
-
+.square-normal       { -fx-background-color: linear-gradient(to bottom right, #8abdff, #71b3ff); }
 .square-ice-hole {
     -fx-background-color: linear-gradient(to bottom right, #55beff, #9ad7ff);
     -fx-border-color: rgb(160, 217, 255);
     -fx-border-width: 1;
 }
-
 .square-sled {
     -fx-background-color: linear-gradient(to bottom right, #c9c6c3ec, #808080);
     -fx-border-color: rgba(152, 165, 168, 0.884);
     -fx-border-width: 1;
 }
-
 .square-bear {
     -fx-background-color: linear-gradient(to bottom right, #7b3f00, #682b0f);
     -fx-border-color: rgba(126, 50, 25, 0.6);
     -fx-border-width: 1;
 }
-
 .square-event {
     -fx-background-color: linear-gradient(to bottom right, #8b7500, #b8960f);
     -fx-border-color: rgba(0, 81, 255, 0.6);
     -fx-border-width: 1;
 }
-
 .square-broken-floor {
     -fx-background-color: linear-gradient(to bottom right, #1980f5, #6a88ee);
     -fx-border-color: rgba(156, 39, 176, 0.5);
     -fx-border-width: 1;
 }
-
 .square-start {
     -fx-background-color: linear-gradient(to bottom right, #1b5e20, #2e7d32);
     -fx-border-color: rgba(76, 175, 80, 0.7);
     -fx-border-width: 2;
 }
-
 .square-end {
     -fx-background-color: linear-gradient(to bottom right, #b71c1c, #e53935);
     -fx-border-color: rgba(255, 215, 0, 0.8);
     -fx-border-width: 2;
 }
-
-.square-number {
-    -fx-padding: 1 2;
-}
+.square-number { -fx-padding: 1 2; }
 
 /* ===== RIGHT PANEL ===== */
 .right-panel {
@@ -128,14 +121,8 @@
     -fx-border-width: 1;
 }
 
-.player-name {
-    -fx-font-weight: bold;
-}
-
-.player-square {
-    -fx-text-fill: #a0c4ff;
-    -fx-font-size: 12;
-}
+.player-name { -fx-font-weight: bold; }
+.player-square { -fx-text-fill: #a0c4ff; -fx-font-size: 12; }
 
 .inventory-card {
     -fx-background-color: rgb(130, 213, 252);
@@ -146,21 +133,9 @@
     -fx-border-width: 1;
 }
 
-.inventory-title {
-    -fx-text-fill: #e0f0ff;
-    -fx-font-weight: bold;
-}
-
-.inventory-card .label {
-    -fx-text-fill: #c0d8f0;
-    -fx-font-size: 12;
-}
-
-.total-items {
-    -fx-text-fill: #ffd700 !important;
-    -fx-font-weight: bold;
-    -fx-font-size: 12;
-}
+.inventory-title { -fx-text-fill: #e0f0ff; -fx-font-weight: bold; }
+.inventory-card .label { -fx-text-fill: #c0d8f0; -fx-font-size: 12; }
+.total-items { -fx-text-fill: #ffd700 !important; -fx-font-weight: bold; -fx-font-size: 12; }
 
 .players-summary {
     -fx-background-color: rgba(255, 255, 255, 0.03);
@@ -171,10 +146,7 @@
     -fx-border-width: 1;
 }
 
-.section-title {
-    -fx-text-fill: #e0f0ff;
-    -fx-font-weight: bold;
-}
+.section-title { -fx-text-fill: #e0f0ff; -fx-font-weight: bold; }
 
 .seal-card {
     -fx-background-color: rgba(100, 50, 0, 0.3);
@@ -184,11 +156,7 @@
     -fx-border-color: rgba(255, 165, 0, 0.3);
     -fx-border-width: 1;
 }
-
-.seal-card .label {
-    -fx-text-fill: #ffcc80;
-    -fx-font-size: 12;
-}
+.seal-card .label { -fx-text-fill: #ffcc80; -fx-font-size: 12; }
 
 /* ===== ACTION BAR ===== */
 .action-bar {
@@ -199,91 +167,279 @@
     -fx-border-width: 1;
 }
 
-/* Buttons base */
+/* =================================================================
+   PIXEL-ART ACTION BUTTONS
+   Every button shares the same skeleton; only the body gradient changes.
+   ================================================================= */
+
 .btn-roll,
 .btn-fast-dice,
 .btn-slow-dice,
 .btn-snowball,
 .btn-save {
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 13;
-    -fx-background-radius: 6;
-    -fx-border-radius: 6;
+    -fx-background-insets: 0, 4;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-font-family: "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+    -fx-padding: 10 22;
     -fx-cursor: hand;
-    -fx-padding: 8 16;
+    /* Crisp pixel-art drop shadow: radius=0 → no blur, just a hard offset block */
+    -fx-effect: dropshadow(two-pass-box, #2c1535, 0, 0, 3, 4);
 }
 
+/* --- Roll Dice : blue (canonical PLAY-button colour) --- */
+/* 4 solid bands with hard stops → real pixel-art banding */
 .btn-roll {
-    -fx-background-color: linear-gradient(to bottom, #2196f3, #1565c0);
-    -fx-border-color: #42a5f5;
-    -fx-border-width: 1;
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #4dd0da 0%,    #4dd0da 14%,
+            #4099d1 14%,   #4099d1 75%,
+            #2c8ec0 75%,   #2c8ec0 88%,
+            #1f6eb0 88%,   #1f6eb0 100%);
+    -fx-text-fill: #2c1535;
 }
-
 .btn-roll:hover {
-    -fx-background-color: linear-gradient(to bottom, #42a5f5, #1976d2);
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #6ee2eb 0%,    #6ee2eb 14%,
+            #4cabd9 14%,   #4cabd9 75%,
+            #389ccd 75%,   #389ccd 88%,
+            #2780bb 88%,   #2780bb 100%);
+    -fx-translate-y: -2;
 }
-
 .btn-roll:pressed {
-    -fx-background-color: #0d47a1;
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #1f6eb0 0%,    #1f6eb0 14%,
+            #2c8ec0 14%,   #2c8ec0 75%,
+            #4099d1 75%,   #4099d1 88%,
+            #4eb1de 88%,   #4eb1de 100%);
+    -fx-translate-y: 1;
 }
 
+/* --- Fast Dice : warm orange/amber --- */
 .btn-fast-dice {
-    -fx-background-color: linear-gradient(to bottom, #ff9800, #e65100);
-    -fx-border-color: #4bffc9;
-    -fx-border-width: 1;
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #ffe49b 0%,    #ffe49b 14%,
+            #f4881a 14%,   #f4881a 75%,
+            #e26308 75%,   #e26308 88%,
+            #b14400 88%,   #b14400 100%);
+    -fx-text-fill: #2c1535;
 }
-
 .btn-fast-dice:hover {
-    -fx-background-color: linear-gradient(to bottom, #ffb74d, #f57c00);
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #fff0bf 0%,    #fff0bf 14%,
+            #f99d39 14%,   #f99d39 75%,
+            #ea7619 75%,   #ea7619 88%,
+            #c45200 88%,   #c45200 100%);
+    -fx-translate-y: -2;
 }
-
-.btn-fast-dice:disabled {
-    -fx-opacity: 0.4;
+.btn-fast-dice:pressed {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #b14400 0%,    #b14400 14%,
+            #e26308 14%,   #e26308 75%,
+            #f4881a 75%,   #f4881a 88%,
+            #ffb443 88%,   #ffb443 100%);
+    -fx-translate-y: 1;
 }
+.btn-fast-dice:disabled { -fx-opacity: 0.4; }
 
+/* --- Slow Dice : cool grey/silver --- */
 .btn-slow-dice {
-    -fx-background-color: linear-gradient(to bottom, #78909c, #455a64);
-    -fx-border-color: #90a4ae;
-    -fx-border-width: 1;
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #d4dde2 0%,    #d4dde2 14%,
+            #6f7e89 14%,   #6f7e89 75%,
+            #4f5c66 75%,   #4f5c66 88%,
+            #2f3a43 88%,   #2f3a43 100%);
+    -fx-text-fill: #ffffff;
 }
-
 .btn-slow-dice:hover {
-    -fx-background-color: linear-gradient(to bottom, #90a4ae, #546e7a);
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #e8eef2 0%,    #e8eef2 14%,
+            #87959f 14%,   #87959f 75%,
+            #5e6b75 75%,   #5e6b75 88%,
+            #3b4751 88%,   #3b4751 100%);
+    -fx-translate-y: -2;
 }
-
-.btn-slow-dice:disabled {
-    -fx-opacity: 0.4;
+.btn-slow-dice:pressed {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #2f3a43 0%,    #2f3a43 14%,
+            #4f5c66 14%,   #4f5c66 75%,
+            #6f7e89 75%,   #6f7e89 88%,
+            #9aa9b3 88%,   #9aa9b3 100%);
+    -fx-translate-y: 1;
 }
+.btn-slow-dice:disabled { -fx-opacity: 0.4; }
 
+/* --- Snowball : icy green/mint --- */
 .btn-snowball {
-    -fx-background-color: linear-gradient(to bottom, #4caf50, #2e7d32);
-    -fx-border-color: #66bb6a;
-    -fx-border-width: 1;
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #b6f5c0 0%,    #b6f5c0 14%,
+            #4cba5d 14%,   #4cba5d 75%,
+            #2f9a3f 75%,   #2f9a3f 88%,
+            #1f7028 88%,   #1f7028 100%);
+    -fx-text-fill: #2c1535;
 }
-
 .btn-snowball:hover {
-    -fx-background-color: linear-gradient(to bottom, #66bb6a, #388e3c);
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #cefccf 0%,    #cefccf 14%,
+            #5cc66f 14%,   #5cc66f 75%,
+            #3eaa50 75%,   #3eaa50 88%,
+            #2a8133 88%,   #2a8133 100%);
+    -fx-translate-y: -2;
 }
-
-.btn-snowball:disabled {
-    -fx-opacity: 0.4;
+.btn-snowball:pressed {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #1f7028 0%,    #1f7028 14%,
+            #2f9a3f 14%,   #2f9a3f 75%,
+            #4cba5d 75%,   #4cba5d 88%,
+            #6cd97e 88%,   #6cd97e 100%);
+    -fx-translate-y: 1;
 }
+.btn-snowball:disabled { -fx-opacity: 0.4; }
 
+/* --- Save : royal purple --- */
 .btn-save {
-    -fx-background-color: linear-gradient(to bottom, #7e57c2, #4527a0);
-    -fx-border-color: #9575cd;
-    -fx-border-width: 1;
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #d8c1ff 0%,    #d8c1ff 14%,
+            #7e57c2 14%,   #7e57c2 75%,
+            #5e3aa3 75%,   #5e3aa3 88%,
+            #3f2278 88%,   #3f2278 100%);
+    -fx-text-fill: #ffffff;
 }
-
 .btn-save:hover {
-    -fx-background-color: linear-gradient(to bottom, #9575cd, #5e35b1);
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #ead5ff 0%,    #ead5ff 14%,
+            #9069cf 14%,   #9069cf 75%,
+            #6e47b1 75%,   #6e47b1 88%,
+            #4d2d8a 88%,   #4d2d8a 100%);
+    -fx-translate-y: -2;
+}
+.btn-save:pressed {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #3f2278 0%,    #3f2278 14%,
+            #5e3aa3 14%,   #5e3aa3 75%,
+            #7e57c2 75%,   #7e57c2 88%,
+            #a07ce8 88%,   #a07ce8 100%);
+    -fx-translate-y: 1;
 }
 
-/* Disabled state for all buttons */
+/* Generic disabled state */
 .button:disabled {
     -fx-opacity: 0.4;
     -fx-cursor: default;
+}
+
+/* =================================================================
+   NAVIGATION BUTTONS (mirror of style.css for in-game scope)
+   ================================================================= */
+.nav-btn-back {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #ff8a9a 0%,    #ff8a9a 14%,
+            #c83244 14%,   #c83244 75%,
+            #a71f30 75%,   #a71f30 88%,
+            #7d1421 88%,   #7d1421 100%);
+    -fx-background-insets: 0, 4;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-font-family: "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 10 22;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(two-pass-box, #2c1535, 0, 0, 3, 4);
+}
+.nav-btn-back:hover {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #ffa6b3 0%,    #ffa6b3 14%,
+            #d54355 14%,   #d54355 75%,
+            #b62a3c 75%,   #b62a3c 88%,
+            #8c1825 88%,   #8c1825 100%);
+    -fx-translate-y: -2;
+}
+.nav-btn-back:pressed {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #7d1421 0%,    #7d1421 14%,
+            #a71f30 14%,   #a71f30 75%,
+            #c83244 75%,   #c83244 88%,
+            #e74c5e 88%,   #e74c5e 100%);
+    -fx-translate-y: 1;
+}
+
+.nav-btn-home {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #ffe49b 0%,    #ffe49b 14%,
+            #f4881a 14%,   #f4881a 75%,
+            #e26308 75%,   #e26308 88%,
+            #b14400 88%,   #b14400 100%);
+    -fx-background-insets: 0, 4;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-font-family: "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+    -fx-text-fill: #2c1535;
+    -fx-padding: 10 22;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(two-pass-box, #2c1535, 0, 0, 3, 4);
+}
+.nav-btn-home:hover {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #fff0bf 0%,    #fff0bf 14%,
+            #f99d39 14%,   #f99d39 75%,
+            #ea7619 75%,   #ea7619 88%,
+            #c45200 88%,   #c45200 100%);
+    -fx-translate-y: -2;
+}
+.nav-btn-home:pressed {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #b14400 0%,    #b14400 14%,
+            #e26308 14%,   #e26308 75%,
+            #f4881a 75%,   #f4881a 88%,
+            #ffb443 88%,   #ffb443 100%);
+    -fx-translate-y: 1;
 }
 
 /* ===== EVENT LOG ===== */
@@ -297,31 +453,40 @@
     -fx-border-radius: 6;
     -fx-background-radius: 6;
 }
+.event-log .content { -fx-background-color: rgb(166, 227, 255); }
 
-.event-log .content {
-    -fx-background-color: rgb(166, 227, 255);
-}
-
-/* ===== SCROLLBAR STYLING ===== */
-.scroll-bar:vertical .thumb {
-    -fx-background-color: rgb(161, 210, 255);
-    -fx-background-radius: 4;
-}
-
-.scroll-bar:vertical .track {
-    -fx-background-color: transparent;
-}
-
+/* ===== SCROLLBAR ===== */
+.scroll-bar:vertical .thumb { -fx-background-color: rgb(161, 210, 255); -fx-background-radius: 4; }
+.scroll-bar:vertical .track { -fx-background-color: transparent; }
 .scroll-bar:vertical .increment-button,
-.scroll-bar:vertical .decrement-button {
-    -fx-background-color: transparent;
-    -fx-padding: 0;
+.scroll-bar:vertical .decrement-button { -fx-background-color: transparent; -fx-padding: 0; }
+
+/* ===== Inventory hotbar slot — pixel-art frame with banded fill ===== */
+.inventory-slot {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #4dd0da 0%,    #4dd0da 14%,
+            #4099d1 14%,   #4099d1 75%,
+            #2c8ec0 75%,   #2c8ec0 88%,
+            #1f6eb0 88%,   #1f6eb0 100%);
+    -fx-background-insets: 0, 3;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-effect: dropshadow(two-pass-box, #2c1535, 0, 0, 2, 3);
 }
 
-/* ===== LEGACY SUPPORT ===== */
+.inventory-quantity {
+    -fx-text-fill: #ffeb3b;
+    -fx-font-family: "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+    -fx-effect: dropshadow(gaussian, #2c1535, 2, 1, 1, 1);
+    -fx-padding: 0 4 2 0;
+}
+
+/* Legacy square classes (no-ops) */
 .square-bottom-left,
 .square-bottom-right,
 .square-top-left,
-.square-top-right {
-    /* Remove old red/green borders */
-}
+.square-top-right { }

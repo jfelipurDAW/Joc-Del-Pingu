@@ -22,9 +22,4 @@ public abstract class Square {
 	}
 	
 	public abstract String action(model.entity.Player player);
-
-	public void action() {
-		// // TODO Auto-generated method stub
-		
-	};
 }

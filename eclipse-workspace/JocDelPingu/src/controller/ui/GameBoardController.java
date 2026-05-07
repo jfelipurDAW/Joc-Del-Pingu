@@ -176,10 +176,12 @@ public class GameBoardController {
         mainStack.getChildren().add(animationOverlay);
 
         // Redraw the board once the container has its real layout size,
-        // and again whenever the window is resized — no bindings, no loop.
-        boardContainer.widthProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() > 0) drawBoard();
-        });
+        // and again whenever the window is resized (width OR height) — no bindings, no loop.
+        javafx.beans.value.ChangeListener<Number> resizeListener = (obs, oldVal, newVal) -> {
+            if (newVal != null && newVal.doubleValue() > 0) drawBoard();
+        };
+        boardContainer.widthProperty().addListener(resizeListener);
+        boardContainer.heightProperty().addListener(resizeListener);
     }
 
     private void initializePlayers() {
@@ -286,7 +288,10 @@ public class GameBoardController {
             Player target = targets.get(selectedIndex);
 
             model.game.ActionResult msg = gameManager.getPlayerManager().throwSnowball(current, target);
-            logEvent(formatActionMessage(msg));
+            String snowMsg = formatActionMessage(msg);
+            logEvent(snowMsg);
+            current.recordEvent(snowMsg);
+            target.recordEvent(snowMsg);
 
             model.game.SoundManager.getInstance().playSnowballSound();
             animateSnowballThrow();
@@ -338,7 +343,10 @@ public class GameBoardController {
         animatePlayerMovement(current, diceResult, () -> {
             current.setSquare(startSquare);
             model.game.ActionResult moveResult = gameManager.playTurn(diceResult);
-            logEvent(formatActionMessage(moveResult));
+            String moveMsg = formatActionMessage(moveResult);
+            logEvent(moveMsg);
+            // Persist this event in the player's history so it survives save/load
+            current.recordEvent("🎲" + diceResult + " (" + diceType + ") → " + moveMsg);
             drawBoard();
 
             if (gameManager.isGameOver()) { handleWin(gameManager.getWinner()); return; }
@@ -361,7 +369,9 @@ public class GameBoardController {
                 model.game.SoundManager.getInstance().playSealSound();
                 showSealAnimation();
                 model.game.ActionResult sealResult = gameManager.getPlayerManager().handleSealInteraction(seal, current);
-                logEvent(formatActionMessage(sealResult));
+                String sealMsg = formatActionMessage(sealResult);
+                logEvent(sealMsg);
+                current.recordEvent(sealMsg);
                 drawBoard();
             }
 
@@ -459,7 +469,10 @@ public class GameBoardController {
 
         logEvent("⚔️ SNOWBALL WAR! " + attacker.getName() + " vs " + defender.getName() + "!");
         model.game.ActionResult warResult = gameManager.getPlayerManager().snowballWar(attacker, defender);
-        logEvent(formatActionMessage(warResult));
+        String warMsg = formatActionMessage(warResult);
+        logEvent(warMsg);
+        attacker.recordEvent(warMsg);
+        defender.recordEvent(warMsg);
         model.game.SoundManager.getInstance().playSnowballSound();
         animateWarFlash();
     }
@@ -475,6 +488,11 @@ public class GameBoardController {
             case EVENT:             return "❓ " + res.getEventMessage();
             case BROKEN_FLOOR_FALL: return "💔 " + res.getPlayerName() + " was too heavy (" + res.getValue() + " items)! Fell through the broken floor! Back to START!";
             case BROKEN_FLOOR_CRACK:return "⚠️ " + res.getPlayerName() + " cracked the broken floor (" + res.getValue() + " items). Loses next turn!";
+            case BROKEN_FLOOR_LOSE_ITEM: {
+                String lostItem = res.getEventMessage();
+                return "💨 " + res.getPlayerName() + " stumbled on the broken floor and dropped a "
+                        + (lostItem != null ? lostItem.toLowerCase() : "item") + "!";
+            }
             case BROKEN_FLOOR_SAFE: return "✅ " + res.getPlayerName() + " crosses the broken floor safely (no items)!";
             case WIN:               return "🎉 " + res.getPlayerName() + " reached the END! WINNER!";
             case START_SQUARE:      return res.getPlayerName() + " is at the start.";
@@ -493,8 +511,6 @@ public class GameBoardController {
             case SNOWBALL_WAR_WIN:  return "⚔️ " + res.getPlayerName() + " wins! (" + res.getValue() + " balls) " + res.getTargetName() + " retreats " + res.getValue2() + " squares!";
             case SNOWBALL_WAR_TIE:  return "⚔️ It's a tie! Both spend all snowballs. No one retreats.";
             case SNOWBALL_THROW:    return "⛄ " + res.getPlayerName() + " threw a snowball at " + res.getTargetName() + "! " + res.getTargetName() + " goes back " + res.getValue() + " squares to " + res.getValue2() + "!";
-            case DICE_ROLL:         return "🎲 " + res.getPlayerName() + " rolled " + res.getValue();
-            case MOVE:              return "🚶 " + res.getPlayerName() + " moved to " + res.getValue();
             default:                return "Activity from " + res.getPlayerName();
         }
     }
@@ -508,7 +524,7 @@ public class GameBoardController {
 
         if (rightPanel != null) { rightPanel.setVisible(false); rightPanel.setManaged(false); }
 
-        HBox hotbar = createHotbar(current);
+        javafx.scene.layout.FlowPane hotbar = createHotbar(current);
         rootPane.setTop(hotbar);
 
         Inventory inv = current.getInventory();
@@ -519,9 +535,10 @@ public class GameBoardController {
         if (sealEnabled && seal != null) updateSealStatus();
     }
 
-    private HBox createHotbar(Player player) {
-        HBox hotbar = new HBox(15);
+    private javafx.scene.layout.FlowPane createHotbar(Player player) {
+        javafx.scene.layout.FlowPane hotbar = new javafx.scene.layout.FlowPane(15, 6);
         hotbar.setAlignment(Pos.CENTER_LEFT);
+        hotbar.setRowValignment(javafx.geometry.VPos.CENTER);
         hotbar.setPadding(new javafx.geometry.Insets(10));
         hotbar.setStyle("-fx-background-color: rgba(0,0,0,0.5); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 0 0 4px 0;");
 
@@ -545,18 +562,25 @@ public class GameBoardController {
         }
 
         if (portrait.getChildren().isEmpty() && baseImage != null && colorImage != null) {
+            // Draw the FULL sprite (no cropping) and preserve aspect ratio
+            // by letterboxing inside the targetSize box.
             double w = baseImage.getWidth(), h = baseImage.getHeight();
-            double sx = w * 0.25, sy = 0, sw = w * 0.5, sh = h * 0.5;
+            double aspect = w / h;
+            double dw, dh;
+            if (aspect >= 1.0) { dw = targetSize; dh = targetSize / aspect; }
+            else               { dh = targetSize; dw = targetSize * aspect; }
+            double dx = (targetSize - dw) / 2.0;
+            double dy = (targetSize - dh) / 2.0;
 
             Canvas baseCanvas = new Canvas(targetSize, targetSize);
             GraphicsContext gcBase = baseCanvas.getGraphicsContext2D();
             gcBase.setImageSmoothing(false);
-            gcBase.drawImage(baseImage, sx, sy, sw, sh, 0, 0, targetSize, targetSize);
+            gcBase.drawImage(baseImage, 0, 0, w, h, dx, dy, dw, dh);
 
             Canvas colorCanvas = new Canvas(targetSize, targetSize);
             GraphicsContext gcColor = colorCanvas.getGraphicsContext2D();
             gcColor.setImageSmoothing(false);
-            gcColor.drawImage(colorImage, sx, sy, sw, sh, 0, 0, targetSize, targetSize);
+            gcColor.drawImage(colorImage, 0, 0, w, h, dx, dy, dw, dh);
 
             Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
             lighting.setSurfaceScale(0.0);
@@ -581,11 +605,8 @@ public class GameBoardController {
         Label turnLabel = new Label("IT'S YOUR TURN!");
         turnLabel.getStyleClass().add("hotbar-turn-label");
 
-        hotbar.getChildren().add(playerInfo);
-        hotbar.getChildren().add(slots);
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        hotbar.getChildren().addAll(spacer, turnLabel);
+        // FlowPane wraps automatically — items reflow on narrow windows instead of clipping.
+        hotbar.getChildren().addAll(playerInfo, slots, turnLabel);
 
         return hotbar;
     }
@@ -597,7 +618,7 @@ public class GameBoardController {
 
     private StackPane createInventorySlot(Image icon, int quantity) {
         StackPane slot = new StackPane();
-        slot.getStyleClass().add("button");
+        slot.getStyleClass().add("inventory-slot");
         slot.setPrefSize(80, 80);
         slot.setMaxSize(80, 80);
 
@@ -784,15 +805,24 @@ public class GameBoardController {
             StackPane playerToken = new StackPane();
 
             if (baseImage != null && colorImage != null) {
+                // Preserve aspect ratio of the source sprite (17x19) inside the cell token area
+                double sw = baseImage.getWidth(), sh = baseImage.getHeight();
+                double aspect = sw / sh;
+                double dw, dh;
+                if (aspect >= 1.0) { dw = spriteSize; dh = spriteSize / aspect; }
+                else               { dh = spriteSize; dw = spriteSize * aspect; }
+                double dx = (spriteSize - dw) / 2.0;
+                double dy = (spriteSize - dh) / 2.0;
+
                 Canvas baseCanvas = new Canvas(spriteSize, spriteSize);
                 GraphicsContext gcBase = baseCanvas.getGraphicsContext2D();
                 gcBase.setImageSmoothing(false);
-                gcBase.drawImage(baseImage, 0, 0, spriteSize, spriteSize);
+                gcBase.drawImage(baseImage, 0, 0, sw, sh, dx, dy, dw, dh);
 
                 Canvas colorCanvas = new Canvas(spriteSize, spriteSize);
                 GraphicsContext gcColor = colorCanvas.getGraphicsContext2D();
                 gcColor.setImageSmoothing(false);
-                gcColor.drawImage(colorImage, 0, 0, spriteSize, spriteSize);
+                gcColor.drawImage(colorImage, 0, 0, sw, sh, dx, dy, dw, dh);
 
                 Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
                 lighting.setSurfaceScale(0.0);
@@ -901,16 +931,29 @@ public class GameBoardController {
     // ============================================
 
     private void showBearAnimation() {
-        Label bearLabel = new Label("🐻");
-        bearLabel.setFont(new Font("System", 150));
-        animationOverlay.getChildren().add(bearLabel);
+        Image bearSprite = loadImage("/assets/sprites/squares/foreground/BEAR.png");
+        Node bearNode;
+        if (bearSprite != null) {
+            // Pixel-perfect render via Canvas (matches the rest of the board)
+            double size = 220;
+            Canvas bearCanvas = new Canvas(size, size);
+            GraphicsContext gc = bearCanvas.getGraphicsContext2D();
+            gc.setImageSmoothing(false);
+            gc.drawImage(bearSprite, 0, 0, size, size);
+            bearNode = bearCanvas;
+        } else {
+            Label fallback = new Label("🐻");
+            fallback.setFont(new Font("System", 150));
+            bearNode = fallback;
+        }
+        animationOverlay.getChildren().add(bearNode);
 
-        ScaleTransition st = new ScaleTransition(Duration.millis(300), bearLabel);
+        ScaleTransition st = new ScaleTransition(Duration.millis(300), bearNode);
         st.setFromX(0); st.setFromY(0); st.setToX(2); st.setToY(2);
 
-        FadeTransition ft = new FadeTransition(Duration.millis(500), bearLabel);
+        FadeTransition ft = new FadeTransition(Duration.millis(500), bearNode);
         ft.setDelay(Duration.millis(800)); ft.setFromValue(1.0); ft.setToValue(0.0);
-        ft.setOnFinished(e -> animationOverlay.getChildren().remove(bearLabel));
+        ft.setOnFinished(e -> animationOverlay.getChildren().remove(bearNode));
         st.play(); ft.play();
     }
 
@@ -946,9 +989,7 @@ public class GameBoardController {
 
         Button backBtn = new Button(model.config.LangConfig.getLang(model.config.Lang.GAME_BACK_TO_MENU));
         backBtn.getStyleClass().add("nav-btn-home");
-        backBtn.setStyle("-fx-font-size: 20px; -fx-padding: 12 40; " +
-            "-fx-background-color: linear-gradient(to bottom, #e65c00 0%, #f9d423 100%); " +
-            "-fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;");
+        backBtn.setStyle("-fx-font-size: 22px; -fx-padding: 14 40;");
         backBtn.setOnAction(e -> {
             model.game.SoundManager.getInstance().stopBackgroundMusic();
             navigateTo("/view/fxml/mainMenu.fxml", "/assets/css/style.css");

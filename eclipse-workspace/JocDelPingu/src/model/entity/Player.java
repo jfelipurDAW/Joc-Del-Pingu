@@ -1,21 +1,23 @@
 package model.entity;
 
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.List;
 
 import model.board.Board;
 import model.item.Inventory;
-import model.item.ObjectType;
 
 public class Player extends Entity {
-	
+
+	private static final int MAX_EVENT_HISTORY = 50;
+
 	private String name;
 	private String colour;
 	private String password;
     private String avatarPath;
 	private Inventory inventory;
+	private List<String> eventHistory = new ArrayList<>();
 
-	
+
 	public Player(String name, String colour) {
 		this.setType(EntityType.PLAYER);
 		this.setEntityId((int) (Math.random() * 100000));
@@ -25,7 +27,7 @@ public class Player extends Entity {
 		this.setSkipNextTurn(false);
 		this.inventory = new Inventory(this.getEntityId());
 	}
-	
+
     /**
      * Constructor with password (for database)
      */
@@ -39,10 +41,10 @@ public class Player extends Entity {
         this.setSkipNextTurn(false);
         this.inventory = new Inventory(this.getEntityId());
     }
-	
+
 	public void setName(String name) {
 		this.name = name;
-	}	
+	}
 	public void setColour(String colour) {
 		this.colour = colour;
 	}
@@ -52,11 +54,11 @@ public class Player extends Entity {
     public void setAvatarPath(String avatarPath) {
         this.avatarPath = avatarPath;
     }
-	
+
 	public String getColour() {
 		return this.colour;
 	}
-	
+
 	public String getPassword() {
 		return this.password;
 	}
@@ -64,145 +66,56 @@ public class Player extends Entity {
     public String getAvatarPath() {
         return this.avatarPath;
     }
-	
+
 	@Override
     public String toString() {
         return name + " (" + colour + ") - Square: " + this.getNumSquare() + " " + inventory.toString();
     }
-	
-	/**
-	 * Snowball war between two players.
-	 * Returns the winner (or null if tie).
-	 * The loser retreats by the difference in snowball count.
-	 */
-	public static SnowballWarResult snowballWar(Player player1, Player player2) {
-		int balls1 = player1.getInventory().getObjectQuantity(ObjectType.SNOWBALL);
-		int balls2 = player2.getInventory().getObjectQuantity(ObjectType.SNOWBALL);
-		
-		// Both spend ALL their snowballs
-		player1.getInventory().useObject(ObjectType.SNOWBALL, balls1);
-		player2.getInventory().useObject(ObjectType.SNOWBALL, balls2);
-		
-		int difference = Math.abs(balls1 - balls2);
-		
-		if (balls1 > balls2) {
-			// Player1 wins, Player2 goes back
-			int newPos = Math.max(0, player2.getSquareIndex() - difference);
-			player2.setSquare(newPos);
-			return new SnowballWarResult(player1, player2, balls1, balls2, difference);
-		} else if (balls2 > balls1) {
-			// Player2 wins, Player1 goes back
-			int newPos = Math.max(0, player1.getSquareIndex() - difference);
-			player1.setSquare(newPos);
-			return new SnowballWarResult(player2, player1, balls2, balls1, difference);
-		} else {
-			// Tie: both spend all, no retreat
-			return new SnowballWarResult(null, null, balls1, balls2, 0);
-		}
-	}
-	
-	/**
-	 * Result of a snowball war.
-	 */
-	public static class SnowballWarResult {
-		private final Player winner;
-		private final Player loser;
-		private final int winnerBalls;
-		private final int loserBalls;
-		private final int difference;
-		
-		public SnowballWarResult(Player winner, Player loser, int winnerBalls, int loserBalls, int difference) {
-			this.winner = winner;
-			this.loser = loser;
-			this.winnerBalls = winnerBalls;
-			this.loserBalls = loserBalls;
-			this.difference = difference;
-		}
-		
-		public Player getWinner() { return winner; }
-		public Player getLoser() { return loser; }
-		public int getWinnerBalls() { return winnerBalls; }
-		public int getLoserBalls() { return loserBalls; }
-		public int getDifference() { return difference; }
-		public boolean isTie() { return winner == null; }
-		
-		@Override
-		public String toString() {
-			if (isTie()) {
-				return "It's a tie! (" + winnerBalls + " vs " + loserBalls + ") Both spend all snowballs. No one retreats.";
-			} else {
-				return winner.getName() + " wins! (" + winnerBalls + " vs " + loserBalls + ") " + 
-				       loser.getName() + " retreats " + difference + " squares!";
-			}
-		}
-	}
-
-	public int getPosition() {
-		return this.getNumSquare();
-	}
-
-	/**
-	 * Manage player's needs (required by spec).
-	 * Returns true if needs met (consumed 1 fish), false otherwise (skips next turn).
-	 */
-	public boolean manageNeeds() {
-		if (this.inventory.getObjectQuantity(ObjectType.FISH) > 0) {
-			this.inventory.useObject(ObjectType.FISH, 1);
-			return true;
-		} else {
-			this.setSkipNextTurn(true);
-			return false;
-		}
-	}
 
 	@Override
 	public String getName() {
 		return this.name;
 	}
 
-	/**
-	 * Move forward by a number and process the square effect.
-	 * Returns a log message describing what happened.
-	 */
-	public String moveForward(int number) {
-		boolean reachedEnd = this.advance(number);
-		if (reachedEnd) {
-			return this.getName() + " reached the END! 🎉 WINNER!";
-		}
-        return this.updatePosition(this.getSquareIndex());
-    }
-
-	private String updatePosition(int squareIndex) {
-		// TODO Auto-generated method stub
-		return this.getName() + " is now at square " + squareIndex;
-	}
-
 	@Override
 	public void setSquare(int i) {
 		this.setNumSquare(Math.max(0, Math.min(i, this.getBoard() != null ? Board.MAX_SQUARES - 1 : i)));
 	}
-	
-	
+
+
 	public void setInventory(Inventory inventory) {
 		this.inventory = inventory;
 	}
-	
-	
+
+
 	public Inventory getInventory() {
 		return this.inventory;
 	}
-	
+
 	/**
 	 * Lose half of all inventory items. Used when seal passes through.
 	 */
 	public void loseHalfInventory() {
 		this.inventory.removeHalf();
 	}
-	
+
 	/**
-	 * Lose a random item from inventory.
+	 * Append an event/action message to the player's history (capped at
+	 * MAX_EVENT_HISTORY entries to keep saved games compact).
 	 */
-	public ObjectType loseRandomItem() {
-		return this.inventory.removeRandomItem();
+	public void recordEvent(String message) {
+		if (message == null || message.isEmpty()) return;
+		this.eventHistory.add(message);
+		while (this.eventHistory.size() > MAX_EVENT_HISTORY) {
+			this.eventHistory.remove(0);
+		}
+	}
+
+	public List<String> getEventHistory() {
+		return this.eventHistory;
+	}
+
+	public void setEventHistory(List<String> history) {
+		this.eventHistory = (history != null) ? new ArrayList<>(history) : new ArrayList<>();
 	}
 }

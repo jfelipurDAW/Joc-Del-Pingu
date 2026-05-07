@@ -79,7 +79,10 @@ public class SaveLoadService {
                     invMap.put("fastdice", inv.getFastdiceQuantity());
                     invMap.put("slowdice", inv.getSlowdiceQuantity());
                     pMap.put("inventory", invMap);
-                    
+
+                    // Persist the per-player event history (spec: save game events)
+                    pMap.put("eventHistory", new ArrayList<>(p.getEventHistory()));
+
                     playersList.add(pMap);
                 }
             }
@@ -177,6 +180,11 @@ public class SaveLoadService {
                 inv.setFastdiceQuantity(invMap.get("fastdice"));
                 inv.setSlowdiceQuantity(invMap.get("slowdice"));
                 inv.setDiceQuantity(invMap.get("fastdice") + invMap.get("slowdice"));
+
+                Object historyObj = pMap.get("eventHistory");
+                if (historyObj instanceof List) {
+                    p.setEventHistory((List<String>) historyObj);
+                }
                 players.add(p);
             }
             model.config.GameSetupConfig.setPlayers(players);

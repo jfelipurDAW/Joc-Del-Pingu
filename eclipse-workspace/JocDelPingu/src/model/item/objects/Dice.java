@@ -12,26 +12,24 @@ public class Dice extends model.item.GameObject {
 
 	private int minValue;
     private int maxValue;
-    private ObjectType diceType;
-    
+
     public Dice(ObjectType diceType) {
     	super(diceType);
-        this.diceType = diceType;
-        
+
         switch (diceType) {
-        
+
         case FASTDICE:
         	this.setName("Fast Dice");
         	this.minValue = FASTDICE_MIN_VALUE;
         	this.maxValue = FASTDICE_MAX_VALUE;
         	break;
-    
+
         case SLOWDICE:
         	this.setName("Slow Dice");
         	this.minValue = SLOWDICE_MIN_VALUE;
         	this.maxValue = SLOWDICE_MAX_VALUE;
         	break;
-        	
+
         default:
         	this.setName("Dice");
         	this.minValue = 1;
@@ -39,19 +37,8 @@ public class Dice extends model.item.GameObject {
         	break;
         }
     }
-    
+
     public int roll() {
-        return (int) ((java.lang.Math.random() * (maxValue - minValue + 1)) + minValue);    
-    }
-    
-    public int getMinValue() { 
-    	return minValue; 
-    	}
-    public int getMaxValue() { 
-    	return maxValue; 
-    	}
-    
-    public ObjectType getDiceType() {
-    	return this.diceType;
+        return (int) ((java.lang.Math.random() * (maxValue - minValue + 1)) + minValue);
     }
 }

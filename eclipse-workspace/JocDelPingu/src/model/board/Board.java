@@ -11,7 +11,7 @@ import model.board.squares.S_Start;
 import model.board.squares.S_End;
 
 public class Board {
-	
+
 	public static final int widthBoard = 10;
 	public static final int heightBoard = 5;
 	public static final int MAX_SQUARES = widthBoard*heightBoard;
@@ -20,11 +20,10 @@ public class Board {
 	private Square[] board = new Square[MAX_SQUARES];
 	private ArrayList<Integer> IceHole_Array = new ArrayList<Integer>();
 	private ArrayList<Integer> Sled_Array = new ArrayList<Integer>();
-	private Square[] squares; 
+
 	public Board() {
-	        this.squares = new Square[MAX_SQUARES];
-	    }
-	
+	}
+
 	public void createNewBoard() {
 		for (int i = 0; i < board.length; i++) {
 			if ((int) (Math.random()*100+1) <= NORMAL_SQUARE_PERCENTAGE) {
@@ -32,18 +31,18 @@ public class Board {
 			} else {
 				int randomType = (int) (Math.random()*5+1);
 				switch(randomType) {
-				case 1: 
+				case 1:
 					board[i] = new S_IceHole(SquareType.ICE_HOLE);
 					IceHole_Array.add(i);
 					break;
-				case 2: 
+				case 2:
 					board[i] = new S_Sled(SquareType.SLED);
 					Sled_Array.add(i);
 					break;
-				case 3: 
+				case 3:
 					board[i] = new S_Bear(SquareType.BEAR);
 					break;
-				case 4: 
+				case 4:
 					board[i] = new S_Event(SquareType.EVENT);
 					break;
 				case 5:
@@ -53,7 +52,7 @@ public class Board {
 			}
 			board[i].setSquareID(i);
 		}
-		
+
 		board[0] = new S_Start(SquareType.START);
 		board[0].setSquareID(0);
 		board[board.length-1] = new S_End(SquareType.END);
@@ -69,12 +68,12 @@ public class Board {
             SquareType type = SquareType.valueOf(typeStr);
             switch(type) {
                 case NORMAL: board[i] = new S_Normal(type); break;
-                case ICE_HOLE: 
-                    board[i] = new S_IceHole(type); 
+                case ICE_HOLE:
+                    board[i] = new S_IceHole(type);
                     IceHole_Array.add(i);
                     break;
-                case SLED: 
-                    board[i] = new S_Sled(type); 
+                case SLED:
+                    board[i] = new S_Sled(type);
                     Sled_Array.add(i);
                     break;
                 case BEAR: board[i] = new S_Bear(type); break;
@@ -89,14 +88,14 @@ public class Board {
             }
         }
     }
-	
+
 	public SquareType getSquareType(int square) {
 		return board[square].getType();
 	}
-	
+
 	public int getDestination(int squareIndex) {
 		SquareType type = getSquareType(squareIndex);
-		
+
 		switch(type) {
 		case ICE_HOLE:
 			int listIndex = IceHole_Array.indexOf(squareIndex);
@@ -114,65 +113,30 @@ public class Board {
 			return squareIndex;
 		}
 	}
-	 public Square[] getSquares() {
-	        return squares;
-	    }
 
-	 public Square[] getBoard() {
-		 return board;
-	 }
+	public Square[] getBoard() {
+		return board;
+	}
 
-	 public void setBoard(Square[] board) {
-		 this.board = board;
-	 }
+	public ArrayList<Integer> getIceHole_Array() {
+		return IceHole_Array;
+	}
 
-	 public ArrayList<Integer> getIceHole_Array() {
-		 return IceHole_Array;
-	 }
+	public ArrayList<Integer> getSled_Array() {
+		return Sled_Array;
+	}
 
-	 public void setIceHole_Array(ArrayList<Integer> iceHole_Array) {
-		 IceHole_Array = iceHole_Array;
-	 }
-
-	 public ArrayList<Integer> getSled_Array() {
-		 return Sled_Array;
-	 }
-
-	 public void setSled_Array(ArrayList<Integer> sled_Array) {
-		 Sled_Array = sled_Array;
-	 }
-
-	 public static int getWidthboard() {
-		 return widthBoard;
-	 }
-
-	 public static int getHeightboard() {
-		 return heightBoard;
-	 }
-
-	 public static int getMaxSquares() {
-		 return MAX_SQUARES;
-	 }
-
-	 public static int getNormalSquarePercentage() {
-		 return NORMAL_SQUARE_PERCENTAGE;
-	 }
-
-	 public void setSquares(Square[] squares) {
-		 this.squares = squares;
-	 }
-
-	 /**
-	  * Converts a BROKEN_FLOOR square to an ICE_HOLE once a player falls through it.
-	  * The new hole is inserted into IceHole_Array in sorted order so getDestination()
-	  * continues to work correctly (holes link in ascending-index order).
-	  */
-	 public void convertBrokenFloorToIceHole(int squareIndex) {
-		 board[squareIndex] = new S_IceHole(SquareType.ICE_HOLE);
-		 board[squareIndex].setSquareID(squareIndex);
-		 if (!IceHole_Array.contains(squareIndex)) {
-			 IceHole_Array.add(squareIndex);
-			 java.util.Collections.sort(IceHole_Array);
-		 }
-	 }
+	/**
+	 * Converts a BROKEN_FLOOR square to an ICE_HOLE once a player falls through it.
+	 * The new hole is inserted into IceHole_Array in sorted order so getDestination()
+	 * continues to work correctly (holes link in ascending-index order).
+	 */
+	public void convertBrokenFloorToIceHole(int squareIndex) {
+		board[squareIndex] = new S_IceHole(SquareType.ICE_HOLE);
+		board[squareIndex].setSquareID(squareIndex);
+		if (!IceHole_Array.contains(squareIndex)) {
+			IceHole_Array.add(squareIndex);
+			java.util.Collections.sort(IceHole_Array);
+		}
+	}
 }

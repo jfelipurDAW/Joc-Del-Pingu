@@ -16,30 +16,22 @@ import model.item.ObjectType;
  */
 public class Seal extends Entity {
 
-    private boolean isBribed;
     private int blockedTurns;
-    private String name;
     private Random random;
-    
+
     public Seal() {
-        this.name = "Seal";
         this.setType(EntityType.SEAL);
         this.setNumSquare(0);
         this.setSkipNextTurn(false);
-        this.isBribed = false;
         this.blockedTurns = 0;
         this.random = new Random();
     }
-    
+
     @Override
     public String getName() {
         return "🦭 Seal";
     }
-    
-    public boolean hasBeenBribed() {
-        return isBribed;
-    }
-    
+
     public boolean isBlocked() {
     	return blockedTurns > 0;
     }
@@ -58,7 +50,6 @@ public class Seal extends Entity {
     public ActionResult bribeSeal(Player player) {
         if (player.getInventory().getObjectQuantity(ObjectType.FISH) > 0) {
             player.getInventory().useObject(ObjectType.FISH, 1);
-            this.isBribed = true;
             this.blockedTurns = 2;
             return new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_BRIBED, player.getName());
         } else {
@@ -112,9 +103,8 @@ public class Seal extends Entity {
     public model.game.ActionResult updateSealTurns() {
         if (this.blockedTurns > 0) {
             this.blockedTurns--;
-            
+
             if (this.blockedTurns == 0) {
-                this.isBribed = false;
                 return new model.game.ActionResult(model.game.ActionResult.ActionType.SEAL_ACTIVE, this.getName());
             }
         }
