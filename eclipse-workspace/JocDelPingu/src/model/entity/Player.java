@@ -106,10 +106,11 @@ public class Player extends Entity {
 	 * MAX_EVENT_HISTORY entries to keep saved games compact).
 	 */
 	public void recordEvent(String message) {
-		if (message == null || message.isEmpty()) return;
-		this.eventHistory.add(message);
-		while (this.eventHistory.size() > MAX_EVENT_HISTORY) {
-			this.eventHistory.remove(0);
+		if (message != null && !message.isEmpty()) {
+			this.eventHistory.add(message);
+			while (this.eventHistory.size() > MAX_EVENT_HISTORY) {
+				this.eventHistory.remove(0);
+			}
 		}
 	}
 

@@ -57,6 +57,17 @@ public class Board {
 		board[0].setSquareID(0);
 		board[board.length-1] = new S_End(SquareType.END);
 		board[board.length-1].setSquareID(board.length-1);
+
+		// The START/END overwrite above may invalidate auxiliary indices that
+		// the random pass added for those positions. Drop any stale entries so
+		// later sled/hole lookups never resolve to START or END.
+		dropEdgeIndices(IceHole_Array);
+		dropEdgeIndices(Sled_Array);
+	}
+
+	private void dropEdgeIndices(ArrayList<Integer> indices) {
+		final int last = board.length - 1;
+		indices.removeIf(idx -> idx == 0 || idx == last);
 	}
 
     public void loadBoard(java.util.List<String> boardTypes) {
@@ -86,6 +97,12 @@ public class Board {
                 board[i].setSquareID(i);
             }
         }
+
+        // Same defensive cleanup as createNewBoard: a corrupted save file
+        // could list SLED or ICE_HOLE at the START/END indices. Drop those
+        // stale entries so they never resolve to the START or END square.
+        dropEdgeIndices(IceHole_Array);
+        dropEdgeIndices(Sled_Array);
     }
 
 	public SquareType getSquareType(int square) {

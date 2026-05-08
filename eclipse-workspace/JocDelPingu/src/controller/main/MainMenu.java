@@ -55,7 +55,6 @@ public class MainMenu extends Application {
         //  Allow Rescale
         primaryStage.setResizable(true);
 
-        // Fix: Store dimensions before fullscreen and restore on exit
         final double[] savedDimensions = { 900, 720 };
         primaryStage.fullScreenProperty().addListener((obs, wasFullScreen, isFullScreen) -> {
             if (isFullScreen) {
@@ -78,8 +77,6 @@ public class MainMenu extends Application {
 
     public static void main(String[] args) {
 
-        // Solo esto si tienes problema con DPI en Windows
-        // System.setProperty("prism.allowhidpi", "false");
 
         LangConfig.loadLang();
         launch(args);

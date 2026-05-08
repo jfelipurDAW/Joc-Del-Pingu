@@ -107,30 +107,22 @@
       </VBox>
    </right>
 
-   <!-- BOTTOM BAR: Action Buttons + Event Log -->
+   <!-- BOTTOM BAR: Action Buttons (event log replaced by an animated
+        cinematic ticker overlay added programmatically in initialize()) -->
    <bottom>
-      <VBox spacing="8">
+      <FlowPane alignment="CENTER" hgap="12" vgap="8" rowValignment="CENTER" styleClass="action-bar">
          <padding>
-            <Insets top="8.0" />
+            <Insets bottom="8.0" left="10.0" right="10.0" top="8.0" />
          </padding>
-
-         <!-- Action Buttons (FlowPane so they wrap on narrow windows) -->
-         <FlowPane alignment="CENTER" hgap="12" vgap="8" rowValignment="CENTER" styleClass="action-bar">
-            <padding>
-               <Insets bottom="8.0" left="10.0" right="10.0" top="8.0" />
-            </padding>
-            <Button fx:id="rollDiceButton" mnemonicParsing="false" onAction="#rollDice" styleClass="btn-roll" text="🎲 Roll Dice" prefWidth="150" prefHeight="40" />
-            <Button fx:id="rollFastDiceButton" mnemonicParsing="false" onAction="#rollFastDice" styleClass="btn-fast-dice" text="🎲✨ Fast Dice" prefWidth="150" prefHeight="40" />
-            <Button fx:id="rollSlowDiceButton" mnemonicParsing="false" onAction="#rollSlowDice" styleClass="btn-slow-dice" text="🎲 Slow Dice" prefWidth="150" prefHeight="40" />
-            <Button fx:id="throwSnowballButton" mnemonicParsing="false" onAction="#throwSnowball" styleClass="btn-snowball" text="⛄ Throw Snowball" prefWidth="160" prefHeight="40" />
-            <Button fx:id="saveGameButton" mnemonicParsing="false" onAction="#saveGame" styleClass="btn-save" text="💾 Save Game" prefWidth="130" prefHeight="40" />
-            <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" styleClass="nav-btn-back" text="◀ Back" prefHeight="40" />
-            <Button fx:id="homeButton" mnemonicParsing="false" onAction="#handleReturnToMenu" styleClass="nav-btn-home" text="🏠 Menu" prefHeight="40" />
-         </FlowPane>
-
-         <!-- Event Log -->
-         <TextArea fx:id="eventLog" editable="false" prefHeight="80.0" wrapText="true" styleClass="event-log" promptText="Game events will appear here..." />
-      </VBox>
+         <Button fx:id="rollDiceButton" mnemonicParsing="false" onAction="#rollDice" styleClass="btn-roll" text="🎲 Roll Dice" prefWidth="150" prefHeight="40" />
+         <Button fx:id="rollFastDiceButton" mnemonicParsing="false" onAction="#rollFastDice" styleClass="btn-fast-dice" text="🎲✨ Fast Dice" prefWidth="150" prefHeight="40" />
+         <Button fx:id="rollSlowDiceButton" mnemonicParsing="false" onAction="#rollSlowDice" styleClass="btn-slow-dice" text="🎲 Slow Dice" prefWidth="150" prefHeight="40" />
+         <Button fx:id="throwSnowballButton" mnemonicParsing="false" onAction="#throwSnowball" styleClass="btn-snowball" text="⛄ Throw Snowball" prefWidth="160" prefHeight="40" />
+         <Button fx:id="saveGameButton" mnemonicParsing="false" onAction="#saveGame" styleClass="btn-save" text="💾 Save Game" prefWidth="130" prefHeight="40" />
+         <Button fx:id="historyButton" mnemonicParsing="false" onAction="#showEventHistory" styleClass="btn-history" text="📜 History" prefWidth="130" prefHeight="40" />
+         <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" styleClass="nav-btn-back" text="◀ Back" prefHeight="40" />
+         <Button fx:id="homeButton" mnemonicParsing="false" onAction="#handleReturnToMenu" styleClass="nav-btn-home" text="🏠 Menu" prefHeight="40" />
+      </FlowPane>
    </bottom>
     </BorderPane>
 </StackPane>

@@ -119,6 +119,30 @@ public class PlayerSetupController {
     @FXML
     private void handleStartGame() {
         GameSetupConfig.setLoadedGame(false);
+        List<Player> players = collectAndValidatePlayers();
+
+        if (players != null && !players.isEmpty()) {
+            GameSetupConfig.setPlayers(players);
+            GameSetupConfig.setSealEnabled(sealCheckBox.isSelected());
+
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/gameBoard.fxml"));
+                Parent gameBoardRoot = loader.load();
+                Stage stage = (Stage) rootPane.getScene().getWindow();
+                stage.setScene(new Scene(gameBoardRoot));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Builds the player list from the current input rows, validating each
+     * password. Returns null if validation fails, or the (possibly empty)
+     * list of valid players otherwise. Extracted so handleStartGame() does
+     * not need an early empty return.
+     */
+    private List<Player> collectAndValidatePlayers() {
         List<Player> players = new ArrayList<>();
 
         for (PlayerInput input : playerInputs) {
@@ -132,7 +156,7 @@ public class PlayerSetupController {
                         LangConfig.getLang(Lang.ALERT_WRONGPASSWORD_TITLE),
                         String.format(LangConfig.getLang(Lang.ALERT_WRONGPASSWORD_MESSAGE), name)
                     );
-                    return;
+                    return null;
                 }
 
                 Player player = new Player(name, color);
@@ -145,22 +169,7 @@ public class PlayerSetupController {
                 SaveLoadService.registerPlayer(name, password, color);
             }
         }
-
-        if (players.isEmpty()) {
-            return;
-        }
-
-        GameSetupConfig.setPlayers(players);
-        GameSetupConfig.setSealEnabled(sealCheckBox.isSelected());
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/gameBoard.fxml"));
-            Parent gameBoardRoot = loader.load();
-            Stage stage = (Stage) rootPane.getScene().getWindow();
-            stage.setScene(new Scene(gameBoardRoot));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return players;
     }
 
     private static class PlayerInput {
@@ -223,9 +232,16 @@ public class PlayerSetupController {
                 LangConfig.getLang(Lang.ALERT_NOPLAYERS_TITLE),
                 LangConfig.getLang(Lang.ALERT_NOPLAYERS_MESSAGE)
             );
-            return;
+        } else {
+            promptExistingPlayerChoice(existentes);
         }
+    }
 
+    /**
+     * Shows the existing-player picker dialog and assigns the selection.
+     * Extracted so handleSelectExistingPlayer() does not need an early return.
+     */
+    private void promptExistingPlayerChoice(List<Player> existentes) {
         List<String> nombres = existentes.stream().map(Player::getName).collect(Collectors.toList());
 
         javafx.scene.control.ChoiceDialog<String> dialog =

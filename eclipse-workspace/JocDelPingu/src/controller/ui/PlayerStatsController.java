@@ -54,12 +54,14 @@ public class PlayerStatsController {
         if (stats.isEmpty()) {
             noDataLabel.setVisible(true);
             noDataLabel.setManaged(true);
-            return;
+        } else {
+            noDataLabel.setVisible(false);
+            noDataLabel.setManaged(false);
+            renderStatsRows(stats);
         }
+    }
 
-        noDataLabel.setVisible(false);
-        noDataLabel.setManaged(false);
-
+    private void renderStatsRows(ArrayList<LinkedHashMap<String, String>> stats) {
         int rank = 1;
         for (LinkedHashMap<String, String> row : stats) {
             String name = row.get("PLAYERNAME");

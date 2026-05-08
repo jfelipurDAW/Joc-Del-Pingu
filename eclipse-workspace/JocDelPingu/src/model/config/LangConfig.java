@@ -76,13 +76,13 @@ public class LangConfig {
                     System.err.println("Falling back to default language: " + DEFAULT_LANG);
                     internalLoad(DEFAULT_LANG);
                 }
-                return;
-            }
-            data = yaml.load(inputStream);
-            currentLang = langCode;
+            } else {
+                data = yaml.load(inputStream);
+                currentLang = langCode;
 
-            // Notify all registered listeners that language has changed
-            notifyListeners();
+                // Notify all registered listeners that language has changed
+                notifyListeners();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

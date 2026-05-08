@@ -3,7 +3,9 @@
     "allow": [
       "Bash(find src *)",
       "Read(//tmp/**)",
-      "Bash(javac -version)"
+      "Bash(javac -version)",
+      "Bash(awk '{for\\(i=1;i<=length\\($0\\);i++\\){c=substr\\($0,i,1\\);if\\(c==\"{\"\\)o++;if\\(c==\"}\"\\)cl++}}END{print \"open:\"o, \"close:\"cl, \"diff:\"o-cl}' \"d:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/controller/ui/GameBoardController.java\")",
+      "Bash(awk '{for\\(i=1;i<=length\\($0\\);i++\\){c=substr\\($0,i,1\\);if\\(c==\"{\"\\)o++;if\\(c==\"}\"\\)cl++}}END{print \"open:\"o, \"close:\"cl, \"diff:\"o-cl}' \"d:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/model/game/SaveLoadService.java\")"
     ]
   }
 }

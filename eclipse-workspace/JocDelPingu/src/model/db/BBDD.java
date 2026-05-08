@@ -153,26 +153,24 @@ public class BBDD {
 	 *                                    columnas seleccionadas.
 	 */
 	public static void print(Connection con, String sql, String[] listaElementosSeleccionados) {
-		if (con == null) {
-			return;
-		}
+		if (con != null) {
+			try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
 
-		try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+				int fila = 0;
+				boolean hayResultados = false;
 
-			int fila = 0;
-			boolean hayResultados = false;
-
-			while (rs.next()) {
-				hayResultados = true;
-				fila++;
-				System.out.println("---- Fila " + fila + " ----");
-				for (String col : listaElementosSeleccionados) {
-					System.out.println(col + ": " + rs.getString(col));
+				while (rs.next()) {
+					hayResultados = true;
+					fila++;
+					System.out.println("---- Fila " + fila + " ----");
+					for (String col : listaElementosSeleccionados) {
+						System.out.println(col + ": " + rs.getString(col));
+					}
 				}
-			}
 
-		} catch (SQLException e) {
-			// error in SELECT execution
+			} catch (SQLException e) {
+				// error in SELECT execution
+			}
 		}
 	}
 

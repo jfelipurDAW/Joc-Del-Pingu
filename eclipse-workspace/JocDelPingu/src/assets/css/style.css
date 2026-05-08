@@ -26,20 +26,20 @@
     /* Title keeps the chunky Pixel Game face for the logo look */
     -fx-font-family: "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
     -fx-font-weight: 900;
-    -fx-font-size: 100px;
+    -fx-font-size: 160px;
     -fx-fill: #ffffff;
-    -fx-translate-y: -20;
+    -fx-translate-y: -32;
 }
 
 .mainmenu_title_shadow {
     -fx-font-family: "Pixel Game Extrude", "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
     -fx-font-weight: 900;
-    -fx-font-size: 100px;
+    -fx-font-size: 160px;
     -fx-fill: linear-gradient(to right, #f4f4f5 0%, #77bbf3 100%);
-    -fx-translate-y: -18;
+    -fx-translate-y: -29;
     -fx-translate-x: 0;
     -fx-font-kerning: off;
-    -fx-letter-spacing: -5px;
+    -fx-letter-spacing: -8px;
 }
 
 /* =================================================================
@@ -91,6 +91,55 @@
             #2c8ec0 14%,   #2c8ec0 75%,
             #4099d1 75%,   #4099d1 88%,
             #4eb1de 88%,   #4eb1de 100%);
+    -fx-translate-y: 1;
+}
+
+/* =================================================================
+   PLAYER-SETUP "Select Existing Player" BUTTON
+   Same dimensions as the Start Game / New Game button so the two
+   primary actions match in the setup HBox, but kept wine-red as a
+   visual cue that it is a secondary "load existing" action.
+   ================================================================= */
+.setup-btn-existing {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #ff8a9a 0%,    #ff8a9a 14%,
+            #c83244 14%,   #c83244 75%,
+            #a71f30 75%,   #a71f30 88%,
+            #7d1421 88%,   #7d1421 100%);
+    -fx-background-insets: 0, 5;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-font-family: "FS Pixel Sans Unicode Regular", "Pixel Game", "Segoe UI", sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 34px;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 12 32;
+    -fx-min-height: 68px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(two-pass-box, #2c1535, 0, 0, 4, 5);
+}
+
+.setup-btn-existing:hover {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #ffa6b3 0%,    #ffa6b3 14%,
+            #d54355 14%,   #d54355 75%,
+            #b62a3c 75%,   #b62a3c 88%,
+            #8c1825 88%,   #8c1825 100%);
+    -fx-translate-y: -2;
+}
+
+.setup-btn-existing:pressed {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #7d1421 0%,    #7d1421 14%,
+            #a71f30 14%,   #a71f30 75%,
+            #c83244 75%,   #c83244 88%,
+            #e74c5e 88%,   #e74c5e 100%);
     -fx-translate-y: 1;
 }
 

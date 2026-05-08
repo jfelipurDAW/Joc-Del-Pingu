@@ -14,6 +14,7 @@ import model.item.objects.Dice;
 
 import javafx.animation.*;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -22,11 +23,14 @@ import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.util.Duration;
 
@@ -69,7 +73,19 @@ public class GameBoardController {
     @FXML private Label sealBlockedLabel;
     @FXML private VBox rightPanel;
 
-    @FXML private TextArea eventLog;
+    @FXML private Button historyButton;
+
+    // --- Event history backing list (no on-screen ticker; the full
+    //     log is reachable through the "📜 History" button on the action bar)
+    private final java.util.List<String> eventHistoryFull = new ArrayList<>();
+
+    // --- Debug mode (Ctrl+Shift+D) ---
+    // Lets the developer drag a player token to any cell and pre-set the
+    // value of the next dice roll. Off by default, no effect on normal play.
+    private boolean debugMode = false;
+    private Integer debugForcedDice = null;
+    private HBox debugPanel;
+    private Label debugBannerLabel;
 
     // --- Game State ---
     private Board gameBoard;
@@ -172,6 +188,14 @@ public class GameBoardController {
         fastDice    = new Dice(ObjectType.FASTDICE);
         slowDice    = new Dice(ObjectType.SLOWDICE);
 
+        // Overlays must be created before any logEvent / drawBoard call —
+        // both can be invoked from within initialize() (game-start log,
+        // resize listener) and they rely on these containers existing.
+        animationOverlay = new StackPane();
+        animationOverlay.setMouseTransparent(true);
+        animationOverlay.setStyle("-fx-background-color: transparent;");
+        mainStack.getChildren().add(animationOverlay);
+
         drawBoard();
         applyCss();
         updateHUD();
@@ -184,12 +208,11 @@ public class GameBoardController {
         }
         logEvent("🎯 " + getCurrentPlayer().getName() + "'s turn!");
 
+        // Music has likely been playing since the main menu — make sure it is
+        // running. Volume stays at the menu level for the whole game so the
+        // background track sounds the same as on the main menu.
         model.game.SoundManager.getInstance().startBackgroundMusic();
-
-        animationOverlay = new StackPane();
-        animationOverlay.setMouseTransparent(true);
-        animationOverlay.setStyle("-fx-background-color: transparent;");
-        mainStack.getChildren().add(animationOverlay);
+        model.game.SoundManager.getInstance().restoreMenuVolume();
 
         // Redraw the board once the container has its real layout size,
         // and again whenever the window is resized (width OR height) — no bindings, no loop.
@@ -198,6 +221,180 @@ public class GameBoardController {
         };
         boardContainer.widthProperty().addListener(resizeListener);
         boardContainer.heightProperty().addListener(resizeListener);
+
+        // Ctrl+Shift+D toggles a developer debug mode (drag pingu, force dice).
+        // Registered on the scene as soon as the FXML is attached.
+        mainStack.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.addEventFilter(KeyEvent.KEY_PRESSED, ev -> {
+                    if (ev.isControlDown() && ev.isShiftDown() && ev.getCode() == KeyCode.D) {
+                        toggleDebugMode();
+                        ev.consume();
+                    }
+                });
+            }
+        });
+    }
+
+    // ============================================
+    //  DEBUG MODE  (Ctrl+Shift+D)
+    // ============================================
+
+    private void toggleDebugMode() {
+        debugMode = !debugMode;
+        if (debugPanel == null) {
+            buildDebugPanel();
+        }
+        debugPanel.setVisible(debugMode);
+        debugPanel.setManaged(debugMode);
+        if (!debugMode) {
+            debugForcedDice = null;
+            updateDebugBanner();
+        }
+        // Redraw so player tokens pick up (or drop) drag handlers/cursor.
+        drawBoard();
+    }
+
+    private void buildDebugPanel() {
+        debugBannerLabel = new Label("🛠 DEBUG ON  ");
+        debugBannerLabel.setStyle("-fx-text-fill: #ffeb3b; -fx-font-weight: 900; -fx-font-size: 14px;");
+
+        Label forceLbl = new Label("Force next roll:");
+        forceLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 13px;");
+
+        TextField diceField = new TextField();
+        diceField.setPrefWidth(60);
+        diceField.setPromptText("1-50");
+
+        Button setBtn = new Button("Set");
+        setBtn.setOnAction(e -> {
+            try {
+                int v = Integer.parseInt(diceField.getText().trim());
+                if (v >= 1 && v <= 50) {
+                    debugForcedDice = v;
+                    updateDebugBanner();
+                    diceField.clear();
+                }
+            } catch (NumberFormatException ignored) {
+                // silently ignore invalid input — debug-only UI
+            }
+        });
+
+        Button clearBtn = new Button("Clear");
+        clearBtn.setOnAction(e -> {
+            debugForcedDice = null;
+            updateDebugBanner();
+        });
+
+        Label hint = new Label("    Drag any 🐧 to teleport.");
+        hint.setStyle("-fx-text-fill: #a0c4ff; -fx-font-size: 12px;");
+
+        debugPanel = new HBox(8, debugBannerLabel, forceLbl, diceField, setBtn, clearBtn, hint);
+        debugPanel.setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 6 14;");
+        debugPanel.setAlignment(Pos.CENTER_LEFT);
+        debugPanel.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        debugPanel.setMouseTransparent(false);
+        debugPanel.setVisible(false);
+        debugPanel.setManaged(false);
+
+        StackPane.setAlignment(debugPanel, Pos.TOP_CENTER);
+        StackPane.setMargin(debugPanel, new javafx.geometry.Insets(2, 0, 0, 0));
+        mainStack.getChildren().add(debugPanel);
+    }
+
+    private void updateDebugBanner() {
+        if (debugBannerLabel != null) {
+            debugBannerLabel.setText(debugForcedDice != null
+                ? "🛠 DEBUG ON — next: " + debugForcedDice + "  "
+                : "🛠 DEBUG ON  ");
+        }
+    }
+
+    /**
+     * Returns either the forced debug value (and consumes it) or the dice's
+     * normal random roll. Used by all three roll handlers.
+     */
+    private int rollOrForce(model.item.objects.Dice dice) {
+        if (debugForcedDice != null) {
+            int v = debugForcedDice;
+            debugForcedDice = null;
+            updateDebugBanner();
+            return v;
+        }
+        return dice.roll();
+    }
+
+    /**
+     * Attaches mouse-drag handlers to a player token while debug mode is on.
+     * On release, the cell under the cursor is computed and the player is
+     * teleported there. The board is then redrawn from scratch.
+     */
+    private void attachDebugDragHandlers(StackPane playerToken, Player player) {
+        playerToken.setCursor(Cursor.OPEN_HAND);
+        final double[] startTranslate = new double[2];
+        final double[] startMouse = new double[2];
+
+        playerToken.setOnMousePressed(e -> {
+            if (debugMode) {
+                startTranslate[0] = playerToken.getTranslateX();
+                startTranslate[1] = playerToken.getTranslateY();
+                startMouse[0] = e.getSceneX();
+                startMouse[1] = e.getSceneY();
+                playerToken.setCursor(Cursor.CLOSED_HAND);
+                // Lift the parent cell to the front of the GridPane so the
+                // dragged token isn't covered by later cells when moving
+                // forward (GridPane renders children in insertion order, so
+                // squares with a higher index were on top by default).
+                Node parentCell = playerToken.getParent();
+                if (parentCell != null) {
+                    parentCell.toFront();
+                }
+                playerToken.toFront();
+                e.consume();
+            }
+        });
+
+        playerToken.setOnMouseDragged(e -> {
+            if (debugMode) {
+                double dx = e.getSceneX() - startMouse[0];
+                double dy = e.getSceneY() - startMouse[1];
+                playerToken.setTranslateX(startTranslate[0] + dx);
+                playerToken.setTranslateY(startTranslate[1] + dy);
+                e.consume();
+            }
+        });
+
+        playerToken.setOnMouseReleased(e -> {
+            if (debugMode) {
+                int targetIndex = findCellIndexAt(e.getSceneX(), e.getSceneY());
+                if (targetIndex >= 0) {
+                    player.setSquare(targetIndex);
+                    logEvent("🛠 DEBUG: " + player.getName() + " teleported to square " + targetIndex);
+                }
+                playerToken.setCursor(Cursor.OPEN_HAND);
+                drawBoard();
+                e.consume();
+            }
+        });
+    }
+
+    /**
+     * Finds the snake-pattern square index of the cell under the given scene
+     * coordinates, or -1 if no cell contains the point.
+     */
+    private int findCellIndexAt(double sceneX, double sceneY) {
+        int cols = Board.widthBoard;
+        for (Node child : grid.getChildren()) {
+            Bounds b = child.localToScene(child.getBoundsInLocal());
+            if (b.contains(sceneX, sceneY)) {
+                Integer col = GridPane.getColumnIndex(child);
+                Integer row = GridPane.getRowIndex(child);
+                if (col != null && row != null) {
+                    return row * cols + (row % 2 == 0 ? col : cols - 1 - col);
+                }
+            }
+        }
+        return -1;
     }
 
     private void initializePlayers() {
@@ -237,57 +434,67 @@ public class GameBoardController {
 
     @FXML
     private void rollDice() {
-        if (gameOver) return;
-        int result = defaultDice.roll();
-        processDiceRoll(result, "Normal");
+        if (!gameOver) {
+            int result = rollOrForce(defaultDice);
+            processDiceRoll(result, "Normal");
+        }
     }
 
     @FXML
     private void rollFastDice() {
-        if (gameOver) return;
-        Player current = getCurrentPlayer();
-        if (current.getInventory().getObjectQuantity(ObjectType.FASTDICE) > 0) {
-            current.getInventory().useObject(ObjectType.FASTDICE, 1);
-            int result = fastDice.roll();
-            processDiceRoll(result, "Fast");
-        } else {
-            showAlert("No Fast Dice", "You don't have any fast dice! Land on event squares to find some.");
+        if (!gameOver) {
+            Player current = getCurrentPlayer();
+            if (current.getInventory().getObjectQuantity(ObjectType.FASTDICE) > 0) {
+                current.getInventory().useObject(ObjectType.FASTDICE, 1);
+                int result = rollOrForce(fastDice);
+                processDiceRoll(result, "Fast");
+            } else {
+                showAlert("No Fast Dice", "You don't have any fast dice! Land on event squares to find some.");
+            }
         }
     }
 
     @FXML
     private void rollSlowDice() {
-        if (gameOver) return;
-        Player current = getCurrentPlayer();
-        if (current.getInventory().getObjectQuantity(ObjectType.SLOWDICE) > 0) {
-            current.getInventory().useObject(ObjectType.SLOWDICE, 1);
-            int result = slowDice.roll();
-            processDiceRoll(result, "Slow");
-        } else {
-            showAlert("No Slow Dice", "You don't have any slow dice in your inventory!");
+        if (!gameOver) {
+            Player current = getCurrentPlayer();
+            if (current.getInventory().getObjectQuantity(ObjectType.SLOWDICE) > 0) {
+                current.getInventory().useObject(ObjectType.SLOWDICE, 1);
+                int result = rollOrForce(slowDice);
+                processDiceRoll(result, "Slow");
+            } else {
+                showAlert("No Slow Dice", "You don't have any slow dice in your inventory!");
+            }
         }
     }
 
     @FXML
     private void throwSnowball() {
-        if (gameOver) return;
+        if (!gameOver) {
+            beginThrowSnowball();
+        }
+    }
+
+    private void beginThrowSnowball() {
         Player current = getCurrentPlayer();
 
         if (current.getInventory().getObjectQuantity(ObjectType.SNOWBALL) <= 0) {
             showAlert("No Snowballs", "You don't have any snowballs! Land on event squares to find some.");
-            return;
-        }
+        } else {
+            List<Player> targets = new ArrayList<>();
+            for (Entity e : turnController.getAllPlayers()) {
+                if (e instanceof Player && e != current) targets.add((Player) e);
+            }
 
-        List<Player> targets = new ArrayList<>();
-        for (Entity e : turnController.getAllPlayers()) {
-            if (e instanceof Player && e != current) targets.add((Player) e);
+            if (targets.isEmpty()) {
+                showAlert("No Targets", "There are no other players to throw snowballs at!");
+            } else {
+                promptSnowballTargetAndThrow(current, targets);
+            }
         }
+    }
 
-        if (targets.isEmpty()) {
-            showAlert("No Targets", "There are no other players to throw snowballs at!");
-            return;
-        }
-
+    private void promptSnowballTargetAndThrow(Player current, List<Player> targets) {
         ChoiceDialog<String> dialog = new ChoiceDialog<>();
         dialog.setTitle("Throw Snowball ⛄");
         dialog.setHeaderText("Choose a target to hit with a snowball!");
@@ -349,16 +556,21 @@ public class GameBoardController {
 
     private void processDiceRoll(int diceResult, String diceType) {
         disableActions();
-        model.game.SoundManager.getInstance().playDiceSound();
         Player current = getCurrentPlayer();
         int startSquare = current.getSquareIndex();
 
         logEvent("🎲 " + current.getName() + " rolled " + diceResult + " (" + diceType + " die)");
 
+        // Delay the SFX so it lines up with the rolling-dice GIF instead of
+        // firing the moment the button is clicked.
+        PauseTransition diceSoundDelay = new PauseTransition(Duration.millis(1500));
+        diceSoundDelay.setOnFinished(e -> model.game.SoundManager.getInstance().playDiceSound());
+        diceSoundDelay.play();
+
         showDiceAnimation(() -> {
-            diceResultLabel.setText("🎲 " + diceResult);
-            animateDiceResult();
-            runDiceMovement(current, startSquare, diceResult, diceType);
+            showDiceResultBadge(diceResult, () ->
+                runDiceMovement(current, startSquare, diceResult, diceType)
+            );
         });
     }
 
@@ -372,55 +584,57 @@ public class GameBoardController {
             current.recordEvent("🎲" + diceResult + " (" + diceType + ") → " + moveMsg);
             drawBoard();
 
-            if (gameManager.isGameOver()) { handleWin(gameManager.getWinner()); return; }
-
-            if (moveResult != null) {
-                switch (moveResult.getType()) {
-                    case BEAR_ATTACK:
-                        model.game.SoundManager.getInstance().playBearSound();
-                        showBearAnimation();
-                        flashDamage(current);
-                        break;
-                    case ICE_HOLE:
-                    case BROKEN_FLOOR_FALL:
-                    case BROKEN_FLOOR_LOSE_ITEM:
-                        flashDamage(current);
-                        break;
-                    case EVENT:
-                        model.game.SoundManager.getInstance().playEventSound();
-                        break;
-                    default: break;
-                }
-            }
-
-            List<Player> collisions = turnController.getPlayersAtSquare(current.getSquareIndex(), current);
-            if (!collisions.isEmpty()) {
-                for (Player other : collisions) handlePlayerWar(current, other);
-                drawBoard();
-            }
-
-            if (sealEnabled && seal != null && seal.getSquareIndex() == current.getSquareIndex()) {
-                model.game.SoundManager.getInstance().playSealSound();
-                showSealAnimation();
-                model.game.ActionResult sealResult = gameManager.getPlayerManager().handleSealInteraction(seal, current);
-                String sealMsg = formatActionMessage(sealResult);
-                logEvent(sealMsg);
-                current.recordEvent(sealMsg);
-                if (sealResult != null) {
-                    switch (sealResult.getType()) {
-                        case SEAL_HIT_HOLE:
-                        case SEAL_HIT_START:
-                        case SEAL_PASS:
+            if (gameManager.isGameOver()) {
+                handleWin(gameManager.getWinner());
+            } else {
+                if (moveResult != null) {
+                    switch (moveResult.getType()) {
+                        case BEAR_ATTACK:
+                            model.game.SoundManager.getInstance().playBearSound();
+                            showBearAnimation();
                             flashDamage(current);
+                            break;
+                        case ICE_HOLE:
+                        case BROKEN_FLOOR_FALL:
+                        case BROKEN_FLOOR_LOSE_ITEM:
+                            flashDamage(current);
+                            break;
+                        case EVENT:
+                            model.game.SoundManager.getInstance().playEventSound();
                             break;
                         default: break;
                     }
                 }
-                drawBoard();
-            }
 
-            updateHUD();
-            endTurn();
+                List<Player> collisions = turnController.getPlayersAtSquare(current.getSquareIndex(), current);
+                if (!collisions.isEmpty()) {
+                    for (Player other : collisions) handlePlayerWar(current, other);
+                    drawBoard();
+                }
+
+                if (sealEnabled && seal != null && seal.getSquareIndex() == current.getSquareIndex()) {
+                    model.game.SoundManager.getInstance().playSealSound();
+                    showSealAnimation();
+                    model.game.ActionResult sealResult = gameManager.getPlayerManager().handleSealInteraction(seal, current);
+                    String sealMsg = formatActionMessage(sealResult);
+                    logEvent(sealMsg);
+                    current.recordEvent(sealMsg);
+                    if (sealResult != null) {
+                        switch (sealResult.getType()) {
+                            case SEAL_HIT_HOLE:
+                            case SEAL_HIT_START:
+                            case SEAL_PASS:
+                                flashDamage(current);
+                                break;
+                            default: break;
+                        }
+                    }
+                    drawBoard();
+                }
+
+                updateHUD();
+                endTurn();
+            }
         });
     }
 
@@ -429,14 +643,15 @@ public class GameBoardController {
      * and then clears the flag so the idle sprite returns automatically.
      */
     private void flashDamage(Entity entity) {
-        if (entity == null) return;
-        entity.setDamaged(true);
-        drawBoard();
-        Timeline t = new Timeline(new KeyFrame(Duration.millis(450), e -> {
-            entity.setDamaged(false);
+        if (entity != null) {
+            entity.setDamaged(true);
             drawBoard();
-        }));
-        t.play();
+            Timeline t = new Timeline(new KeyFrame(Duration.millis(450), e -> {
+                entity.setDamaged(false);
+                drawBoard();
+            }));
+            t.play();
+        }
     }
 
     /** Look up a Player in the current game by name (used for seal-turn log results). */
@@ -467,22 +682,24 @@ public class GameBoardController {
     }
 
     private void endTurn() {
-        if (gameOver) return;
-        turnController.nextTurn();
-        if (sealEnabled && seal != null && turnController.getCurrentTurnIndex() == 0) {
-            playSealTurnAnimated();
-            return;
+        if (!gameOver) {
+            turnController.nextTurn();
+            if (sealEnabled && seal != null && turnController.getCurrentTurnIndex() == 0) {
+                playSealTurnAnimated();
+            } else {
+                startNextPlayerTurn();
+            }
         }
-        startNextPlayerTurn();
     }
 
     private void startNextPlayerTurn() {
-        if (gameOver) return;
-        updateHUD();
-        enableActions();
-        Player next = getCurrentPlayer();
-        logEvent("──────────────────");
-        logEvent("🎯 " + next.getName() + "'s turn!");
+        if (!gameOver) {
+            updateHUD();
+            enableActions();
+            Player next = getCurrentPlayer();
+            logEvent("──────────────────");
+            logEvent("🎯 " + next.getName() + "'s turn!");
+        }
     }
 
     private void playSealTurnAnimated() {
@@ -522,14 +739,17 @@ public class GameBoardController {
             if (seal.getSquareIndex() >= Board.MAX_SQUARES - 1) {
                 logEvent("🦭 THE SEAL REACHED THE END! ALL PLAYERS LOSE!");
                 gameOver = true;
+                this.winner = "Seal";
                 disableActions();
+                model.game.SoundManager.getInstance().restoreMenuVolume();
                 SaveLoadService.recordGameResult(turnController.getAllPlayers(), null);
-                showAlert("Game Over!", "🦭 The Seal won the game! Better luck next time!");
-                return;
+                drawBoard();
+                showSealWinAnimation();
+            } else {
+                drawBoard();
+                updateSealStatus();
+                startNextPlayerTurn();
             }
-            drawBoard();
-            updateSealStatus();
-            startNextPlayerTurn();
         });
         sealTimeline.getKeyFrames().add(finalFrame);
         sealTimeline.play();
@@ -541,9 +761,12 @@ public class GameBoardController {
 
         if (atkBalls == 0 && defBalls == 0) {
             logEvent("⚔️ " + attacker.getName() + " and " + defender.getName() + " meet on the same square, but neither has snowballs!");
-            return;
+        } else {
+            executeSnowballWar(attacker, defender);
         }
+    }
 
+    private void executeSnowballWar(Player attacker, Player defender) {
         logEvent("⚔️ SNOWBALL WAR! " + attacker.getName() + " vs " + defender.getName() + "!");
         model.game.ActionResult warResult = gameManager.getPlayerManager().snowballWar(attacker, defender);
         String warMsg = formatActionMessage(warResult);
@@ -696,7 +919,10 @@ public class GameBoardController {
         HBox.setHgrow(leftSpacer, Priority.ALWAYS);
         HBox.setHgrow(rightSpacer, Priority.ALWAYS);
 
-        hotbar.getChildren().addAll(playerInfo, leftSpacer, titleStack, rightSpacer, slots);
+        // Inventory / dice slots are now anchored on the LEFT next to the
+        // player sprite; spacers keep the game-title centered with empty
+        // space on both sides.
+        hotbar.getChildren().addAll(playerInfo, slots, leftSpacer, titleStack, rightSpacer);
 
         return hotbar;
     }
@@ -753,7 +979,14 @@ public class GameBoardController {
     private void drawBoard() {
         // Re-entrancy guard: prevents the listener on boardContainer.widthProperty()
         // from triggering a second drawBoard() while we are still inside one.
-        if (isRedrawing) return;
+        if (isRedrawing) {
+            // already drawing — skip this call
+        } else {
+            redrawBoardOnce();
+        }
+    }
+
+    private void redrawBoardOnce() {
         isRedrawing = true;
         try {
             int cols = Board.widthBoard;
@@ -850,8 +1083,9 @@ public class GameBoardController {
 
         if (sealEnabled && seal != null && seal.getSquareIndex() == squareIndex) {
             // Cap the seal to ~55% of the cell on its longest axis, then size the
-            // canvas to match the sprite's actual aspect ratio so BOTTOM_RIGHT
-            // alignment puts the seal flush in the corner (no letterbox gap).
+            // canvas to match the sprite's actual aspect ratio. The seal is
+            // centered so it shares the same horizontal "lane" as the player
+            // tokens (which are also centered in the StackPane).
             double sealMax = Math.max(cellSize * 0.55, 1.0);
             // Direction follows the snake-row direction, like the players
             int sealRow = squareIndex / Board.widthBoard;
@@ -867,15 +1101,13 @@ public class GameBoardController {
                 GraphicsContext gc = sealCanvas.getGraphicsContext2D();
                 gc.setImageSmoothing(false);
                 gc.drawImage(sealSprite, 0, 0, sw, sh, 0, 0, dw, dh);
-                StackPane.setAlignment(sealCanvas, Pos.BOTTOM_RIGHT);
-                // Tiny pixel-art margin so the sprite isn't glued to the very edge
-                StackPane.setMargin(sealCanvas, new javafx.geometry.Insets(0, 2, 2, 0));
+                StackPane.setAlignment(sealCanvas, Pos.CENTER);
                 cell.getChildren().add(sealCanvas);
             } else {
                 Label sealLabel = new Label("🦭");
                 int fontSize = Math.max(8, (int)(cellSize * 0.3));
                 sealLabel.setStyle("-fx-font-size: " + fontSize + ";");
-                StackPane.setAlignment(sealLabel, Pos.BOTTOM_RIGHT);
+                StackPane.setAlignment(sealLabel, Pos.CENTER);
                 cell.getChildren().add(sealLabel);
             }
         }
@@ -908,7 +1140,12 @@ public class GameBoardController {
         for (Entity e : turnController.getAllPlayers()) {
             if (e instanceof Player && e.getSquareIndex() == squareIndex) playersHere.add((Player) e);
         }
-        if (playersHere.isEmpty()) return;
+        if (!playersHere.isEmpty()) {
+            renderPlayersOnCell(cell, squareIndex, cellSize, playersHere);
+        }
+    }
+
+    private void renderPlayersOnCell(StackPane cell, int squareIndex, double cellSize, List<Player> playersHere) {
 
         // Snake-pattern board: even rows go left→right (face right),
         // odd rows go right→left (face left). Direction follows the row,
@@ -969,6 +1206,11 @@ public class GameBoardController {
 
             // Centre the group of tokens horizontally within the cell
             playerToken.setTranslateX((idx - (count - 1) / 2.0) * spacingVal);
+            // While debug mode is on, every player token can be dragged to
+            // any cell of the board to teleport that player.
+            if (debugMode) {
+                attachDebugDragHandlers(playerToken, player);
+            }
             cell.getChildren().add(playerToken);
         }
     }
@@ -977,13 +1219,37 @@ public class GameBoardController {
     //  ANIMATIONS
     // ============================================
 
-    private void animateDiceResult() {
-        ScaleTransition scale = new ScaleTransition(Duration.millis(300), diceResultLabel);
-        scale.setFromX(0.5); scale.setFromY(0.5);
-        scale.setToX(1.2);   scale.setToY(1.2);
-        scale.setCycleCount(2);
-        scale.setAutoReverse(true);
-        scale.play();
+    /**
+     * Pixel-art overlay that flashes the dice result over the board for ~1s
+     * after the rolling-dice GIF finishes and before the player walks. Gives
+     * visible feedback of the rolled number (the original {@code diceResultLabel}
+     * lives in an FXML HBox that gets replaced by the hotbar in updateHUD).
+     */
+    private void showDiceResultBadge(int diceResult, Runnable onFinished) {
+        Label badge = new Label("🎲 " + diceResult);
+        badge.getStyleClass().add("dice-result-badge");
+        badge.setOpacity(0);
+        StackPane.setAlignment(badge, Pos.CENTER);
+        animationOverlay.getChildren().add(badge);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(120), badge);
+        fadeIn.setFromValue(0); fadeIn.setToValue(1);
+
+        ScaleTransition pop = new ScaleTransition(Duration.millis(180), badge);
+        pop.setFromX(0.6); pop.setFromY(0.6);
+        pop.setToX(1.0);   pop.setToY(1.0);
+
+        PauseTransition stay = new PauseTransition(Duration.millis(700));
+
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(200), badge);
+        fadeOut.setFromValue(1); fadeOut.setToValue(0);
+        fadeOut.setOnFinished(e -> {
+            animationOverlay.getChildren().remove(badge);
+            if (onFinished != null) onFinished.run();
+        });
+
+        new ParallelTransition(fadeIn, pop).play();
+        new SequentialTransition(new PauseTransition(Duration.millis(180)), stay, fadeOut).play();
     }
 
     private void showDiceAnimation(Runnable onFinished) {
@@ -991,8 +1257,12 @@ public class GameBoardController {
         if (is == null) {
             System.err.println("Dice animation not found: /assets/dice/dados.gif");
             if (onFinished != null) onFinished.run();
-            return;
+        } else {
+            playDiceGifOverlay(is, onFinished);
         }
+    }
+
+    private void playDiceGifOverlay(InputStream is, Runnable onFinished) {
         Image gif = new Image(is);
         ImageView view = new ImageView(gif);
         view.setPreserveRatio(true);
@@ -1039,8 +1309,25 @@ public class GameBoardController {
     private Player getCurrentPlayer() { return (Player) turnController.getCurrentTurn(); }
 
     private void logEvent(String message) {
-        eventLog.appendText(message + "\n");
-        eventLog.setScrollTop(Double.MAX_VALUE);
+        if (message != null && !message.isBlank()) {
+            eventHistoryFull.add(message);
+        }
+    }
+
+    @FXML
+    private void showEventHistory() {
+        javafx.scene.control.Dialog<Void> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("📜 Event History");
+        dialog.setHeaderText("All events for this game");
+
+        TextArea ta = new TextArea(String.join("\n", eventHistoryFull));
+        ta.setEditable(false);
+        ta.setWrapText(true);
+        ta.setPrefSize(520, 400);
+
+        dialog.getDialogPane().setContent(ta);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.showAndWait();
     }
 
     private void disableActions() {
@@ -1081,7 +1368,7 @@ public class GameBoardController {
         gameOver = true;
         this.winner = winner.getName();
         disableActions();
-        model.game.SoundManager.getInstance().stopBackgroundMusic();
+        model.game.SoundManager.getInstance().restoreMenuVolume();
         logEvent("🏆 GAME OVER! " + winner.getName() + " HAS WON THE GAME! 🏆");
         SaveLoadService.recordGameResult(turnController.getAllPlayers(), winner.getName());
         drawBoard();
@@ -1153,35 +1440,133 @@ public class GameBoardController {
     }
 
     private void showWinAnimation(Player winner) {
+        showWinAnimation(winner.getName(), buildPlayerCharacterNode(winner, 200));
+    }
+
+    private void showSealWinAnimation() {
+        showWinAnimation("THE SEAL", buildSealCharacterNode(200));
+    }
+
+    /**
+     * Win screen: dark backdrop with the winner's crown, sprite, name and
+     * a back-to-menu button. The sprite gently bobs up and down to give
+     * the scene some life.
+     */
+    private void showWinAnimation(String winnerName, Node characterNode) {
         animationOverlay.setMouseTransparent(false);
 
-        VBox winBox = new VBox(20);
+        StackPane root = new StackPane();
+        root.setStyle("-fx-background-color: rgba(8, 18, 35, 0.92);");
+        root.prefWidthProperty().bind(animationOverlay.widthProperty());
+        root.prefHeightProperty().bind(animationOverlay.heightProperty());
+
+        // Build winner content: 👑 crown + sprite + name + back button
+        VBox winBox = new VBox(18);
         winBox.setAlignment(Pos.CENTER);
-        winBox.setStyle("-fx-background-color: rgba(0,0,0,0.8); -fx-padding: 50;");
+        winBox.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         Label crown = new Label("👑");
-        crown.setFont(new Font("System", 100));
+        crown.setStyle("-fx-font-size: 110px;");
+        // Tint the emoji to bright yellow using the same Lighting trick that
+        // tints player sprites in the hotbar — surfaceScale 0 makes the light
+        // colour fully replace the underlying pixels' colour.
+        Lighting crownTint = new Lighting(new Light.Distant(45, 90, Color.web("#ffeb3b")));
+        crownTint.setSurfaceScale(0.0);
+        crown.setEffect(crownTint);
 
-        Label title = new Label(winner.getName() + " WINS!");
-        title.setStyle("-fx-font-family: 'Courier New'; -fx-font-size: 60px; -fx-text-fill: gold; -fx-font-weight: bold;");
-
-        Label subtitle = new Label("🎉 Congratulations! 🎉");
-        subtitle.setStyle("-fx-font-size: 24px; -fx-text-fill: #a0d8ef;");
+        Label title = new Label(winnerName + " WINS!");
+        title.getStyleClass().add("win-title");
 
         Button backBtn = new Button(model.config.LangConfig.getLang(model.config.Lang.GAME_BACK_TO_MENU));
         backBtn.getStyleClass().add("nav-btn-home");
         backBtn.setStyle("-fx-font-size: 22px; -fx-padding: 14 40;");
         backBtn.setOnAction(e -> {
-            model.game.SoundManager.getInstance().stopBackgroundMusic();
+            model.game.SoundManager.getInstance().restoreMenuVolume();
             navigateTo("/view/fxml/mainMenu.fxml", "/assets/css/style.css");
         });
 
-        winBox.getChildren().addAll(crown, title, subtitle, backBtn);
-        animationOverlay.getChildren().add(winBox);
+        if (characterNode != null) {
+            winBox.getChildren().addAll(crown, characterNode, title, backBtn);
+            // Subtle floating idle: ±10 px on Y, ~1.3s per cycle, looping.
+            TranslateTransition bob = new TranslateTransition(Duration.millis(1300), characterNode);
+            bob.setFromY(-10);
+            bob.setToY(10);
+            bob.setAutoReverse(true);
+            bob.setCycleCount(Animation.INDEFINITE);
+            bob.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+            bob.play();
+        } else {
+            winBox.getChildren().addAll(crown, title, backBtn);
+        }
+        winBox.setOpacity(0);
 
-        ScaleTransition st = new ScaleTransition(Duration.millis(1000), winBox);
-        st.setFromX(0.5); st.setFromY(0.5); st.setToX(1.0); st.setToY(1.0);
-        st.play();
+        root.getChildren().add(winBox);
+        animationOverlay.getChildren().add(root);
+
+        FadeTransition winFade = new FadeTransition(Duration.millis(500), winBox);
+        winFade.setFromValue(0); winFade.setToValue(1);
+
+        ScaleTransition winScale = new ScaleTransition(Duration.millis(620), winBox);
+        winScale.setFromX(0.5); winScale.setFromY(0.5);
+        winScale.setToX(1.0);   winScale.setToY(1.0);
+        winScale.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+
+        new ParallelTransition(winFade, winScale).play();
+    }
+
+    /** Builds a large pixel-art canvas of the player's tinted sprite. */
+    private Node buildPlayerCharacterNode(Player player, double size) {
+        if (baseRightImage == null || colorRightImage == null) {
+            Label fallback = new Label("🐧");
+            fallback.setStyle("-fx-font-size: " + (int) size + "px;");
+            return fallback;
+        }
+        double w = baseRightImage.getWidth(), h = baseRightImage.getHeight();
+        double aspect = w / h;
+        double dw, dh;
+        if (aspect >= 1.0) { dw = size; dh = size / aspect; }
+        else               { dh = size; dw = size * aspect; }
+        double dx = (size - dw) / 2.0;
+        double dy = (size - dh) / 2.0;
+
+        Canvas baseCanvas = new Canvas(size, size);
+        baseCanvas.getGraphicsContext2D().setImageSmoothing(false);
+        baseCanvas.getGraphicsContext2D().drawImage(baseRightImage, 0, 0, w, h, dx, dy, dw, dh);
+
+        Canvas colorCanvas = new Canvas(size, size);
+        colorCanvas.getGraphicsContext2D().setImageSmoothing(false);
+        colorCanvas.getGraphicsContext2D().drawImage(colorRightImage, 0, 0, w, h, dx, dy, dw, dh);
+
+        Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
+        lighting.setSurfaceScale(0.0);
+        colorCanvas.setEffect(lighting);
+
+        StackPane sp = new StackPane(baseCanvas, colorCanvas);
+        sp.setMinSize(size, size);
+        sp.setPrefSize(size, size);
+        return sp;
+    }
+
+    /** Builds a large pixel-art canvas of the seal sprite. */
+    private Node buildSealCharacterNode(double size) {
+        Image sprite = (sealRightImage != null) ? sealRightImage : sealLeftImage;
+        if (sprite == null) {
+            Label fallback = new Label("🦭");
+            fallback.setStyle("-fx-font-size: " + (int) size + "px;");
+            return fallback;
+        }
+        double w = sprite.getWidth(), h = sprite.getHeight();
+        double aspect = w / h;
+        double dw, dh;
+        if (aspect >= 1.0) { dw = size; dh = size / aspect; }
+        else               { dh = size; dw = size * aspect; }
+        Canvas c = new Canvas(size, size);
+        c.getGraphicsContext2D().setImageSmoothing(false);
+        c.getGraphicsContext2D().drawImage(sprite, 0, 0, w, h, (size - dw) / 2.0, (size - dh) / 2.0, dw, dh);
+        StackPane sp = new StackPane(c);
+        sp.setMinSize(size, size);
+        sp.setPrefSize(size, size);
+        return sp;
     }
 
     public Board getCurrentGameBoard() { return this.gameBoard; }
@@ -1190,30 +1575,35 @@ public class GameBoardController {
 
     @FXML
     private void handleBack() {
-        if (!gameOver) {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Leave Game?");
-            confirm.setHeaderText("You will lose your current game progress!");
-            confirm.setContentText("Go back to Player Setup?");
-            Optional<ButtonType> result = confirm.showAndWait();
-            if (result.isEmpty() || result.get() != ButtonType.OK) return;
+        if (confirmLeaveIfNeeded("Leave Game?", "You will lose your current game progress!", "Go back to Player Setup?")) {
+            model.game.SoundManager.getInstance().restoreMenuVolume();
+            navigateTo("/view/fxml/playerSetup.fxml", "/assets/css/style.css");
         }
-        model.game.SoundManager.getInstance().stopBackgroundMusic();
-        navigateTo("/view/fxml/playerSetup.fxml", "/assets/css/style.css");
     }
 
     @FXML
     private void handleReturnToMenu() {
-        if (!gameOver) {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Return to Menu?");
-            confirm.setHeaderText("You will lose your current game progress!");
-            confirm.setContentText("Return to Main Menu?");
-            Optional<ButtonType> result = confirm.showAndWait();
-            if (result.isEmpty() || result.get() != ButtonType.OK) return;
+        if (confirmLeaveIfNeeded("Return to Menu?", "You will lose your current game progress!", "Return to Main Menu?")) {
+            model.game.SoundManager.getInstance().restoreMenuVolume();
+            navigateTo("/view/fxml/mainMenu.fxml", "/assets/css/style.css");
         }
-        model.game.SoundManager.getInstance().stopBackgroundMusic();
-        navigateTo("/view/fxml/mainMenu.fxml", "/assets/css/style.css");
+    }
+
+    /**
+     * If the game is still in progress, asks the user to confirm leaving;
+     * otherwise the navigation is silently allowed. Returns true when the
+     * caller may proceed with the navigation.
+     */
+    private boolean confirmLeaveIfNeeded(String title, String header, String content) {
+        if (gameOver) {
+            return true;
+        }
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle(title);
+        confirm.setHeaderText(header);
+        confirm.setContentText(content);
+        Optional<ButtonType> result = confirm.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 
     private void navigateTo(String fxmlPath, String cssPath) {

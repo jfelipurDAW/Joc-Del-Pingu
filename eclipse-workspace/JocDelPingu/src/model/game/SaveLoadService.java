@@ -1,6 +1,7 @@
 package model.game;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,12 +42,7 @@ public class SaveLoadService {
 
  // Cambia la firma del método para aceptar 'customName'
     public static boolean saveGame(String customName, Object board, TurnController turnController, Seal seal, String winner) {
-        // ... (toda tu lógica anterior de serialización YAML y Encriptación se mantiene igual) ...
-        
         try {
-            // USAMOS EL NOMBRE QUE PASA EL USUARIO (sanitizado contra inyección básica)
-            String safeName = customName.replace("'", "''");
-
             Map<String, Object> state = new HashMap<>();
 
             // Serializar el tablero
@@ -99,13 +95,28 @@ public class SaveLoadService {
             Yaml yaml = new Yaml();
             String yamlString = yaml.dump(state);
             String encrypted = CryptoUtil.encrypt(yamlString);
-            
+
             Connection con = BBDD.conectarBaseDatos(null);
             if (con != null) {
-                String sql = "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES ('" + safeName + "', '" + encrypted + "')";
-                BBDD.insert(con, sql);
-                BBDD.cerrar(con);
-                return true;
+                // GAME_DATA is a CLOB and the encrypted YAML easily exceeds
+                // Oracle's 4000-char SQL-literal limit, so a concatenated
+                // INSERT silently fails with ORA-01704. PreparedStatement
+                // streams the value via JDBC and also avoids quote-escaping
+                // issues in the encrypted blob and the user-supplied name.
+                String sql = "INSERT INTO SAVED_GAMES (GAME_ID, GAME_DATA) VALUES (?, ?)";
+                try (PreparedStatement ps = con.prepareStatement(sql)) {
+                    ps.setString(1, customName);
+                    ps.setString(2, encrypted);
+                    int rows = ps.executeUpdate();
+                    if (!con.getAutoCommit()) {
+                        con.commit();
+                    }
+                    BBDD.cerrar(con);
+                    return rows > 0;
+                } catch (java.sql.SQLException sqlEx) {
+                    System.err.println("saveGame INSERT failed: " + sqlEx.getMessage());
+                    BBDD.cerrar(con);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
