@@ -606,7 +606,7 @@ public class GameBoardController {
 
         if (rightPanel != null) { rightPanel.setVisible(false); rightPanel.setManaged(false); }
 
-        javafx.scene.layout.FlowPane hotbar = createHotbar(current);
+        HBox hotbar = createHotbar(current);
         rootPane.setTop(hotbar);
 
         Inventory inv = current.getInventory();
@@ -617,17 +617,16 @@ public class GameBoardController {
         if (sealEnabled && seal != null) updateSealStatus();
     }
 
-    private javafx.scene.layout.FlowPane createHotbar(Player player) {
-        javafx.scene.layout.FlowPane hotbar = new javafx.scene.layout.FlowPane(15, 6);
+    private HBox createHotbar(Player player) {
+        HBox hotbar = new HBox(18);
         hotbar.setAlignment(Pos.CENTER_LEFT);
-        hotbar.setRowValignment(javafx.geometry.VPos.CENTER);
-        hotbar.setPadding(new javafx.geometry.Insets(10));
-        hotbar.setStyle("-fx-background-color: rgba(0,0,0,0.5); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 0 0 4px 0;");
+        hotbar.getStyleClass().add("hotbar");
 
-        VBox playerInfo = new VBox(5);
+        VBox playerInfo = new VBox(6);
         playerInfo.setAlignment(Pos.CENTER);
 
         StackPane portrait = new StackPane();
+        portrait.getStyleClass().add("hotbar-portrait");
         double targetSize = 48;
 
         if (player.getAvatarPath() != null) {
@@ -683,11 +682,21 @@ public class GameBoardController {
         addSlotIfPresent(slots, inv, ObjectType.FASTDICE, "/assets/sprites/objects/fastdice.png");
         addSlotIfPresent(slots, inv, ObjectType.SLOWDICE, "/assets/sprites/objects/slowdice.png");
 
-        Label turnLabel = new Label("IT'S YOUR TURN!");
-        turnLabel.getStyleClass().add("hotbar-turn-label");
+        // Centered game-title banner — same layered shadow + main Text technique
+        // as the main menu, scaled down to fit the hotbar.
+        StackPane titleStack = new StackPane();
+        Text titleShadow = new Text("Pingu's Game");
+        titleShadow.getStyleClass().add("hotbar-title-shadow");
+        Text titleMain = new Text("Pingu's Game");
+        titleMain.getStyleClass().add("hotbar-title");
+        titleStack.getChildren().addAll(titleShadow, titleMain);
 
-        // FlowPane wraps automatically — items reflow on narrow windows instead of clipping.
-        hotbar.getChildren().addAll(playerInfo, slots, turnLabel);
+        Region leftSpacer = new Region();
+        Region rightSpacer = new Region();
+        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
+
+        hotbar.getChildren().addAll(playerInfo, leftSpacer, titleStack, rightSpacer, slots);
 
         return hotbar;
     }

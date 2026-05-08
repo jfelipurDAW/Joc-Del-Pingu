@@ -76,17 +76,23 @@ public class MainMenuController {
         language_combobox.setOnAction(event -> {
             String selectedDisplay = language_combobox.getValue();
             if (selectedDisplay == null) return;
-
-            // Find the language code matching the selected display name
-            for (String code : LangConfig.getAvailableLanguages()) {
-                if (LangConfig.getDisplayName(code).equals(selectedDisplay)) {
-                    LangConfig.loadLang(code);
-                    System.out.println("Language changed to: " + code);
-                    // UI refresh is handled automatically by the language listener
-                    break;
-                }
-            }
+            applyLanguageByDisplayName(selectedDisplay);
         });
+    }
+
+    /**
+     * Loads the language whose display name matches the given value.
+     * Extracted so the lookup can return early without a loop break.
+     */
+    private void applyLanguageByDisplayName(String displayName) {
+        for (String code : LangConfig.getAvailableLanguages()) {
+            if (LangConfig.getDisplayName(code).equals(displayName)) {
+                LangConfig.loadLang(code);
+                System.out.println("Language changed to: " + code);
+                // UI refresh is handled automatically by the language listener
+                return;
+            }
+        }
     }
 
     private void addBackgroundImage() {

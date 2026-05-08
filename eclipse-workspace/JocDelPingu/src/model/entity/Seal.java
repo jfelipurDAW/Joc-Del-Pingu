@@ -168,11 +168,11 @@ public class Seal extends Entity {
     	if (this.getBoard() != null) {
     		List<Integer> holes = this.getBoard().getIceHole_Array();
     		int previousHole = 0;
+    		// IceHole_Array is kept sorted, so iterating without an early
+    		// break is equivalent — later holes do not update previousHole.
     		for (int hole : holes) {
     			if (hole < position) {
     				previousHole = hole;
-    			} else {
-    				break;
     			}
     		}
     		return previousHole;

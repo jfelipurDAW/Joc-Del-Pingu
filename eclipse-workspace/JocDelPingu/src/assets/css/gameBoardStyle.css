@@ -474,6 +474,72 @@
 .scroll-bar:vertical .increment-button,
 .scroll-bar:vertical .decrement-button { -fx-background-color: transparent; -fx-padding: 0; }
 
+/* =================================================================
+   TOP HOTBAR — Antarctic ice band (banner above the board)
+   Holds the current player's portrait, name, the centered game title,
+   and the inventory slots.
+   ================================================================= */
+.hotbar {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #6ee2eb 0%,    #6ee2eb 8%,
+            #4dd0da 8%,    #4dd0da 22%,
+            #4099d1 22%,   #4099d1 70%,
+            #2c8ec0 70%,   #2c8ec0 88%,
+            #1f6eb0 88%,   #1f6eb0 100%);
+    -fx-background-insets: 0, 0 0 5 0;
+    -fx-background-radius: 0;
+    -fx-padding: 10 18 14 18;
+    -fx-border-width: 0;
+    -fx-effect: dropshadow(two-pass-box, rgba(15, 30, 50, 0.55), 0, 0, 0, 4);
+}
+
+/* Pixel-art ice frame around the player portrait (cyan top → glacier base) */
+.hotbar-portrait {
+    -fx-background-color:
+        #2c1535,
+        linear-gradient(to bottom,
+            #4dd0da 0%,    #4dd0da 14%,
+            #4099d1 14%,   #4099d1 75%,
+            #2c8ec0 75%,   #2c8ec0 88%,
+            #1f6eb0 88%,   #1f6eb0 100%);
+    -fx-background-insets: 0, 3;
+    -fx-background-radius: 0;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(two-pass-box, #2c1535, 0, 0, 2, 3);
+}
+
+.hotbar-player-name {
+    -fx-font-family: "FS Pixel Sans Unicode Regular", "Pixel Game", "Segoe UI", sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 18px;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(two-pass-box, #2c1535, 0, 0, 1, 2);
+}
+
+/* Game title banner — same layered shadow + main Text technique used by
+   the main menu (.mainmenu_title_shadow + .mainmenu_maintitle), scaled
+   down to fit the hotbar so the visual identity stays consistent. */
+.hotbar-title {
+    -fx-font-family: "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 40px;
+    -fx-fill: #ffffff;
+    -fx-translate-y: -8;
+}
+
+.hotbar-title-shadow {
+    -fx-font-family: "Pixel Game Extrude", "Pixel Game", "FS Pixel Sans Unicode Regular", "Segoe UI", sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 40px;
+    -fx-fill: linear-gradient(to right, #f4f4f5 0%, #77bbf3 100%);
+    -fx-translate-y: -7;
+    -fx-translate-x: 0;
+    -fx-font-kerning: off;
+    -fx-letter-spacing: -2px;
+}
+
 /* ===== Inventory hotbar slot — pixel-art frame with banded fill ===== */
 .inventory-slot {
     -fx-background-color:

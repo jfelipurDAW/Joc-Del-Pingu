@@ -62,8 +62,7 @@ public class Board {
     public void loadBoard(java.util.List<String> boardTypes) {
         IceHole_Array.clear();
         Sled_Array.clear();
-        for (int i = 0; i < board.length; i++) {
-            if (i >= boardTypes.size()) break;
+        for (int i = 0; i < board.length && i < boardTypes.size(); i++) {
             String typeStr = boardTypes.get(i);
             SquareType type = SquareType.valueOf(typeStr);
             switch(type) {

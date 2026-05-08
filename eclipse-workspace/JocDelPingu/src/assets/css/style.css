@@ -251,14 +251,6 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0, 0, 1);
 }
 
-.hotbar-turn-label {
-    -fx-font-family: "FS Pixel Sans Unicode Regular", "Pixel Game", "Segoe UI", sans-serif;
-    -fx-font-weight: 900;
-    -fx-font-size: 20px;
-    -fx-text-fill: #ffeb3b;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 4, 0, 0, 2);
-}
-
 /* =================================================================
    NAVIGATION BUTTONS — Pixel-Art skin (Back = wine, Home = orange)
    ================================================================= */

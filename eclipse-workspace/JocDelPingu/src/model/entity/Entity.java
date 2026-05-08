@@ -66,7 +66,7 @@ public abstract class Entity {
 	 * Process the effect of landing on the current square.
 	 * Returns a description of what happened for the game log.
 	 */
-    // Handled by BoardManager now
+    // Handled by BoardManager 
 	
 	// ---------- Getters / Setters ----------
 	

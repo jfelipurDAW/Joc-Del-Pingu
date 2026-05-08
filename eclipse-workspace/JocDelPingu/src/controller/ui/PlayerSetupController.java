@@ -238,24 +238,7 @@ public class PlayerSetupController {
         result.ifPresent(nombreSeleccionado -> {
             for (Player p : existentes) {
                 if (p.getName().equals(nombreSeleccionado)) {
-                    boolean asignado = false;
-                    for (PlayerInput input : playerInputs) {
-                        if (input.nameField.getText().trim().isEmpty()) {
-                            input.nameField.setText(p.getName());
-                            if (p.getPassword() != null) {
-                                input.passwordField.setText(p.getPassword());
-                            }
-                            try {
-                                input.colorPicker.setValue(javafx.scene.paint.Color.web("#" + p.getColour()));
-                            } catch (Exception e) {
-                                // ignore invalid stored color
-                            }
-                            asignado = true;
-                            break;
-                        }
-                    }
-
-                    if (!asignado) {
+                    if (!asignarJugadorAlPrimerInputVacio(p)) {
                         mostrarAlerta(
                             LangConfig.getLang(Lang.ALERT_FULL_TITLE),
                             LangConfig.getLang(Lang.ALERT_FULL_MESSAGE)
@@ -264,6 +247,29 @@ public class PlayerSetupController {
                 }
             }
         });
+    }
+
+    /**
+     * Fills the first empty PlayerInput row with this player's data.
+     * Returns true if a slot was found, false if all rows are full.
+     * Extracted so the search can return early without a loop break.
+     */
+    private boolean asignarJugadorAlPrimerInputVacio(Player p) {
+        for (PlayerInput input : playerInputs) {
+            if (input.nameField.getText().trim().isEmpty()) {
+                input.nameField.setText(p.getName());
+                if (p.getPassword() != null) {
+                    input.passwordField.setText(p.getPassword());
+                }
+                try {
+                    input.colorPicker.setValue(javafx.scene.paint.Color.web("#" + p.getColour()));
+                } catch (Exception e) {
+                    // ignore invalid stored color
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private void mostrarAlerta(String title, String message) {
