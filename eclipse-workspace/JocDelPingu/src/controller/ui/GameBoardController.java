@@ -130,7 +130,15 @@ public class GameBoardController {
     }
 
     private Image loadImage(String path) {
+<<<<<<< Updated upstream
         if (resourceCache.containsKey(path)) return resourceCache.get(path);
+=======
+        Map<String, Object> resourceCache = null;
+		if (resourceCache.containsKey(path)) {
+            return (Image) resourceCache.get(path);
+        }
+
+>>>>>>> Stashed changes
         try (InputStream is = getClass().getResourceAsStream(path)) {
             if (is == null) { System.err.println("Resource not found: " + path); return null; }
             Image img = new Image(is, 0, 0, true, false); // natural size, nearest-neighbour
