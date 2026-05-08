@@ -12,7 +12,11 @@ public abstract class Entity {
 	private EntityType type;
 	private Board board;
 	private boolean skipNextTurn;
-	
+
+	// Transient visual state — not persisted in saves
+	private boolean facingRight = true;
+	private boolean damaged = false;
+
 	// Last event result for UI display
 	private EventManager.EventResult lastEvent;
 
@@ -23,8 +27,12 @@ public abstract class Entity {
 	/**
 	 * Advance the entity by a number of squares, clamped to not exceed the board.
 	 * Returns true if the entity reached or passed the END square.
+	 * Updates facingRight based on direction of movement.
 	 */
 	public boolean advance(int squares) {
+		if (squares > 0)      this.facingRight = true;
+		else if (squares < 0) this.facingRight = false;
+
 		int newPos = this.numSquare + squares;
 		if (newPos >= Board.MAX_SQUARES - 1) {
 			this.numSquare = Board.MAX_SQUARES - 1;
@@ -48,7 +56,10 @@ public abstract class Entity {
 	}
 	
 	public void setSquare(int newPosition) {
-		this.numSquare = Math.max(0, Math.min(newPosition, Board.MAX_SQUARES - 1));
+		int clamped = Math.max(0, Math.min(newPosition, Board.MAX_SQUARES - 1));
+		if (clamped > this.numSquare)      this.facingRight = true;
+		else if (clamped < this.numSquare) this.facingRight = false;
+		this.numSquare = clamped;
 	}
 	
 	/**
@@ -90,9 +101,27 @@ public abstract class Entity {
 	public int getNumSquare() {
 		return numSquare;
 	}
-	
+
 	public void setNumSquare(int numSquare) {
+		if (numSquare > this.numSquare)      this.facingRight = true;
+		else if (numSquare < this.numSquare) this.facingRight = false;
 		this.numSquare = numSquare;
+	}
+
+	public boolean isFacingRight() {
+		return facingRight;
+	}
+
+	public void setFacingRight(boolean facingRight) {
+		this.facingRight = facingRight;
+	}
+
+	public boolean isDamaged() {
+		return damaged;
+	}
+
+	public void setDamaged(boolean damaged) {
+		this.damaged = damaged;
 	}
 	
 	public Board getBoard() {

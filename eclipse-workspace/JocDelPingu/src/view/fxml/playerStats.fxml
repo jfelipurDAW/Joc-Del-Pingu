@@ -5,44 +5,51 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<StackPane fx:id="rootPane" alignment="CENTER" prefHeight="600.0" prefWidth="800.0" styleClass="mainmenu_bg" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ui.PlayerStatsController">
+<StackPane fx:id="rootPane" alignment="CENTER" prefHeight="600.0" prefWidth="800.0" minHeight="500.0" minWidth="700.0" styleClass="mainmenu_bg" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ui.PlayerStatsController">
    <children>
-      <VBox alignment="TOP_CENTER" spacing="20" style="-fx-padding: 40;">
+      <VBox alignment="TOP_CENTER" spacing="20">
+         <padding>
+            <Insets bottom="30.0" left="40.0" right="40.0" top="20.0" />
+         </padding>
          <children>
             <!-- Navigation Bar -->
             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="nav-bar">
                <Button fx:id="backButton" onAction="#handleBack" styleClass="nav-btn-back" text="◀ Back" mnemonicParsing="false" />
             </HBox>
 
-            <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="mainmenu_maintitle" text="Player Statistics">
+            <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="stats-screen-title" text="Player Statistics">
                <font>
                   <Font size="50.0" />
                </font>
             </Text>
 
             <!-- Stats header row -->
-            <HBox fx:id="headerRow" alignment="CENTER" spacing="10" style="-fx-padding: 10; -fx-background-color: rgba(0,0,0,0.3); -fx-background-radius: 10;">
-               <Label fx:id="headerPlayer" text="Player" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-min-width: 180;" />
-               <Label fx:id="headerColour" text="Colour" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-min-width: 100;" />
-               <Label fx:id="headerPlayed" text="Games Played" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-min-width: 140;" />
-               <Label fx:id="headerWon" text="Games Won" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-min-width: 120;" />
+            <HBox fx:id="headerRow" alignment="CENTER" spacing="10" styleClass="stats-header">
+               <Label fx:id="headerPlayer"  text="Player"        minWidth="180" />
+               <Label fx:id="headerColour"  text="Colour"        minWidth="100" />
+               <Label fx:id="headerPlayed"  text="Games Played"  minWidth="140" />
+               <Label fx:id="headerWon"     text="Games Won"     minWidth="120" />
             </HBox>
 
             <!-- Scrollable stats list -->
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="350.0" vbarPolicy="AS_NEEDED" style="-fx-background-color: transparent;">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
                <content>
-                  <VBox fx:id="statsContainer" alignment="TOP_CENTER" spacing="8" style="-fx-padding: 10;">
+                  <VBox fx:id="statsContainer" alignment="TOP_CENTER" spacing="10">
+                     <padding>
+                        <Insets top="6" bottom="6" left="2" right="2" />
+                     </padding>
                   </VBox>
                </content>
             </ScrollPane>
 
             <!-- No data label (shown when empty) -->
-            <Label fx:id="noDataLabel" text="No player data found." style="-fx-text-fill: white; -fx-font-size: 18;" visible="false" managed="false" />
+            <Label fx:id="noDataLabel" text="No player data found." styleClass="stats-no-data" visible="false" managed="false" />
          </children>
       </VBox>
    </children>

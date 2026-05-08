@@ -69,31 +69,24 @@ public class PlayerStatsController {
 
             HBox rowBox = new HBox(10);
             rowBox.setAlignment(Pos.CENTER);
-            rowBox.setStyle(
-                "-fx-padding: 12; " +
-                "-fx-background-color: rgba(255,255,255,0.15); " +
-                "-fx-background-radius: 8; " +
-                "-fx-border-radius: 8; " +
-                "-fx-border-color: rgba(255,255,255,0.2); " +
-                "-fx-border-width: 1;"
-            );
+            rowBox.getStyleClass().add("stats-row");
 
-            // Rank medal
             String medal = rank == 1 ? "🥇 " : rank == 2 ? "🥈 " : rank == 3 ? "🥉 " : rank + ". ";
 
             Label nameLabel = new Label(medal + (name != null ? name : "?"));
-            nameLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15; -fx-min-width: 180;");
+            nameLabel.getStyleClass().add("stats-cell-name");
 
-            // Colour swatch
             String safeColour = (colour != null && colour.length() >= 6) ? colour : "FFFFFF";
             Label colourLabel = new Label("■ " + safeColour);
-            colourLabel.setStyle("-fx-text-fill: #" + safeColour + "; -fx-font-size: 15; -fx-min-width: 100;");
+            colourLabel.getStyleClass().add("stats-cell-colour");
+            // The swatch text colour is per-row data → keep as inline override
+            colourLabel.setStyle("-fx-text-fill: #" + safeColour + ";");
 
             Label playedLabel = new Label(played != null ? played : "0");
-            playedLabel.setStyle("-fx-text-fill: #a0d8ef; -fx-font-size: 15; -fx-min-width: 140; -fx-alignment: center;");
+            playedLabel.getStyleClass().add("stats-cell-played");
 
             Label wonLabel = new Label(won != null ? won : "0");
-            wonLabel.setStyle("-fx-text-fill: #ffd700; -fx-font-weight: bold; -fx-font-size: 15; -fx-min-width: 120; -fx-alignment: center;");
+            wonLabel.getStyleClass().add("stats-cell-won");
 
             rowBox.getChildren().addAll(nameLabel, colourLabel, playedLabel, wonLabel);
             statsContainer.getChildren().add(rowBox);

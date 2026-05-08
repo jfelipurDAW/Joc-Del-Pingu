@@ -79,7 +79,9 @@ public class Player extends Entity {
 
 	@Override
 	public void setSquare(int i) {
-		this.setNumSquare(Math.max(0, Math.min(i, this.getBoard() != null ? Board.MAX_SQUARES - 1 : i)));
+		int target = Math.max(0, Math.min(i, this.getBoard() != null ? Board.MAX_SQUARES - 1 : i));
+		// setNumSquare updates facingRight based on direction
+		this.setNumSquare(target);
 	}
 
 

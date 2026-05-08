@@ -24,29 +24,29 @@
                      </children>
                   </StackPane>
                   
-                  <Button fx:id="newGame_button" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleNewGame" prefHeight="42.0" prefWidth="422.0" styleClass="mainmenu_button_newgame" text="new.game" textAlignment="CENTER" textFill="WHITE">
+                  <Button fx:id="newGame_button" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleNewGame" prefHeight="68.0" prefWidth="460.0" styleClass="mainmenu_button_newgame" text="new.game" textAlignment="CENTER" textFill="WHITE">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor>
                      <VBox.margin>
-                        <Insets top="80" />
+                        <Insets top="40" />
                      </VBox.margin>
                   </Button>
-                  
-                  <Button fx:id="loadGame_button" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleLoadGame" prefHeight="42.0" prefWidth="422.0" styleClass="mainmenu_button_loadgame" text="load.game" textFill="WHITE">
+
+                  <Button fx:id="loadGame_button" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleLoadGame" prefHeight="68.0" prefWidth="460.0" styleClass="mainmenu_button_loadgame" text="load.game" textFill="WHITE">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor>
                   </Button>
-                  
-                  <Button fx:id="stats_button" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleStats" prefHeight="42.0" prefWidth="422.0" styleClass="mainmenu_button_loadgame" text="stats" textFill="WHITE">
+
+                  <Button fx:id="stats_button" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleStats" prefHeight="68.0" prefWidth="460.0" styleClass="mainmenu_button_loadgame" text="stats" textFill="WHITE">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor>
                   </Button>
-                  
+
                   <!-- Changed: replaced Button with ComboBox for language selection dropdown -->
-                  <ComboBox fx:id="language_combobox" prefHeight="42.0" prefWidth="220.0" styleClass="mainmenu_language_combo">
+                  <ComboBox fx:id="language_combobox" prefHeight="56.0" prefWidth="260.0" styleClass="mainmenu_language_combo">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor>

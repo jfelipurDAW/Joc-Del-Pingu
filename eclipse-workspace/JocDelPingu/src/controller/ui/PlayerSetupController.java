@@ -70,22 +70,21 @@ public class PlayerSetupController {
 
     private PlayerInput createPlayerInput(int playerNumber) {
         VBox playerVBox = new VBox();
-        playerVBox.setSpacing(8);
-        playerVBox.setStyle("-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;");
+        playerVBox.getStyleClass().add("setup-card");
 
         Label label = new Label(LangConfig.getLang(Lang.GAMESETUP_PLAYER) + playerNumber);
-        label.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+        label.getStyleClass().add("setup-card-title");
 
         TextField nameField = new TextField();
         nameField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PLAYERNAME));
-        nameField.setPrefWidth(200);
+        nameField.setMaxWidth(Double.MAX_VALUE);
 
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText(LangConfig.getLang(Lang.GAMESETUP_PASSWORD));
-        passwordField.setPrefWidth(200);
+        passwordField.setMaxWidth(Double.MAX_VALUE);
 
         javafx.scene.control.ColorPicker colorPicker = new javafx.scene.control.ColorPicker(javafx.scene.paint.Color.RED);
-        colorPicker.setPrefWidth(200);
+        colorPicker.setMaxWidth(Double.MAX_VALUE);
 
         colorPicker.setOnAction((javafx.event.ActionEvent event) -> {
             if (rootPane != null) rootPane.requestFocus();
@@ -95,7 +94,7 @@ public class PlayerSetupController {
         });
 
         Button avatarBtn = new Button(LangConfig.getLang(Lang.GAMESETUP_CHOOSEAVATAR));
-        avatarBtn.setPrefWidth(200);
+        avatarBtn.setMaxWidth(Double.MAX_VALUE);
         avatarBtn.getStyleClass().add("player-setup-field");
         final String[] avatarPath = new String[1];
 

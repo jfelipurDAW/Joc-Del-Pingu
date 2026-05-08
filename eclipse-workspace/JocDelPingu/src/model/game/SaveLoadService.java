@@ -122,20 +122,37 @@ public class SaveLoadService {
         try {
             Connection con = BBDD.conectarBaseDatos(null);
             if (con != null) {
+                // Ensure the BOARD row referenced by GAME.BOARDID exists.
+                // Idempotent: only inserts if missing (avoids FK_GAME_BOARD violation).
+                BBDD.executeInsUpDel(con,
+                    "INSERT INTO BOARD (BOARDID) " +
+                    "SELECT 1 FROM DUAL " +
+                    "WHERE NOT EXISTS (SELECT 1 FROM BOARD WHERE BOARDID = 1)",
+                    "Insert BOARD");
+
                 BBDD.insert(con, "INSERT INTO GAME (GAMESTATE, GAMEDATE, BOARDID) VALUES ('FINISHED', SYSDATE, 1)");
 
+                // NVL guards against legacy rows where GAMES_PLAYED/GAMES_WON are NULL
+                // (NULL + 1 = NULL in Oracle, which would silently keep counters at NULL).
                 for (Entity e : allPlayers) {
                     if (e instanceof Player) {
                         String safeName = ((Player) e).getName().replace("'", "''");
-                        BBDD.update(con, "UPDATE ENTITY SET GAMES_PLAYED = GAMES_PLAYED + 1 " +
+                        int rows = BBDD.update(con, "UPDATE ENTITY SET GAMES_PLAYED = NVL(GAMES_PLAYED, 0) + 1 " +
                             "WHERE PLAYERNAME = '" + safeName + "' AND ENTITYTYPE = 'PLAYER'");
+                        if (rows == 0) {
+                            System.err.println("recordGameResult: no row updated for player '" + safeName + "'. " +
+                                "Was the player registered in ENTITY?");
+                        }
                     }
                 }
 
                 if (winnerName != null && !winnerName.isEmpty()) {
                     String safeWinner = winnerName.replace("'", "''");
-                    BBDD.update(con, "UPDATE ENTITY SET GAMES_WON = GAMES_WON + 1 " +
+                    int rows = BBDD.update(con, "UPDATE ENTITY SET GAMES_WON = NVL(GAMES_WON, 0) + 1 " +
                         "WHERE PLAYERNAME = '" + safeWinner + "' AND ENTITYTYPE = 'PLAYER'");
+                    if (rows == 0) {
+                        System.err.println("recordGameResult: no row updated for winner '" + safeWinner + "'.");
+                    }
                 }
 
                 BBDD.cerrar(con);

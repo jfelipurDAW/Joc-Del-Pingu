@@ -48,15 +48,15 @@ public class MainMenu extends Application {
 
         primaryStage.setScene(scene);
 
-        // Initial size
-        primaryStage.setWidth(800);
-        primaryStage.setHeight(600);
+        // Initial size — tall enough for the bigger pixel-art buttons
+        primaryStage.setWidth(900);
+        primaryStage.setHeight(720);
 
         //  Allow Rescale
         primaryStage.setResizable(true);
 
         // Fix: Store dimensions before fullscreen and restore on exit
-        final double[] savedDimensions = { 800, 600 };
+        final double[] savedDimensions = { 900, 720 };
         primaryStage.fullScreenProperty().addListener((obs, wasFullScreen, isFullScreen) -> {
             if (isFullScreen) {
                 // Save current dimensions before going fullscreen

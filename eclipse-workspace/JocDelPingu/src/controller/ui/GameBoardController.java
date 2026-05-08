@@ -21,6 +21,7 @@ import javafx.scene.control.*;
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -84,16 +85,31 @@ public class GameBoardController {
     private String winner;
 
     // --- Sprites ---
-    private final Image baseImage;
-    private final Image colorImage;
+    // Player: 4 sprite layers (base/colour x left/right), plus damaged frames
+    private final Image baseRightImage;
+    private final Image colorRightImage;
+    private final Image baseLeftImage;
+    private final Image colorLeftImage;
+    private final Image damagedRightImage;
+    private final Image damagedLeftImage;
+    // Seal: idle facing left/right
+    private final Image sealRightImage;
+    private final Image sealLeftImage;
+
     private final Map<String, Image> resourceCache = new HashMap<>();
 
     // Guard against re-entrant drawBoard calls
     private boolean isRedrawing = false;
 
     public GameBoardController() {
-        baseImage  = loadImage("/assets/sprites/entities/player/player_idle.png");
-        colorImage = loadImage("/assets/sprites/entities/player/player_idle_colour.png");
+        baseRightImage    = loadImage("/assets/sprites/entities/player/player_idle_right.png");
+        colorRightImage   = loadImage("/assets/sprites/entities/player/player_idle_colour_right.png");
+        baseLeftImage     = loadImage("/assets/sprites/entities/player/player_idle_left.png");
+        colorLeftImage    = loadImage("/assets/sprites/entities/player/player_idle_colour_left.png");
+        damagedRightImage = loadImage("/assets/sprites/entities/player/player_damaged_right.png");
+        damagedLeftImage  = loadImage("/assets/sprites/entities/player/player_damaged_left.png");
+        sealRightImage    = loadImage("/assets/sprites/entities/seal/seal_idle_right.png");
+        sealLeftImage     = loadImage("/assets/sprites/entities/seal/seal_idle_left.png");
         gameOver = false;
     }
 
@@ -292,6 +308,7 @@ public class GameBoardController {
             logEvent(snowMsg);
             current.recordEvent(snowMsg);
             target.recordEvent(snowMsg);
+            flashDamage(target);
 
             model.game.SoundManager.getInstance().playSnowballSound();
             animateSnowballThrow();
@@ -336,10 +353,16 @@ public class GameBoardController {
         Player current = getCurrentPlayer();
         int startSquare = current.getSquareIndex();
 
-        diceResultLabel.setText("🎲 " + diceResult);
-        animateDiceResult();
         logEvent("🎲 " + current.getName() + " rolled " + diceResult + " (" + diceType + " die)");
 
+        showDiceAnimation(() -> {
+            diceResultLabel.setText("🎲 " + diceResult);
+            animateDiceResult();
+            runDiceMovement(current, startSquare, diceResult, diceType);
+        });
+    }
+
+    private void runDiceMovement(Player current, int startSquare, int diceResult, String diceType) {
         animatePlayerMovement(current, diceResult, () -> {
             current.setSquare(startSquare);
             model.game.ActionResult moveResult = gameManager.playTurn(diceResult);
@@ -353,8 +376,19 @@ public class GameBoardController {
 
             if (moveResult != null) {
                 switch (moveResult.getType()) {
-                    case BEAR_ATTACK: model.game.SoundManager.getInstance().playBearSound(); showBearAnimation(); break;
-                    case EVENT:       model.game.SoundManager.getInstance().playEventSound(); break;
+                    case BEAR_ATTACK:
+                        model.game.SoundManager.getInstance().playBearSound();
+                        showBearAnimation();
+                        flashDamage(current);
+                        break;
+                    case ICE_HOLE:
+                    case BROKEN_FLOOR_FALL:
+                    case BROKEN_FLOOR_LOSE_ITEM:
+                        flashDamage(current);
+                        break;
+                    case EVENT:
+                        model.game.SoundManager.getInstance().playEventSound();
+                        break;
                     default: break;
                 }
             }
@@ -372,12 +406,46 @@ public class GameBoardController {
                 String sealMsg = formatActionMessage(sealResult);
                 logEvent(sealMsg);
                 current.recordEvent(sealMsg);
+                if (sealResult != null) {
+                    switch (sealResult.getType()) {
+                        case SEAL_HIT_HOLE:
+                        case SEAL_HIT_START:
+                        case SEAL_PASS:
+                            flashDamage(current);
+                            break;
+                        default: break;
+                    }
+                }
                 drawBoard();
             }
 
             updateHUD();
             endTurn();
         });
+    }
+
+    /**
+     * Briefly mark an entity as damaged → renders the damaged sprite for ~450ms
+     * and then clears the flag so the idle sprite returns automatically.
+     */
+    private void flashDamage(Entity entity) {
+        if (entity == null) return;
+        entity.setDamaged(true);
+        drawBoard();
+        Timeline t = new Timeline(new KeyFrame(Duration.millis(450), e -> {
+            entity.setDamaged(false);
+            drawBoard();
+        }));
+        t.play();
+    }
+
+    /** Look up a Player in the current game by name (used for seal-turn log results). */
+    private Player findPlayerByName(String name) {
+        if (name == null) return null;
+        for (Entity e : turnController.getAllPlayers()) {
+            if (e instanceof Player && name.equals(e.getName())) return (Player) e;
+        }
+        return null;
     }
 
     private void animatePlayerMovement(Player player, int steps, Runnable onFinished) {
@@ -435,6 +503,15 @@ public class GameBoardController {
             final model.game.ActionResult msg = sealLog.get(i);
             KeyFrame kf = new KeyFrame(Duration.millis(delay + i * 700), e -> {
                 logEvent(formatActionMessage(msg));
+                // Flash any player hit by the seal during its turn
+                switch (msg.getType()) {
+                    case SEAL_HIT_HOLE:
+                    case SEAL_HIT_START:
+                    case SEAL_PASS:
+                        flashDamage(findPlayerByName(msg.getPlayerName()));
+                        break;
+                    default: break;
+                }
                 drawBoard();
                 updateSealStatus();
             });
@@ -473,6 +550,11 @@ public class GameBoardController {
         logEvent(warMsg);
         attacker.recordEvent(warMsg);
         defender.recordEvent(warMsg);
+        // Flash the loser (the one whose name does NOT match the winner in the result)
+        if (warResult != null && warResult.getType() == model.game.ActionResult.ActionType.SNOWBALL_WAR_WIN) {
+            Player loser = attacker.getName().equals(warResult.getPlayerName()) ? defender : attacker;
+            flashDamage(loser);
+        }
         model.game.SoundManager.getInstance().playSnowballSound();
         animateWarFlash();
     }
@@ -561,10 +643,9 @@ public class GameBoardController {
             }
         }
 
-        if (portrait.getChildren().isEmpty() && baseImage != null && colorImage != null) {
-            // Draw the FULL sprite (no cropping) and preserve aspect ratio
-            // by letterboxing inside the targetSize box.
-            double w = baseImage.getWidth(), h = baseImage.getHeight();
+        if (portrait.getChildren().isEmpty() && baseRightImage != null && colorRightImage != null) {
+            // The HUD portrait is a static UI element → always face right (idle pose).
+            double w = baseRightImage.getWidth(), h = baseRightImage.getHeight();
             double aspect = w / h;
             double dw, dh;
             if (aspect >= 1.0) { dw = targetSize; dh = targetSize / aspect; }
@@ -575,12 +656,12 @@ public class GameBoardController {
             Canvas baseCanvas = new Canvas(targetSize, targetSize);
             GraphicsContext gcBase = baseCanvas.getGraphicsContext2D();
             gcBase.setImageSmoothing(false);
-            gcBase.drawImage(baseImage, 0, 0, w, h, dx, dy, dw, dh);
+            gcBase.drawImage(baseRightImage, 0, 0, w, h, dx, dy, dw, dh);
 
             Canvas colorCanvas = new Canvas(targetSize, targetSize);
             GraphicsContext gcColor = colorCanvas.getGraphicsContext2D();
             gcColor.setImageSmoothing(false);
-            gcColor.drawImage(colorImage, 0, 0, w, h, dx, dy, dw, dh);
+            gcColor.drawImage(colorRightImage, 0, 0, w, h, dx, dy, dw, dh);
 
             Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
             lighting.setSurfaceScale(0.0);
@@ -759,11 +840,35 @@ public class GameBoardController {
         addPlayerSpritesToCell(cell, squareIndex, cellSize);
 
         if (sealEnabled && seal != null && seal.getSquareIndex() == squareIndex) {
-            Label sealLabel = new Label("🦭");
-            int fontSize = Math.max(8, (int)(cellSize * 0.3));
-            sealLabel.setStyle("-fx-font-size: " + fontSize + ";");
-            StackPane.setAlignment(sealLabel, Pos.BOTTOM_RIGHT);
-            cell.getChildren().add(sealLabel);
+            // Cap the seal to ~55% of the cell on its longest axis, then size the
+            // canvas to match the sprite's actual aspect ratio so BOTTOM_RIGHT
+            // alignment puts the seal flush in the corner (no letterbox gap).
+            double sealMax = Math.max(cellSize * 0.55, 1.0);
+            // Direction follows the snake-row direction, like the players
+            int sealRow = squareIndex / Board.widthBoard;
+            boolean sealRowFacesRight = (sealRow % 2 == 0);
+            Image sealSprite = sealRowFacesRight ? sealRightImage : sealLeftImage;
+            if (sealSprite != null) {
+                double sw = sealSprite.getWidth(), sh = sealSprite.getHeight();
+                double aspect = sw / sh;
+                double dw, dh;
+                if (aspect >= 1.0) { dw = sealMax; dh = sealMax / aspect; }
+                else               { dh = sealMax; dw = sealMax * aspect; }
+                Canvas sealCanvas = new Canvas(dw, dh);
+                GraphicsContext gc = sealCanvas.getGraphicsContext2D();
+                gc.setImageSmoothing(false);
+                gc.drawImage(sealSprite, 0, 0, sw, sh, 0, 0, dw, dh);
+                StackPane.setAlignment(sealCanvas, Pos.BOTTOM_RIGHT);
+                // Tiny pixel-art margin so the sprite isn't glued to the very edge
+                StackPane.setMargin(sealCanvas, new javafx.geometry.Insets(0, 2, 2, 0));
+                cell.getChildren().add(sealCanvas);
+            } else {
+                Label sealLabel = new Label("🦭");
+                int fontSize = Math.max(8, (int)(cellSize * 0.3));
+                sealLabel.setStyle("-fx-font-size: " + fontSize + ";");
+                StackPane.setAlignment(sealLabel, Pos.BOTTOM_RIGHT);
+                cell.getChildren().add(sealLabel);
+            }
         }
 
         return cell;
@@ -796,6 +901,12 @@ public class GameBoardController {
         }
         if (playersHere.isEmpty()) return;
 
+        // Snake-pattern board: even rows go left→right (face right),
+        // odd rows go right→left (face left). Direction follows the row,
+        // not the player's last movement delta.
+        int row = squareIndex / Board.widthBoard;
+        boolean rowFacesRight = (row % 2 == 0);
+
         double spriteSize = Math.max(cellSize * 0.25, 1.0);
         double spacingVal = cellSize * 0.15;
         int count = playersHere.size();
@@ -804,9 +915,19 @@ public class GameBoardController {
             Player player = playersHere.get(idx);
             StackPane playerToken = new StackPane();
 
-            if (baseImage != null && colorImage != null) {
+            // Pick base / colour overlay according to row direction and damaged state.
+            // Damaged frames have no colour-overlay variant → fall back to the idle colour.
+            Image baseSprite;
+            if (player.isDamaged()) {
+                baseSprite = rowFacesRight ? damagedRightImage : damagedLeftImage;
+            } else {
+                baseSprite = rowFacesRight ? baseRightImage : baseLeftImage;
+            }
+            Image colorSprite = rowFacesRight ? colorRightImage : colorLeftImage;
+
+            if (baseSprite != null && colorSprite != null) {
                 // Preserve aspect ratio of the source sprite (17x19) inside the cell token area
-                double sw = baseImage.getWidth(), sh = baseImage.getHeight();
+                double sw = baseSprite.getWidth(), sh = baseSprite.getHeight();
                 double aspect = sw / sh;
                 double dw, dh;
                 if (aspect >= 1.0) { dw = spriteSize; dh = spriteSize / aspect; }
@@ -817,12 +938,12 @@ public class GameBoardController {
                 Canvas baseCanvas = new Canvas(spriteSize, spriteSize);
                 GraphicsContext gcBase = baseCanvas.getGraphicsContext2D();
                 gcBase.setImageSmoothing(false);
-                gcBase.drawImage(baseImage, 0, 0, sw, sh, dx, dy, dw, dh);
+                gcBase.drawImage(baseSprite, 0, 0, sw, sh, dx, dy, dw, dh);
 
                 Canvas colorCanvas = new Canvas(spriteSize, spriteSize);
                 GraphicsContext gcColor = colorCanvas.getGraphicsContext2D();
                 gcColor.setImageSmoothing(false);
-                gcColor.drawImage(colorImage, 0, 0, sw, sh, dx, dy, dw, dh);
+                gcColor.drawImage(colorSprite, 0, 0, sw, sh, dx, dy, dw, dh);
 
                 Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
                 lighting.setSurfaceScale(0.0);
@@ -854,6 +975,38 @@ public class GameBoardController {
         scale.setCycleCount(2);
         scale.setAutoReverse(true);
         scale.play();
+    }
+
+    private void showDiceAnimation(Runnable onFinished) {
+        InputStream is = getClass().getResourceAsStream("/assets/dice/dados.gif");
+        if (is == null) {
+            System.err.println("Dice animation not found: /assets/dice/dados.gif");
+            if (onFinished != null) onFinished.run();
+            return;
+        }
+        Image gif = new Image(is);
+        ImageView view = new ImageView(gif);
+        view.setPreserveRatio(true);
+        view.setSmooth(false);
+        view.setFitWidth(280);
+        view.setOpacity(0);
+
+        StackPane.setAlignment(view, Pos.CENTER);
+        animationOverlay.getChildren().add(view);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(120), view);
+        fadeIn.setFromValue(0); fadeIn.setToValue(1);
+
+        PauseTransition stay = new PauseTransition(Duration.millis(1100));
+
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(180), view);
+        fadeOut.setFromValue(1); fadeOut.setToValue(0);
+        fadeOut.setOnFinished(e -> {
+            animationOverlay.getChildren().remove(view);
+            if (onFinished != null) onFinished.run();
+        });
+
+        new SequentialTransition(fadeIn, stay, fadeOut).play();
     }
 
     private void animateSnowballThrow() {
@@ -958,16 +1111,35 @@ public class GameBoardController {
     }
 
     private void showSealAnimation() {
-        Label sealLabel = new Label("🦭");
-        sealLabel.setFont(new Font("System", 120));
-        animationOverlay.getChildren().add(sealLabel);
+        // Cinematic always slides in from the right → use the left-facing sprite
+        // (the seal "looks toward" the centre as it enters).
+        Image sprite = (sealLeftImage != null) ? sealLeftImage : sealRightImage;
+        Node sealNode;
+        if (sprite != null) {
+            double size = 220;
+            double sw = sprite.getWidth(), sh = sprite.getHeight();
+            double aspect = sw / sh;
+            double dw, dh;
+            if (aspect >= 1.0) { dw = size; dh = size / aspect; }
+            else               { dh = size; dw = size * aspect; }
+            Canvas sealCanvas = new Canvas(size, size);
+            GraphicsContext gc = sealCanvas.getGraphicsContext2D();
+            gc.setImageSmoothing(false);
+            gc.drawImage(sprite, 0, 0, sw, sh, (size - dw) / 2.0, (size - dh) / 2.0, dw, dh);
+            sealNode = sealCanvas;
+        } else {
+            Label fallback = new Label("🦭");
+            fallback.setFont(new Font("System", 120));
+            sealNode = fallback;
+        }
+        animationOverlay.getChildren().add(sealNode);
 
-        TranslateTransition tt = new TranslateTransition(Duration.millis(400), sealLabel);
+        TranslateTransition tt = new TranslateTransition(Duration.millis(400), sealNode);
         tt.setFromX(800); tt.setToX(0);
 
-        FadeTransition ft = new FadeTransition(Duration.millis(300), sealLabel);
+        FadeTransition ft = new FadeTransition(Duration.millis(300), sealNode);
         ft.setDelay(Duration.millis(1000)); ft.setFromValue(1.0); ft.setToValue(0.0);
-        ft.setOnFinished(e -> animationOverlay.getChildren().remove(sealLabel));
+        ft.setOnFinished(e -> animationOverlay.getChildren().remove(sealNode));
         tt.play(); ft.play();
     }
 
