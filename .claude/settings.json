@@ -5,7 +5,11 @@
       "Bash(npm init *)",
       "Bash(npm install *)",
       "Bash(node build.mjs)",
-      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=20000 --run-all-compositor-stages-before-draw --print-to-pdf=\"D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/esquema-obsidian/Joc del Pingu - Guia Completa.pdf\" \"file:///D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/esquema-obsidian/_build/guia-completa.html\")"
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=20000 --run-all-compositor-stages-before-draw --print-to-pdf=\"D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/esquema-obsidian/Joc del Pingu - Guia Completa.pdf\" \"file:///D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/esquema-obsidian/_build/guia-completa.html\")",
+      "Bash(node build-docx.mjs)",
+      "Bash(node check-pages.mjs)",
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless=new --disable-gpu --no-pdf-header-footer --print-to-pdf=\"D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/database-scripts/_build/preview.pdf\" \"file:///D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/database-scripts/_build/preview.html\")",
+      "Bash(node -e \"const s = require\\('fs'\\).readFileSync\\('preview.pdf'\\).toString\\('latin1'\\); const m = s.match\\(/\\\\/Type\\\\s*\\\\/Pages[^>]*\\\\/Count\\\\s+\\(\\\\d+\\)/\\); console.log\\('Pages:', m ? m[1] : '?'\\);\")"
     ]
   }
 }
