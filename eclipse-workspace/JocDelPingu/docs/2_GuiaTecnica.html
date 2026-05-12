@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Joc del Pingu - Guia Tècnica</title>
+<style>
+  @page { size: A4; margin: 2cm; }
+  body { font-family: "Segoe UI", Tahoma, sans-serif; color: #1a1a1a; line-height: 1.55; max-width: 900px; margin: 0 auto; padding: 20px; }
+  h1 { color: #0d3b66; border-bottom: 3px solid #0d3b66; padding-bottom: 8px; }
+  h2 { color: #0d3b66; margin-top: 2em; border-bottom: 1px solid #cfd8dc; padding-bottom: 4px; }
+  h3 { color: #1565c0; margin-top: 1.5em; }
+  h4 { color: #37474f; margin-bottom: 0.3em; }
+  code, pre { font-family: "Consolas", "Courier New", monospace; }
+  pre { background: #263238; color: #eceff1; padding: 12px 14px; border-radius: 6px; overflow-x: auto; font-size: 12px; line-height: 1.4; }
+  code.inline { background: #eceff1; color: #c62828; padding: 1px 5px; border-radius: 3px; font-size: 0.92em; }
+  .capture { border: 2px dashed #b71c1c; background: #ffebee; color: #b71c1c; padding: 14px; margin: 14px 0; text-align: center; font-weight: 600; border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid #b0bec5; padding: 8px 10px; text-align: left; font-size: 0.94em; vertical-align: top; }
+  th { background: #0d3b66; color: white; }
+  .cover { text-align: center; padding: 60px 0 40px; border-bottom: 1px solid #cfd8dc; margin-bottom: 30px; }
+  .cover h1 { border: none; font-size: 2.4em; }
+  .meta { color: #607d8b; font-size: 0.95em; }
+  .note { background: #fff8e1; border-left: 4px solid #ffa000; padding: 10px 14px; margin: 14px 0; border-radius: 4px; }
+  .tree { background: #263238; color: #b2dfdb; padding: 14px; border-radius: 6px; font-family: Consolas, monospace; font-size: 13px; white-space: pre; line-height: 1.45; }
+  ul.toc { list-style: none; padding-left: 0; }
+  ul.toc li { padding: 4px 0; }
+  ul.toc a { color: #0d3b66; text-decoration: none; }
+  .page-break { page-break-after: always; }
+  .flow { background: #e8f5e9; padding: 10px 14px; border-radius: 4px; border-left: 4px solid #2e7d32; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Joc del Pingu</h1>
+  <h2 style="border:none; margin-top:0;">Guia tècnica per a desenvolupadors</h2>
+  <p class="meta">Estructura, tecnologies i decisions de disseny</p>
+  <p class="meta">Grup DW25-26 GR06 — Curs 2025/2026</p>
+</div>
+
+<h2>Índex</h2>
+<ul class="toc">
+  <li>1. Visió general del projecte</li>
+  <li>2. Tecnologies utilitzades</li>
+  <li>3. Estructura del projecte</li>
+  <li>4. Organització del codi (classes principals)</li>
+  <li>5. Funcionament general (flux de l'aplicació)</li>
+  <li>6. Relacions entre classes</li>
+  <li>7. Decisions de disseny rellevants</li>
+  <li>8. Instruccions per compilar i executar</li>
+</ul>
+
+<div class="page-break"></div>
+
+<h2>1. Visió general del projecte</h2>
+<p>
+  <strong>Joc del Pingu</strong> és un joc de taula multi-jugador (1 a 4
+  participants) inspirat en l'oca, ambientat en un escenari àrtic. Cada
+  jugador controla un pingüí que avança pel tauler mitjançant tirades de
+  dau, recull objectes (boles de neu, peixos, daus alternatius) i interactua
+  amb caselles especials (forats de gel, trineus, esdeveniments, terra
+  trencat). Opcionalment es pot habilitar una <strong>foca</strong>
+  controlada per IA com a antagonista.
+</p>
+<p>
+  L'aplicació segueix una arquitectura <strong>MVC</strong> amb tres capes
+  ben diferenciades (Model / View / Controller) i utilitza <strong>JavaFX</strong>
+  per a la interfície gràfica. La persistència es fa contra una BBDD Oracle.
+</p>
+
+<h2>2. Tecnologies utilitzades</h2>
+<table>
+  <tr><th>Tecnologia</th><th>Versió</th><th>Propòsit</th></tr>
+  <tr><td>Java</td><td>17+ (mòdul Java 9+)</td><td>Llenguatge principal</td></tr>
+  <tr><td>JavaFX</td><td>21+</td><td>Interfície gràfica (FXML, CSS, Canvas, Media)</td></tr>
+  <tr><td>Oracle JDBC</td><td>ojdbc8/11</td><td>Connexió a la BBDD Oracle</td></tr>
+  <tr><td>SnakeYAML</td><td>1.x / 2.x</td><td>Serialització de l'estat de la partida</td></tr>
+  <tr><td>JCE (Java Cryptography)</td><td>Estàndard JDK</td><td>Encriptació AES-128 de contrasenyes i partides guardades</td></tr>
+  <tr><td>Eclipse IDE</td><td>2024+</td><td>IDE de desenvolupament (workspace inclòs)</td></tr>
+  <tr><td>FXML + CSS</td><td>—</td><td>Definició declarativa de pantalles i estils</td></tr>
+</table>
+
+<div class="capture">[CAPTURA 2.1: Pantalla d'Eclipse mostrant el classpath del projecte amb javafx-lib, ojdbc, snakeyaml]</div>
+
+<h2>3. Estructura del projecte</h2>
+<p>El projecte segueix una estructura per <em>paquets</em> que separa molt
+clarament les responsabilitats:</p>
+
+<div class="tree">JocDelPingu/
+├── src/
+│   ├── controller/
+│   │   ├── main/
+│   │   │   └── MainMenu.java          ← Entry point JavaFX
+│   │   └── ui/
+│   │       ├── MainMenuController.java
+│   │       ├── PlayerSetupController.java
+│   │       ├── GameBoardController.java
+│   │       └── PlayerStatsController.java
+│   ├── model/
+│   │   ├── board/                     ← Tauler i caselles
+│   │   │   ├── Board.java
+│   │   │   ├── Square.java
+│   │   │   ├── SquareType.java
+│   │   │   ├── EventManager.java
+│   │   │   └── squares/               ← Subtipus de casella
+│   │   │       ├── S_Normal, S_Start, S_End
+│   │   │       ├── S_IceHole, S_Sled
+│   │   │       ├── S_Bear, S_Event, S_BrokenFloor
+│   │   ├── config/
+│   │   │   ├── GameSetupConfig.java   ← Hand-off entre controladors
+│   │   │   ├── LangConfig.java        ← i18n
+│   │   │   ├── Lang.java
+│   │   │   └── CryptoUtil.java        ← AES-128
+│   │   ├── db/
+│   │   │   └── BBDD.java              ← Facade JDBC
+│   │   ├── entity/
+│   │   │   ├── Entity.java (abstract)
+│   │   │   ├── EntityType.java
+│   │   │   ├── Player.java
+│   │   │   └── Seal.java
+│   │   ├── game/
+│   │   │   ├── Game.java              ← Aggregate state
+│   │   │   ├── GameManager.java       ← Orquestrador
+│   │   │   ├── BoardManager.java
+│   │   │   ├── PlayerManager.java
+│   │   │   ├── TurnController.java
+│   │   │   ├── SaveLoadService.java   ← Persistència
+│   │   │   ├── SoundManager.java
+│   │   │   └── ActionResult.java
+│   │   └── item/                      ← Inventari i objectes
+│   │       ├── GameObject.java
+│   │       ├── Inventory.java
+│   │       ├── ObjectType.java
+│   │       └── objects/
+│   │           ├── Dice, Fish, SnowBall
+│   ├── view/
+│   │   ├── fxml/                      ← Pantalles JavaFX
+│   │   │   ├── mainMenu.fxml
+│   │   │   ├── playerSetup.fxml
+│   │   │   ├── gameBoard.fxml
+│   │   │   └── playerStats.fxml
+│   │   └── ui/
+│   │       └── BBDDPanel.java         ← Panell de proves CRUD
+│   ├── assets/
+│   │   ├── css/style.css
+│   │   ├── font/                      ← Fonts pixel-art
+│   │   ├── lang/                      ← 12 traduccions YAML
+│   │   ├── sound/
+│   │   └── sprites/
+│   └── module-info.java
+├── javafx-lib/
+├── bin/
+└── docs/                              ← Aquesta documentació</div>
+
+<h3>3.1. Paquets clau</h3>
+<table>
+  <tr><th>Paquet</th><th>Responsabilitat</th></tr>
+  <tr><td><code>controller.main</code></td><td>Punt d'entrada de l'aplicació JavaFX (<code>MainMenu</code>)</td></tr>
+  <tr><td><code>controller.ui</code></td><td>Controladors FXML que connecten les pantalles amb la lògica</td></tr>
+  <tr><td><code>model.board</code></td><td>Representació del tauler i les seves caselles</td></tr>
+  <tr><td><code>model.entity</code></td><td>Entitats del joc: jugador, foca</td></tr>
+  <tr><td><code>model.item</code></td><td>Objectes i inventari (peixos, boles de neu, daus)</td></tr>
+  <tr><td><code>model.game</code></td><td>Orquestració de la partida (torns, accions, persistència)</td></tr>
+  <tr><td><code>model.db</code></td><td>Capa d'accés a BBDD Oracle (JDBC)</td></tr>
+  <tr><td><code>model.config</code></td><td>Configuració global: idioma, encriptació, setup compartit</td></tr>
+  <tr><td><code>view.fxml</code></td><td>Definicions declaratives de les pantalles</td></tr>
+  <tr><td><code>view.ui</code></td><td>Panells auxiliars (per ex. el BBDDPanel de proves CRUD)</td></tr>
+  <tr><td><code>assets</code></td><td>Recursos: sprites, fonts, sons, traduccions, CSS</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>4. Organització del codi (classes principals)</h2>
+
+<h3>4.1. Capa <em>Controller</em></h3>
+
+<h4>MainMenu (controller.main)</h4>
+<p>
+  Punt d'entrada de l'aplicació. Hereta de <code>javafx.application.Application</code>.
+  Les seves responsabilitats:
+</p>
+<ul>
+  <li>Carregar les fonts pixel-art abans de qualsevol FXML.</li>
+  <li>Carregar l'idioma per defecte (<code>LangConfig.loadLang()</code>).</li>
+  <li>Construir l'<code>Stage</code> principal i mostrar el menú.</li>
+  <li>Gestionar el mode fullscreen i la restauració de dimensions.</li>
+</ul>
+
+<h4>MainMenuController</h4>
+<p>Controlador de <code>mainMenu.fxml</code>. Gestiona:</p>
+<ul>
+  <li>Botons "New Game", "Load Game", "Stats".</li>
+  <li>ComboBox de canvi d'idioma en runtime.</li>
+  <li>Fons del menú i música de títol (<code>SoundManager.playTitleMusic()</code>).</li>
+  <li>Validació de contrasenyes en carregar partides multi-jugador.</li>
+</ul>
+
+<h4>PlayerSetupController</h4>
+<p>Controlador de <code>playerSetup.fxml</code>. Gestiona:</p>
+<ul>
+  <li>Combo per escollir el nombre de jugadors (1-4).</li>
+  <li>Per a cada jugador: nom, contrasenya, color (ColorPicker), avatar (FileChooser).</li>
+  <li>Botó "Select Existing Player" → carrega jugadors registrats de la BBDD.</li>
+  <li>Validació de contrasenyes contra els hashes encriptats.</li>
+  <li>Registre del jugador via <code>SaveLoadService.registerPlayer()</code>.</li>
+</ul>
+
+<h4>GameBoardController</h4>
+<p>
+  <strong>La classe més gran i complexa del projecte</strong>. Controlador
+  de <code>gameBoard.fxml</code>. Responsabilitats:
+</p>
+<ul>
+  <li>Renderitzar el tauler (Canvas amb sprites pixel-art) en patró de serp.</li>
+  <li>Construir el HUD: retrats, inventaris, indicador de torn.</li>
+  <li>Animacions: tirada de dau, moviment, llançament de bola de neu, atac de l'os.</li>
+  <li>Loop de torns coordinat amb <code>TurnController</code> i <code>GameManager</code>.</li>
+  <li>Gestió de la foca (torn dedicat, animacions, cooldown).</li>
+  <li>Save / Load i seqüència cinematogràfica de victòria.</li>
+  <li>Mode <strong>debug</strong> ocult (Ctrl+Shift+D): teletransportar jugadors, forçar tirades, editar inventaris.</li>
+  <li>Història d'esdeveniments (botó "📜 History").</li>
+</ul>
+
+<h4>PlayerStatsController</h4>
+<p>Controlador de <code>playerStats.fxml</code>. Mostra el rànquing global amb medalles per al top-3, basat en <code>SaveLoadService.getPlayerStats()</code>.</p>
+
+<h3>4.2. Capa <em>Model</em></h3>
+
+<h4>Game (model.game)</h4>
+<p>
+  POJO que agrupa tot l'estat d'una partida (tauler, jugadors, torn actual,
+  guanyador, foca, gameOver). És el que es serialitza a YAML per al sistema
+  de save/load.
+</p>
+
+<h4>GameManager</h4>
+<p>
+  Orquestrador d'alt nivell. La UI només parla amb aquesta classe.
+  Delega a:
+</p>
+<ul>
+  <li><strong>BoardManager</strong> → resol l'efecte de cada casella.</li>
+  <li><strong>PlayerManager</strong> → mou els jugadors, combat de boles.</li>
+  <li><strong>TurnController</strong> → rotació de torns.</li>
+  <li><strong>Game</strong> → estat persistent.</li>
+  <li><strong>SaveLoadService</strong> → guardar/carregar.</li>
+</ul>
+
+<h4>Board (model.board)</h4>
+<p>
+  Array fix de <code>Square</code> (50 caselles, 10×5). Gestiona dues
+  llistes auxiliars (<code>IceHole_Array</code>, <code>Sled_Array</code>)
+  per resoldre les caselles encadenades.
+</p>
+
+<h4>Square i subtipus (model.board.squares)</h4>
+<p>Jerarquia de caselles, una classe per tipus:</p>
+<ul>
+  <li><code>S_Normal</code>: casella neutra.</li>
+  <li><code>S_Start</code>, <code>S_End</code>: entrada i meta.</li>
+  <li><code>S_IceHole</code>: forat de gel — retorna al forat anterior.</li>
+  <li><code>S_Sled</code>: trineu — avança al següent trineu.</li>
+  <li><code>S_Bear</code>: atac d'os → salta el següent torn.</li>
+  <li><code>S_BrokenFloor</code>: terra trencat → es converteix en forat.</li>
+  <li><code>S_Event</code>: dispara un esdeveniment aleatori (<code>EventManager</code>).</li>
+</ul>
+
+<h4>Player i Seal (model.entity)</h4>
+<p>Subclasses de <code>Entity</code> (classe abstracta). Player conté:</p>
+<ul>
+  <li>Nom, color, contrasenya encriptada, avatarPath.</li>
+  <li>Inventory (boles de neu, peixos, daus ràpid/lent).</li>
+  <li>Historial d'esdeveniments (cap a 50 últimes accions).</li>
+</ul>
+
+<h4>BBDD (model.db)</h4>
+<p>
+  Facade JDBC. Connecta a Oracle i exposa <code>insert / update / delete /
+  select / print / executeInsUpDel</code>. La connexió no està
+  pool·litzada: cada operació crea i tanca la seva (acceptable per a un joc
+  d'un usuari local).
+</p>
+
+<h4>SaveLoadService (model.game)</h4>
+<p>
+  Facade per a tota la persistència. Mètodes principals:
+</p>
+<ul>
+  <li><code>saveGame()</code> → YAML + AES + INSERT a SAVED_GAMES (PreparedStatement).</li>
+  <li><code>loadGame()</code> → SELECT + Decrypt + parseYAML.</li>
+  <li><code>registerPlayer()</code> → MERGE idempotent a ENTITY.</li>
+  <li><code>verifyPassword()</code> → SELECT + Decrypt + comparació.</li>
+  <li><code>getPlayerStats()</code> → leaderboard ordenat per victòries.</li>
+  <li><code>recordGameResult()</code> → INSERT a GAME + UPDATE de comptadors.</li>
+</ul>
+
+<h4>CryptoUtil (model.config)</h4>
+<p>
+  AES-128 en mode ECB+PKCS5 amb clau fixa de 16 bytes (<code>PinguGameKey1234</code>).
+  Retorna ciphertext Base64-encoded perquè es pugui guardar en text pla a
+  YAML o a la BBDD. <em>No és una mesura de seguretat forta</em> — és
+  obfuscació per al joc local.
+</p>
+
+<h4>LangConfig (model.config)</h4>
+<p>
+  Sistema d'internacionalització. Carrega un YAML d'idioma
+  (<code>assets/lang/&lt;codi&gt;.yml</code>) i exposa <code>getLang(Lang)</code>.
+  Suporta canvi de llengua en runtime mitjançant listeners.
+</p>
+<p>Idiomes disponibles: ar, ca, en, en_es, es, es_ca, ff, fr, jp, pt, ro, ru, uk.</p>
+
+<div class="capture">[CAPTURA 4.1: ComboBox del menú principal mostrant la llista d'idiomes desplegada]</div>
+
+<h3>4.3. Capa <em>View</em></h3>
+<p>
+  Definida exclusivament en <strong>FXML + CSS</strong>. Cada pantalla
+  consisteix en:
+</p>
+<ul>
+  <li>Un fitxer <code>.fxml</code> que descriu l'arbre de nodes.</li>
+  <li>Una referència al controlador via <code>fx:controller</code>.</li>
+  <li>Estils centralitzats a <code>assets/css/style.css</code>.</li>
+</ul>
+
+<div class="capture">[CAPTURA 4.2: Arbre de fitxers FXML a Eclipse (view/fxml/) i mainMenu.fxml obert mostrant l'estructura]</div>
+
+<div class="page-break"></div>
+
+<h2>5. Funcionament general (flux de l'aplicació)</h2>
+
+<h3>5.1. Inicialització</h3>
+<div class="flow">
+  <ol>
+    <li><code>MainMenu.main()</code> carrega l'idioma per defecte.</li>
+    <li>Es crida <code>Application.launch()</code>.</li>
+    <li><code>MainMenu.start(Stage)</code> carrega les fonts pixel-art.</li>
+    <li>Es carrega <code>mainMenu.fxml</code> → s'instancia <code>MainMenuController</code>.</li>
+    <li><code>MainMenuController.initialize()</code> configura el fons, els botons, l'idioma i la música.</li>
+  </ol>
+</div>
+
+<h3>5.2. Flux "New Game"</h3>
+<div class="flow">
+  <ol>
+    <li>Usuari prem <strong>New Game</strong>.</li>
+    <li>Es carrega <code>playerSetup.fxml</code>.</li>
+    <li>L'usuari emplena els camps (nom, contrasenya, color, opcionalment avatar).</li>
+    <li>Pot fer servir <strong>Select Existing Player</strong> → <code>SaveLoadService.getRegisteredPlayers()</code>.</li>
+    <li>Al prémer <strong>Start Game</strong>:
+      <ul>
+        <li><code>verifyPassword()</code> per a cada jugador existent.</li>
+        <li><code>registerPlayer()</code> (MERGE) per als nous.</li>
+        <li>Els jugadors es guarden a <code>GameSetupConfig</code>.</li>
+      </ul>
+    </li>
+    <li>Es carrega <code>gameBoard.fxml</code> → <code>GameBoardController.initialize()</code> crea el <code>Board</code>, el <code>GameManager</code> i comença la partida.</li>
+  </ol>
+</div>
+
+<h3>5.3. Flux "Load Game"</h3>
+<div class="flow">
+  <ol>
+    <li>Usuari prem <strong>Load Game</strong>.</li>
+    <li><code>SaveLoadService.getAllSavedGameIds()</code> consulta SAVED_GAMES.</li>
+    <li>Es mostra un <code>ChoiceDialog</code> amb la llista.</li>
+    <li>En seleccionar: <code>SaveLoadService.loadGame(gameId)</code> → SELECT + Decrypt + parseYAML.</li>
+    <li>Es demana la contrasenya a cada jugador → <code>verifyPassword()</code>.</li>
+    <li>Si tot va bé, es carrega <code>gameBoard.fxml</code> i el GameBoardController detecta <code>GameSetupConfig.isLoadedGame() == true</code> i reconstrueix l'estat.</li>
+  </ol>
+</div>
+
+<h3>5.4. Flux d'un torn</h3>
+<div class="flow">
+  <ol>
+    <li>El jugador actiu prem <strong>🎲 Roll Dice</strong> (o un dau alternatiu del seu inventari).</li>
+    <li><code>GameBoardController</code> anima la tirada → resultat 1-6.</li>
+    <li>El jugador es mou casella per casella (animació).</li>
+    <li>En arribar: <code>BoardManager</code> resol l'efecte segons <code>SquareType</code>.</li>
+    <li>Si hi ha altres jugadors a la mateixa casella, es pot iniciar una guerra de boles de neu.</li>
+    <li>Si la foca està habilitada i comparteix casella amb un jugador, atac de la foca (perd la meitat de l'inventari).</li>
+    <li><code>TurnController.nextTurn()</code> passa al següent jugador (saltant els que tenen <code>skipNextTurn</code>).</li>
+    <li>Si algú arriba a la casella END → seqüència de victòria + <code>recordGameResult()</code>.</li>
+  </ol>
+</div>
+
+<div class="capture">[CAPTURA 5.1: Tauler en plena partida amb el HUD complet (jugador actiu, inventaris, botons de dau, indicador de torn)]</div>
+<div class="capture">[CAPTURA 5.2: Animació de tirada de dau en marxa amb el valor visible al centre]</div>
+
+<h3>5.5. Flux "Save Game"</h3>
+<div class="flow">
+  <ol>
+    <li>Usuari prem <strong>💾 Save Game</strong>.</li>
+    <li>Es demana un nom per a la partida.</li>
+    <li><code>SaveLoadService.saveGame()</code> serialitza l'estat a YAML.</li>
+    <li>S'encripta amb AES-128 → text Base64.</li>
+    <li>INSERT a SAVED_GAMES via PreparedStatement (CLOB).</li>
+    <li>Confirmació visual a l'usuari.</li>
+  </ol>
+</div>
+
+<div class="page-break"></div>
+
+<h2>6. Relacions entre classes</h2>
+
+<h3>6.1. Diagrama lògic simplificat</h3>
+<pre>                     ┌──────────────────────┐
+                     │      MainMenu        │  (Application JavaFX)
+                     └──────────┬───────────┘
+                                │ launch
+                ┌───────────────┼────────────────┐
+                ▼               ▼                ▼
+       MainMenuController  PlayerSetupCtrl  GameBoardController
+                │               │                │
+                └─────► GameSetupConfig ◄────────┘  (hand-off estàtic)
+                                │
+                                ▼
+                           GameManager
+                ┌───────────────┼─────────────┐
+                ▼               ▼             ▼
+          TurnController  BoardManager  PlayerManager
+                │               │             │
+                └────► Game ◄───┴─► Board ◄───┘
+                        │            │
+                        │            └─► Square (S_Normal, S_IceHole, …)
+                        ▼
+                   Player / Seal ─► Inventory ─► GameObject (Dice, Fish, SnowBall)
+
+       (Persistència)                    (i18n)            (Audio)
+       SaveLoadService ─► BBDD       LangConfig          SoundManager
+              │
+              ▼
+        CryptoUtil (AES-128)</pre>
+
+<h3>6.2. Relacions importants</h3>
+<table>
+  <tr><th>Relació</th><th>Tipus</th><th>Descripció</th></tr>
+  <tr><td>GameManager → Game</td><td>Composició</td><td>Manager posseeix l'estat agregat</td></tr>
+  <tr><td>Game → Board</td><td>Composició</td><td>Una partida té un tauler</td></tr>
+  <tr><td>Board → Square[]</td><td>Composició</td><td>Tauler conté 50 caselles</td></tr>
+  <tr><td>Square ← S_Normal/S_IceHole/…</td><td>Herència</td><td>Polimorfisme per tipus de casella</td></tr>
+  <tr><td>Player extends Entity</td><td>Herència</td><td>Player i Seal comparteixen comportament base</td></tr>
+  <tr><td>Player → Inventory</td><td>Composició</td><td>Cada jugador té un inventari</td></tr>
+  <tr><td>SaveLoadService → BBDD</td><td>Dependència</td><td>Persistència delega a la facade JDBC</td></tr>
+  <tr><td>Controllers → GameSetupConfig</td><td>Hand-off</td><td>Comunicació estàtica entre pantalles</td></tr>
+  <tr><td>LangConfig → Listeners</td><td>Observer</td><td>Canvi d'idioma en runtime notifica tots els controladors</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>7. Decisions de disseny rellevants</h2>
+
+<h3>7.1. Per què MVC amb FXML?</h3>
+<p>
+  FXML separa l'estructura visual (declarativa, en XML) de la lògica (Java).
+  Permet als dissenyadors modificar les pantalles sense tocar el codi i
+  evita els típics blocs grandiloqüents de construcció manual de la UI.
+</p>
+
+<h3>7.2. Per què un MERGE per registrar jugadors?</h3>
+<p>
+  Si féssim INSERT directe, registrar el mateix nom dos cops llançaria una
+  excepció. MERGE permet ser <strong>idempotent</strong>: la mateixa
+  operació serveix per crear i per actualitzar. Això simplifica molt el
+  codi del controlador (no cal preguntar abans "existeix aquest jugador?").
+</p>
+
+<h3>7.3. Per què PreparedStatement només a saveGame()?</h3>
+<p>
+  Per a la majoria de sentències, el risc d'injecció SQL és baix
+  (validem els camps abans). Però <code>GAME_DATA</code> conté text
+  encriptat amb caràcters arbitraris i sovint &gt; 4000 caràcters, que és
+  el límit d'un literal SQL a Oracle. El PreparedStatement evita
+  l'<code>ORA-01704</code> i de pas els problemes d'escapat.
+</p>
+
+<h3>7.4. Per què AES amb clau fixa?</h3>
+<p>
+  És obfuscació, no seguretat. El joc és local i la BBDD és per al curs:
+  l'objectiu és que un usuari curiós que obri SQL Developer no pugui llegir
+  directament les contrasenyes o l'estat de la partida. Per a producció
+  caldria PBKDF2 + bcrypt + clau no-hardcoded.
+</p>
+
+<h3>7.5. Per què YAML i no JSON o serialització binària?</h3>
+<p>
+  YAML és llegible per humans (útil per fer debug d'una partida guardada
+  abans d'encriptar) i SnakeYAML mapeja directament <code>Map&lt;String,Object&gt;</code>
+  sense necessitat de POJOs ni anotacions, cosa que ens permet evolucionar
+  el format sense reescriure les classes del model.
+</p>
+
+<h3>7.6. Per què el patró Singleton a SoundManager?</h3>
+<p>
+  Hem de poder canviar de música entre escenes sense que cada controlador
+  hagi de passar-se referències. Un singleton ofereix un punt d'accés
+  global net.
+</p>
+
+<h3>7.7. Per què GameSetupConfig amb camps estàtics?</h3>
+<p>
+  JavaFX instancia els controladors automàticament via <code>FXMLLoader</code>,
+  cosa que fa difícil passar paràmetres entre ells. <code>GameSetupConfig</code>
+  actua com a "calaix" estàtic per al hand-off (jugadors, opcions, estat
+  carregat). És pragmàtic en aquest context, encara que pugui semblar un
+  anti-patró en aplicacions més grans.
+</p>
+
+<h3>7.8. Per què caselles encadenades amb llistes auxiliars?</h3>
+<p>
+  Trineus i forats de gel envien el jugador "al següent" o "a l'anterior"
+  d'aquest tipus. Mantenir dues llistes ordenades d'índexs
+  (<code>IceHole_Array</code>, <code>Sled_Array</code>) fa que la
+  resolució sigui O(log n) en comptes d'O(n) i evita haver de recórrer
+  tot el tauler cada vegada.
+</p>
+
+<h3>7.9. Per què Canvas i no ImageView per a les caselles?</h3>
+<p>
+  El joc és pixel-art: amb <code>ImageView</code> i interpolació estàndard
+  de JavaFX, els sprites es borrejaven al redimensionar. <code>Canvas</code>
+  amb <code>setImageSmoothing(false)</code> i interpolació nearest-neighbour
+  preserva l'aspecte original.
+</p>
+
+<h3>7.10. Per què un mode debug ocult (Ctrl+Shift+D)?</h3>
+<p>
+  Per accelerar el testing: permet teletransportar pingüins arrossegant-los,
+  forçar el resultat del següent dau i editar inventaris en viu, sense
+  reiniciar la partida.
+</p>
+
+<div class="capture">[CAPTURA 7.1: Mode debug activat amb el panell negre superior, comboBox de jugadors i botons per modificar inventari]</div>
+
+<div class="page-break"></div>
+
+<h2>8. Instruccions per compilar i executar</h2>
+
+<h3>8.1. Requisits previs</h3>
+<ul>
+  <li><strong>JDK 17 o superior</strong> (Oracle JDK o OpenJDK).</li>
+  <li><strong>JavaFX SDK 21+</strong> (inclòs a <code>javafx-lib/</code>).</li>
+  <li><strong>Driver Oracle JDBC</strong> (<code>ojdbc8.jar</code> o <code>ojdbc11.jar</code>).</li>
+  <li><strong>SnakeYAML</strong> (<code>snakeyaml-2.x.jar</code>).</li>
+  <li><strong>Eclipse IDE</strong> (recomanat) o qualsevol IDE Java amb suport JavaFX.</li>
+  <li>Connectivitat amb el servidor Oracle de l'institut (xarxa Ilerna o VPN).</li>
+</ul>
+
+<h3>8.2. Importar a Eclipse</h3>
+<ol>
+  <li>Obre Eclipse i selecciona <em>File → Import → Existing Projects into Workspace</em>.</li>
+  <li>Indica la ruta <code>eclipse-workspace/JocDelPingu</code>.</li>
+  <li>Confirma que el <code>.classpath</code> i <code>.project</code> es detecten.</li>
+  <li>Revisa que les llibreries de <code>javafx-lib/</code> estiguin enllaçades al Build Path.</li>
+  <li>Comprova que el JRE configurat sigui Java 17+.</li>
+</ol>
+
+<div class="capture">[CAPTURA 8.1: Eclipse amb el projecte JocDelPingu importat i la jerarquia de paquets visible]</div>
+
+<h3>8.3. Configuració de l'entorn de BBDD</h3>
+<p>
+  La connexió es configura a <code>model/db/BBDD.java</code>, a la línia 27:
+</p>
+<pre>String entorno = "fuera"; // canvia a "centro" si treballes des d'Ilerna</pre>
+<ul>
+  <li><strong>"fuera"</strong>: utilitza <code>oracle.ilerna.com:1521/XEPDB2</code></li>
+  <li><strong>"centro"</strong>: utilitza <code>192.168.3.26:1521/XEPDB2</code></li>
+</ul>
+<p>Les credencials per defecte són:</p>
+<ul>
+  <li><strong>Usuari</strong>: <code>DW2526_GR06_PINGU</code></li>
+  <li><strong>Contrasenya</strong>: <code>ABDJFMV</code></li>
+</ul>
+
+<h3>8.4. Executar el joc</h3>
+<ol>
+  <li>Obre la classe <code>controller.main.MainMenu</code>.</li>
+  <li>Botó dret → <em>Run As → Java Application</em>.</li>
+  <li>Si Eclipse demana arguments VM, afegeix:
+    <pre>--module-path "javafx-lib/lib" --add-modules javafx.controls,javafx.fxml,javafx.media,javafx.swing</pre>
+  </li>
+  <li>S'obrirà la finestra del joc.</li>
+</ol>
+
+<h3>8.5. Executar el panell de proves CRUD</h3>
+<ol>
+  <li>Obre <code>view/ui/BBDDPanel.java</code>.</li>
+  <li>Botó dret → <em>Run As → Java Application</em>.</li>
+  <li>La sortida apareixerà per consola, executant la seqüència INSERT → SELECT → UPDATE → SELECT → DELETE → SELECT.</li>
+</ol>
+
+<h3>8.6. Estructura de sortida</h3>
+<p>Després de compilar, els <code>.class</code> es generen a <code>bin/</code> mantenint la jerarquia de paquets. Els recursos d'<code>assets/</code> també es copien a <code>bin/assets/</code> automàticament per Eclipse.</p>
+
+<div class="note">
+  <strong>Problema comú:</strong> si en executar veus "Resource not found:
+  /assets/...", revisa que la carpeta <code>src/assets/</code> estigui
+  marcada com a <em>Source folder</em> al Build Path.
+</div>
+
+</body>
+</html>

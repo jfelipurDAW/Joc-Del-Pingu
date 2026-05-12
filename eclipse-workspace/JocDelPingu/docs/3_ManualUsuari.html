@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Joc del Pingu - Manual d'usuari</title>
+<style>
+  @page { size: A4; margin: 2cm; }
+  body { font-family: "Segoe UI", Tahoma, sans-serif; color: #1a1a1a; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; }
+  h1 { color: #0d3b66; border-bottom: 3px solid #0d3b66; padding-bottom: 8px; }
+  h2 { color: #0d3b66; margin-top: 2em; border-bottom: 1px solid #cfd8dc; padding-bottom: 4px; }
+  h3 { color: #1565c0; margin-top: 1.5em; }
+  h4 { color: #37474f; margin-bottom: 0.3em; }
+  code, pre { font-family: "Consolas", "Courier New", monospace; }
+  pre { background: #263238; color: #eceff1; padding: 12px 14px; border-radius: 6px; overflow-x: auto; font-size: 12px; line-height: 1.4; }
+  code.inline { background: #eceff1; color: #c62828; padding: 1px 5px; border-radius: 3px; font-size: 0.92em; }
+  .capture { border: 2px dashed #b71c1c; background: #ffebee; color: #b71c1c; padding: 14px; margin: 14px 0; text-align: center; font-weight: 600; border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid #b0bec5; padding: 8px 10px; text-align: left; font-size: 0.95em; vertical-align: top; }
+  th { background: #0d3b66; color: white; }
+  .cover { text-align: center; padding: 60px 0 40px; border-bottom: 1px solid #cfd8dc; margin-bottom: 30px; }
+  .cover h1 { border: none; font-size: 2.4em; }
+  .meta { color: #607d8b; font-size: 0.95em; }
+  .note { background: #fff8e1; border-left: 4px solid #ffa000; padding: 10px 14px; margin: 14px 0; border-radius: 4px; }
+  .tip { background: #e8f5e9; border-left: 4px solid #2e7d32; padding: 10px 14px; margin: 14px 0; border-radius: 4px; }
+  .danger { background: #ffebee; border-left: 4px solid #c62828; padding: 10px 14px; margin: 14px 0; border-radius: 4px; }
+  ul.toc { list-style: none; padding-left: 0; }
+  ul.toc li { padding: 4px 0; }
+  ul.toc a { color: #0d3b66; text-decoration: none; }
+  .page-break { page-break-after: always; }
+  .square-grid { display: table; width: 100%; margin: 12px 0; }
+  .square-cell { display: table-row; }
+  .square-cell > div { display: table-cell; border: 1px solid #b0bec5; padding: 10px; vertical-align: top; }
+  .icon-col { width: 80px; text-align: center; font-size: 1.5em; }
+  .name-col { width: 130px; font-weight: bold; color: #0d3b66; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Joc del Pingu</h1>
+  <h2 style="border:none; margin-top:0;">Manual d'usuari</h2>
+  <p class="meta">Com instal·lar, jugar i resoldre problemes</p>
+  <p class="meta">Grup DW25-26 GR06 — Curs 2025/2026</p>
+</div>
+
+<h2>Índex</h2>
+<ul class="toc">
+  <li>1. Què és el Joc del Pingu</li>
+  <li>2. Instal·lació i inici</li>
+  <li>3. Funcionament bàsic</li>
+  <li>4. Normes del joc</li>
+  <li>5. Interfície</li>
+  <li>6. Possibles errors i solucions</li>
+</ul>
+
+<div class="page-break"></div>
+
+<h2>1. Què és el Joc del Pingu</h2>
+<p>
+  <strong>Joc del Pingu</strong> és un joc de taula per ordinador per a
+  1-4 jugadors, ambientat a l'Àrtic. Cada jugador controla un pingüí que
+  ha d'arribar el primer a la casella final, esquivant forats de gel,
+  óssos polars i una foca controlada per IA (opcional). En el camí pot
+  recollir peixos, boles de neu i daus alternatius per guanyar avantatge
+  sobre els rivals.
+</p>
+
+<div class="capture">[CAPTURA 1.1: Pantalla del menú principal mostrant el títol "Joc del Pingu" amb el fons àrtic i els quatre botons]</div>
+
+<h3>1.1. Característiques principals</h3>
+<ul>
+  <li>Mode 1 a 4 jugadors locals (a la mateixa pantalla, per torns).</li>
+  <li>Tauler generat aleatòriament cada partida (50 caselles).</li>
+  <li>Combat de boles de neu entre jugadors a la mateixa casella.</li>
+  <li>Foca antagonista opcional controlada per IA.</li>
+  <li>Sistema de save/load amb encriptació.</li>
+  <li>Estadístiques globals (rànquing amb medalles).</li>
+  <li>Suport per a 12 idiomes, canviables en runtime.</li>
+  <li>Avatars personalitzables per jugador.</li>
+</ul>
+
+<h2>2. Instal·lació i inici</h2>
+
+<h3>2.1. Requisits del sistema</h3>
+<ul>
+  <li><strong>Sistema operatiu</strong>: Windows 10 / 11, macOS 11+ o Linux modern.</li>
+  <li><strong>Java</strong>: JDK 17 o superior instal·lat.</li>
+  <li><strong>Memòria RAM</strong>: mínim 512 MB lliures.</li>
+  <li><strong>Connexió a internet</strong>: necessària per a la BBDD Oracle (registres i partides guardades).</li>
+</ul>
+
+<h3>2.2. Instal·lació</h3>
+<ol>
+  <li>Descomprimeix el ZIP del joc en una carpeta de la teva elecció.</li>
+  <li>Comprova que tens Java 17+ instal·lat obrint una terminal i executant:
+    <pre>java -version</pre>
+  </li>
+  <li>Si no tens Java, descarrega'l des de
+    <a href="https://adoptium.net/">adoptium.net</a> i instal·la'l.</li>
+</ol>
+
+<h3>2.3. Iniciar el joc</h3>
+<h4>Opció A: Des d'Eclipse</h4>
+<ol>
+  <li>Importa el projecte (<em>File → Import → Existing Projects</em>).</li>
+  <li>Obre <code>controller.main.MainMenu</code>.</li>
+  <li>Botó dret → <em>Run As → Java Application</em>.</li>
+</ol>
+
+<h4>Opció B: Des de l'executable</h4>
+<p>Si tens un JAR empaquetat, fes doble clic o executa:</p>
+<pre>java -jar JocDelPingu.jar</pre>
+
+<div class="capture">[CAPTURA 2.1: Pantalla d'Eclipse mostrant el botó dret sobre MainMenu.java amb l'opció "Run As → Java Application"]</div>
+
+<div class="page-break"></div>
+
+<h2>3. Funcionament bàsic</h2>
+
+<h3>3.1. Començar una partida nova</h3>
+<ol>
+  <li>Al menú principal, prem <strong>New Game</strong>.</li>
+  <li>Tria el nombre de jugadors al desplegable (1-4).</li>
+  <li>Per a cada jugador, omple:
+    <ul>
+      <li><strong>Nom</strong> (obligatori, identifica el jugador).</li>
+      <li><strong>Contrasenya</strong> (opcional; protegeix les estadístiques).</li>
+      <li><strong>Color</strong> del pingüí (selector de color).</li>
+      <li><strong>Avatar</strong> personalitzat (opcional — botó "Choose Avatar").</li>
+    </ul>
+  </li>
+  <li>Si vols reutilitzar un jugador registrat, prem <strong>Select Existing Player</strong>.</li>
+  <li>Marca <strong>Enable Seal</strong> si vols afegir la foca antagonista.</li>
+  <li>Prem <strong>Start Game</strong>.</li>
+</ol>
+
+<div class="capture">[CAPTURA 3.1: Pantalla "Player Setup" amb 3 jugadors configurats (cadascun amb el seu color), el checkbox de la foca marcat i el botó "Start Game" remarcat]</div>
+
+<h3>3.2. Carregar una partida guardada</h3>
+<ol>
+  <li>Al menú principal, prem <strong>Load Game</strong>.</li>
+  <li>Apareixerà una llista amb totes les partides guardades. Selecciona'n una.</li>
+  <li>Si els jugadors d'aquella partida tenen contrasenya, et demanarà que la introdueixis un per un.</li>
+  <li>Un cop validades, es restaurarà l'estat exacte de la partida.</li>
+</ol>
+
+<div class="capture">[CAPTURA 3.2: Diàleg "Load Game" amb una llista de noms de partides guardades i el botó OK]</div>
+<div class="capture">[CAPTURA 3.3: Diàleg "Enter password for [Nom]" demanant la contrasenya d'un jugador]</div>
+
+<h3>3.3. Veure estadístiques</h3>
+<p>Prem <strong>Stats</strong> al menú principal per veure el rànquing global:</p>
+<ul>
+  <li>🥇 Gold per al primer classificat.</li>
+  <li>🥈 Silver per al segon.</li>
+  <li>🥉 Bronze per al tercer.</li>
+  <li>Ordenat per partides guanyades, després per partides jugades.</li>
+</ul>
+
+<div class="capture">[CAPTURA 3.4: Pantalla "Stats" amb el rànquing complet, medalles i columnes Player/Colour/Played/Won]</div>
+
+<h3>3.4. Canviar d'idioma</h3>
+<p>
+  Al menú principal hi ha un desplegable d'idiomes. Selecciona'l i tota la
+  interfície es traduirà a l'instant (sense reiniciar el joc).
+</p>
+<p>Idiomes disponibles: Català, Castellà, Anglès, Francès, Portuguès, Romanès, Rus, Ucraïnès, Àrab, Japonès, i variants.</p>
+
+<div class="capture">[CAPTURA 3.5: Desplegable d'idiomes obert al menú principal mostrant la llista d'idiomes]</div>
+
+<div class="page-break"></div>
+
+<h2>4. Normes del joc</h2>
+
+<h3>4.1. Objectiu</h3>
+<p>
+  Arribar el primer a la casella <strong>END</strong> (l'última del tauler).
+  Si la foca està activada, també pot guanyar si "menja" tots els jugadors
+  (perden tots la meitat de l'inventari i no poden completar el tauler).
+</p>
+
+<h3>4.2. Estructura del torn</h3>
+<ol>
+  <li>El jugador actiu tira el dau (1-6).</li>
+  <li>El seu pingüí es mou cap endavant tantes caselles com indiqui el dau.</li>
+  <li>En arribar, s'aplica l'efecte de la casella.</li>
+  <li>Si comparteix casella amb un altre jugador, es pot iniciar combat de boles de neu.</li>
+  <li>El torn passa al següent jugador.</li>
+  <li>Si la foca està activada, té un torn dedicat entre rondes.</li>
+</ol>
+
+<h3>4.3. Tipus de caselles</h3>
+
+<div class="square-grid">
+  <div class="square-cell">
+    <div class="icon-col">🟦</div>
+    <div class="name-col">START</div>
+    <div>Casella de sortida. Tots els pingüins comencen aquí.</div>
+  </div>
+  <div class="square-cell">
+    <div class="icon-col">⬜</div>
+    <div class="name-col">NORMAL</div>
+    <div>Casella neutra. No té cap efecte.</div>
+  </div>
+  <div class="square-cell">
+    <div class="icon-col">🕳</div>
+    <div class="name-col">ICE HOLE (forat de gel)</div>
+    <div>El pingüí cau i és enviat al <strong>forat anterior</strong> de la cadena (o al START si és el primer forat).</div>
+  </div>
+  <div class="square-cell">
+    <div class="icon-col">🛷</div>
+    <div class="name-col">SLED (trineu)</div>
+    <div>El pingüí avança fins al <strong>trineu següent</strong> de la cadena (si és l'últim, no es mou).</div>
+  </div>
+  <div class="square-cell">
+    <div class="icon-col">🐻</div>
+    <div class="name-col">BEAR (os polar)</div>
+    <div>El pingüí és atacat per l'os polar. <strong>Salta el següent torn</strong>.</div>
+  </div>
+  <div class="square-cell">
+    <div class="icon-col">⚡</div>
+    <div class="name-col">EVENT (esdeveniment)</div>
+    <div>Activa un esdeveniment aleatori (guany d'objecte, intercanvi, etc.).</div>
+  </div>
+  <div class="square-cell">
+    <div class="icon-col">🧊</div>
+    <div class="name-col">BROKEN FLOOR (terra trencat)</div>
+    <div>El pingüí cau i la casella es converteix en un nou <strong>forat de gel</strong> permanent.</div>
+  </div>
+  <div class="square-cell">
+    <div class="icon-col">🏁</div>
+    <div class="name-col">END (meta)</div>
+    <div>Casella final. El primer que hi arriba <strong>guanya la partida</strong>.</div>
+  </div>
+</div>
+
+<div class="capture">[CAPTURA 4.1: Visió completa del tauler amb diversos tipus de caselles visibles (forats, trineus, os, terra trencat)]</div>
+
+<h3>4.4. Objectes recollibles</h3>
+<table>
+  <tr><th>Objecte</th><th>Funció</th></tr>
+  <tr><td>❄️ Bola de neu</td><td>Es pot llançar contra un altre jugador per fer-li perdre el torn.</td></tr>
+  <tr><td>🐟 Peix</td><td>Aliment per a la foca (l'allunya) o per recuperar inventari.</td></tr>
+  <tr><td>🎲 Dau ràpid</td><td>Tira un dau amb valors més alts (3-8).</td></tr>
+  <tr><td>🎲 Dau lent</td><td>Tira un dau amb valors més baixos (però pot evitar caselles perilloses).</td></tr>
+</table>
+
+<h3>4.5. La foca (opcional)</h3>
+<p>
+  Si has activat la foca al setup, apareixerà al tauler com un personatge
+  controlat per IA:
+</p>
+<ul>
+  <li>Té el seu propi torn entre cada ronda de jugadors.</li>
+  <li>Es mou aleatòriament i intenta apropar-se als pingüins.</li>
+  <li>Si comparteix casella amb un pingüí, <strong>li fa perdre la meitat de l'inventari</strong>.</li>
+  <li>Es pot "alimentar" amb peixos per fer-la dormir uns torns.</li>
+</ul>
+
+<div class="capture">[CAPTURA 4.2: Foca al tauler amb el panell lateral "Seal Status" mostrant la seva posició i torns bloquejats]</div>
+
+<h3>4.6. Combat de boles de neu</h3>
+<p>
+  Quan dos o més jugadors coincideixen en la mateixa casella, es pot iniciar
+  una guerra de boles de neu. El llançador escull l'objectiu i, si l'encerta,
+  l'objectiu salta el següent torn.
+</p>
+
+<div class="page-break"></div>
+
+<h2>5. Interfície</h2>
+
+<h3>5.1. Menú principal</h3>
+<p>Quatre opcions:</p>
+<ul>
+  <li><strong>New Game</strong>: comença una partida nova.</li>
+  <li><strong>Load Game</strong>: carrega una partida guardada.</li>
+  <li><strong>Stats</strong>: rànquing global de jugadors.</li>
+  <li><strong>Language</strong>: desplegable per canviar d'idioma.</li>
+</ul>
+
+<div class="capture">[CAPTURA 5.1: Menú principal amb tots els elements anotats: títol, fons, botons, dropdown d'idioma]</div>
+
+<h3>5.2. Pantalla "Player Setup"</h3>
+<ul>
+  <li><strong>Nombre de jugadors</strong>: 1-4.</li>
+  <li><strong>Habilitar foca</strong>: checkbox per al mode amb antagonista IA.</li>
+  <li><strong>Targetes de jugador</strong>: una per slot, amb nom, contrasenya, color, avatar.</li>
+  <li><strong>Select Existing Player</strong>: per reutilitzar un jugador registrat.</li>
+  <li><strong>Start Game / Back</strong>: continuar o tornar al menú.</li>
+</ul>
+
+<div class="capture">[CAPTURA 5.2: Player Setup amb tots els elements anotats]</div>
+
+<h3>5.3. Pantalla del tauler</h3>
+<p>L'àrea principal és el tauler central de 50 caselles en patró serp. Al voltant hi ha:</p>
+
+<h4>Panell esquerre — Llista de tots els jugadors</h4>
+<ul>
+  <li>Retrat (sprite o avatar personalitzat).</li>
+  <li>Nom amb el color de fons del jugador.</li>
+  <li>Indicador de torn actiu.</li>
+</ul>
+
+<h4>Panell dret — HUD del jugador actiu</h4>
+<ul>
+  <li><strong>Nom</strong> del jugador en torn.</li>
+  <li><strong>Casella actual</strong>.</li>
+  <li><strong>Inventari</strong>: comptadors de boles de neu, peixos, daus.</li>
+  <li><strong>Estat de la foca</strong> (si està activada): posició i torns bloquejats.</li>
+</ul>
+
+<h4>Barra d'accions inferior</h4>
+<ul>
+  <li><strong>🎲 Roll Dice</strong>: tira el dau estàndard.</li>
+  <li><strong>🎲 Fast Dice</strong> / <strong>🎲 Slow Dice</strong>: tira un dau alternatiu (si en tens).</li>
+  <li><strong>❄️ Throw Snowball</strong>: llança una bola contra un altre jugador.</li>
+  <li><strong>💾 Save Game</strong>: guarda la partida amb un nom.</li>
+  <li><strong>📜 History</strong>: mostra el log d'esdeveniments.</li>
+</ul>
+
+<div class="capture">[CAPTURA 5.3: Pantalla completa del tauler amb totes les zones anotades: tauler, panell esquerre, HUD dret, barra inferior, indicador de torn]</div>
+
+<h3>5.4. Diàleg d'històric</h3>
+<p>
+  Prement el botó <strong>📜 History</strong> apareix una finestra amb el
+  llistat cronològic de tots els esdeveniments de la partida: tirades, moviments,
+  efectes de casella, atacs, etc.
+</p>
+
+<div class="capture">[CAPTURA 5.4: Diàleg "History" obert amb una llista d'esdeveniments]</div>
+
+<h3>5.5. Pantalla "Stats"</h3>
+<p>Llista en format taula, ordenada de millor a pitjor:</p>
+<ul>
+  <li>Rang amb medalla per al top-3.</li>
+  <li>Nom del jugador.</li>
+  <li>Color (mostra hexadecimal i quadrat acolorit).</li>
+  <li>Partides jugades.</li>
+  <li>Partides guanyades.</li>
+</ul>
+
+<div class="capture">[CAPTURA 5.5: Stats amb diverses files de jugadors i medalles]</div>
+
+<h3>5.6. Drecera oculta: mode debug</h3>
+<div class="note">
+  <strong>Per a desenvolupadors</strong>: durant la partida pots prémer
+  <code class="inline">Ctrl + Shift + D</code> per obrir el panell de
+  debug, que permet teletransportar pingüins arrossegant-los, forçar el
+  resultat del proper dau i editar l'inventari de qualsevol jugador en viu.
+</div>
+
+<div class="page-break"></div>
+
+<h2>6. Possibles errors i solucions</h2>
+
+<h3>6.1. El joc no arrenca</h3>
+<table>
+  <tr><th>Símptoma</th><th>Causa</th><th>Solució</th></tr>
+  <tr>
+    <td>"Error: JavaFX runtime components missing"</td>
+    <td>JavaFX no està al classpath / module-path.</td>
+    <td>Afegir <code>--module-path javafx-lib/lib --add-modules javafx.controls,javafx.fxml,javafx.media</code> als arguments VM.</td>
+  </tr>
+  <tr>
+    <td>"UnsupportedClassVersionError"</td>
+    <td>Estàs utilitzant una versió de Java antiga.</td>
+    <td>Instal·la JDK 17 o superior.</td>
+  </tr>
+  <tr>
+    <td>"Resource not found: /assets/..."</td>
+    <td>La carpeta <code>src/assets/</code> no està marcada com a Source folder.</td>
+    <td>A Eclipse: Build Path → Configure Build Path → Source → Add Folder → <code>assets/</code>.</td>
+  </tr>
+</table>
+
+<h3>6.2. Errors de connexió a la BBDD</h3>
+<table>
+  <tr><th>Símptoma</th><th>Causa</th><th>Solució</th></tr>
+  <tr>
+    <td>"Oracle JDBC driver not found"</td>
+    <td>Falta <code>ojdbc8.jar</code> o <code>ojdbc11.jar</code>.</td>
+    <td>Afegir el JAR al Build Path del projecte.</td>
+  </tr>
+  <tr>
+    <td>"Failed to connect to database"</td>
+    <td>Estàs configurat com a "centro" però treballes des de casa (o viceversa).</td>
+    <td>Editar <code>BBDD.java</code> línia 27: canviar <code>entorno</code> a <code>"fuera"</code> o <code>"centro"</code>.</td>
+  </tr>
+  <tr>
+    <td>"IO Error: Network adapter could not establish the connection"</td>
+    <td>Sense connexió a internet o el servidor està caigut.</td>
+    <td>Verifica la connexió i prova un altre cop.</td>
+  </tr>
+  <tr>
+    <td>"Invalid username/password"</td>
+    <td>Credencials canviades.</td>
+    <td>Demanar al professor les credencials actualitzades i actualitzar <code>BBDD.java</code>.</td>
+  </tr>
+</table>
+
+<h3>6.3. Errors a la pantalla de setup</h3>
+<table>
+  <tr><th>Símptoma</th><th>Causa</th><th>Solució</th></tr>
+  <tr>
+    <td>"Wrong password" en intentar reutilitzar un nom</td>
+    <td>El nom ja existeix a la BBDD amb una altra contrasenya.</td>
+    <td>Introduir la contrasenya correcta, o canviar el nom del jugador.</td>
+  </tr>
+  <tr>
+    <td>El botó "Choose Avatar" no fa res</td>
+    <td>JavaFX no troba el FileChooser nadiu.</td>
+    <td>Reinstal·la JavaFX o utilitza el joc sense avatar personalitzat.</td>
+  </tr>
+  <tr>
+    <td>"No more empty slots available"</td>
+    <td>Intentes carregar més jugadors registrats que slots disponibles.</td>
+    <td>Augmenta el nombre de jugadors o esborra una targeta.</td>
+  </tr>
+</table>
+
+<h3>6.4. Errors durant la partida</h3>
+<table>
+  <tr><th>Símptoma</th><th>Causa</th><th>Solució</th></tr>
+  <tr>
+    <td>El tauler es veu borrós</td>
+    <td>El sistema està aplicant un escalat HiDPI.</td>
+    <td>Redimensiona la finestra: el tauler es redibuixa amb interpolació pixel-perfect.</td>
+  </tr>
+  <tr>
+    <td>No es reprodueix la música</td>
+    <td>JavaFX Media no està disponible o el fitxer no es troba.</td>
+    <td>Afegir <code>javafx.media</code> als <code>--add-modules</code>.</td>
+  </tr>
+  <tr>
+    <td>"Save game failed"</td>
+    <td>Sense connexió a la BBDD en el moment del save.</td>
+    <td>Verifica la connexió i torna a intentar-ho.</td>
+  </tr>
+  <tr>
+    <td>Un jugador queda "encallat"</td>
+    <td>Probablement ha caigut a una cadena de forats / trineus.</td>
+    <td>És comportament esperat — el seu torn ha funcionat però el resultat ha estat advers.</td>
+  </tr>
+</table>
+
+<h3>6.5. Errors carregant partides</h3>
+<table>
+  <tr><th>Símptoma</th><th>Causa</th><th>Solució</th></tr>
+  <tr>
+    <td>"No saved games found"</td>
+    <td>Encara no has guardat cap partida.</td>
+    <td>Comença una partida nova i guarda-la amb <strong>Save Game</strong>.</td>
+  </tr>
+  <tr>
+    <td>"Error loading the selected saved game"</td>
+    <td>El YAML encriptat està corrupte o la clau AES ha canviat.</td>
+    <td>Aquesta partida no es pot recuperar. Comença una nova.</td>
+  </tr>
+  <tr>
+    <td>"Wrong password" en carregar</td>
+    <td>Has introduït una contrasenya diferent de la que tenia el jugador.</td>
+    <td>Recupera la contrasenya original o utilitza el panell d'administració per resetejar-la.</td>
+  </tr>
+</table>
+
+<div class="tip">
+  <strong>Consell:</strong> guarda la partida sovint si fas torns llargs. El
+  format de save inclou tot l'estat (tauler, inventaris, foca, historial),
+  així que pots recuperar exactament on l'havies deixat.
+</div>
+
+<div class="danger">
+  <strong>Atenció:</strong> les contrasenyes dels jugadors estan encriptades
+  amb una clau interna fixa. Si oblides la contrasenya d'un jugador no hi
+  ha manera oficial de recuperar-la des de la UI — només es pot canviar
+  modificant manualment la fila a la BBDD.
+</div>
+
+<h2>Suport i contacte</h2>
+<p>
+  Si trobes un error que no apareix en aquesta llista o tens propostes de
+  millora, contacta amb el grup de desenvolupament:
+</p>
+<ul>
+  <li>Grup: <strong>DW25-26 GR06</strong></li>
+  <li>Repositori: <code>github.com/...../Joc-Del-Pingu</code></li>
+</ul>
+
+</body>
+</html>
