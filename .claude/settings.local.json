@@ -5,7 +5,18 @@
       "Read(//tmp/**)",
       "Bash(javac -version)",
       "Bash(awk '{for\\(i=1;i<=length\\($0\\);i++\\){c=substr\\($0,i,1\\);if\\(c==\"{\"\\)o++;if\\(c==\"}\"\\)cl++}}END{print \"open:\"o, \"close:\"cl, \"diff:\"o-cl}' \"d:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/controller/ui/GameBoardController.java\")",
-      "Bash(awk '{for\\(i=1;i<=length\\($0\\);i++\\){c=substr\\($0,i,1\\);if\\(c==\"{\"\\)o++;if\\(c==\"}\"\\)cl++}}END{print \"open:\"o, \"close:\"cl, \"diff:\"o-cl}' \"d:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/model/game/SaveLoadService.java\")"
+      "Bash(awk '{for\\(i=1;i<=length\\($0\\);i++\\){c=substr\\($0,i,1\\);if\\(c==\"{\"\\)o++;if\\(c==\"}\"\\)cl++}}END{print \"open:\"o, \"close:\"cl, \"diff:\"o-cl}' \"d:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/model/game/SaveLoadService.java\")",
+      "Bash(awk '{for\\(i=1;i<=length\\($0\\);i++\\){c=substr\\($0,i,1\\);if\\(c==\"{\"\\)o++;if\\(c==\"}\"\\)cl++}}END{print \"GameBoardController open:\"o, \"close:\"cl, \"diff:\"o-cl}' \"d:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/controller/ui/GameBoardController.java\")",
+      "Bash(awk '{for\\(i=1;i<=length\\($0\\);i++\\){c=substr\\($0,i,1\\);if\\(c==\"{\"\\)o++;if\\(c==\"}\"\\)cl++}}END{print \"Entity open:\"o, \"close:\"cl, \"diff:\"o-cl}' \"d:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/model/entity/Entity.java\")",
+      "Bash(perl -0777 -pe 's{/\\\\*.*?\\\\*/}{}gs' eclipse-workspace/JocDelPingu/src/model/game/SoundManager.java)",
+      "Bash(grep -v '^[[:space:]]*$')",
+      "Bash(awk 'BEGIN{op=0;cl=0} {for\\(i=1;i<=length\\($0\\);i++\\){c=substr\\($0,i,1\\); if\\(c==\"{\"\\) op++; if\\(c==\"}\"\\) cl++}} END{print \"open=\" op, \"close=\" cl}' \"d:\\\\Usuarios\\\\martavoytk\\\\Joc-Del-Pingu\\\\eclipse-workspace\\\\JocDelPingu\\\\src\\\\controller\\\\ui\\\\GameBoardController.java\")",
+      "Bash(where pandoc *)",
+      "Bash(pandoc --version)",
+      "Bash(where wkhtmltopdf *)",
+      "Bash(where node *)",
+      "Bash(where python *)",
+      "Bash(where npx *)"
     ]
   }
 }

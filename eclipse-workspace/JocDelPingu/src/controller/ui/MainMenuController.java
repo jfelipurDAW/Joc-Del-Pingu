@@ -20,7 +20,29 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.text.Text;
 
+
+/**
+ * Controller for the main menu screen ({@code mainMenu.fxml}).
+ *
+ * <p>The main menu offers four entry points:</p>
+ * <ul>
+ *   <li><b>New Game</b> - opens the player-setup screen.</li>
+ *   <li><b>Load Game</b> - lists saved games, asks each loaded player for
+ *       their password and, on success, jumps straight into the board.</li>
+ *   <li><b>Stats</b> - shows the global leaderboard.</li>
+ *   <li><b>Language</b> - dropdown that swaps the UI language at runtime,
+ *       refreshing every text via the {@link LangConfig} listener.</li>
+ * </ul>
+ *
+ * <p>The controller is also responsible for starting the menu music track
+ * the moment the scene initialises.</p>
+ */
 public class MainMenuController {
+
+
+    /////////////////////////////
+    ///   FXML INJECTIONS    ///
+    /////////////////////////////
 
     @FXML
     private StackPane rootPane;
@@ -44,11 +66,25 @@ public class MainMenuController {
     @FXML
     private Text titleShadowText;
 
+
+    /////////////////////////////
+    ///     INITIALIZATION    ///
+    /////////////////////////////
+
+    /**
+     * FXML lifecycle hook. Called automatically by JavaFX after every
+     * {@code @FXML} field has been injected. Sets up the background, wires
+     * the language dropdown, registers a translation listener and starts
+     * the title music.
+     */
     @FXML
     public void initialize() {
 
         addBackgroundImage();
+
         // Register listener for dynamic language updates
+        // Each translatable widget is re-read by refreshTexts() whenever the
+        // user picks another language from the combobox.
         LangConfig.addLanguageChangeListener(this::refreshTexts);
 
         // Removed addBitmapTitle() to use text instead of image-based font
@@ -57,16 +93,25 @@ public class MainMenuController {
         // Changed: populate language dropdown with available languages
         setupLanguageDropdown();
 
-        // Background music starts as soon as the main menu opens (idempotent
-        // call) and is restored to menu volume in case the user is returning
-        // from a game where it had been ducked.
-        model.game.SoundManager.getInstance().startBackgroundMusic();
-        model.game.SoundManager.getInstance().restoreMenuVolume();
+        // Title-screen music starts as soon as the main menu opens. The call
+        // also restarts the track from zero so coming back from a game makes
+        // the menu music begin again from the beginning.
+        model.game.SoundManager.getInstance().playTitleMusic();
     }
+
+
+    /////////////////////////////
+    ///   LANGUAGE DROPDOWN   ///
+    /////////////////////////////
 
     /**
      * Added: initializes the language ComboBox with display names
      * and wires the selection listener to switch languages.
+     *
+     * <p>The dropdown shows human-friendly names (e.g. "English") but
+     * internally we work with the language codes returned by {@link LangConfig}.
+     * {@link #applyLanguageByDisplayName(String)} translates back from the
+     * picked label to the matching code.</p>
      */
     private void setupLanguageDropdown() {
         language_combobox.getItems().clear();
@@ -86,10 +131,13 @@ public class MainMenuController {
         });
     }
 
+
     /**
      * Loads the language whose display name matches the given value.
      * Uses an indexed loop with a found-flag so neither break nor an
      * empty return is needed.
+     *
+     * @param displayName the human-friendly language label picked in the combobox
      */
     private void applyLanguageByDisplayName(String displayName) {
         String[] codes = LangConfig.getAvailableLanguages();
@@ -105,6 +153,19 @@ public class MainMenuController {
         }
     }
 
+
+    /////////////////////////////
+    ///   BACKGROUND IMAGE    ///
+    /////////////////////////////
+
+    /**
+     * Adds the menu background as a separate node behind the rest of the UI.
+     *
+     * <p>We deliberately do not assign the background directly to {@code rootPane}
+     * because the CSS class {@code mainmenu_bg} on that pane would override
+     * it. Instead a {@link javafx.scene.layout.Region} is inserted at index 0
+     * (bottom-most) and its size is bound to the parent so it tracks resizing.</p>
+     */
     private void addBackgroundImage() {
 
         String path = "/assets/sprites/backgrounds/1.png";
@@ -142,24 +203,33 @@ public class MainMenuController {
     }
 
 //    private void addBitmapTitle() {
-//        System.out.println("Afegint text bitmap...");
+//        System.out.println("Adding bitmap text...");
 //
 //        Group title = CustomBitmapFont.getInstance()
 //                .createText("JOC DEL PINGU", 180, 40, 4.0);
 //
-//        // Opcional: força posicions a píxels enters per evitar subpíxels
+//        // Optional: snap positions to integer pixels to avoid subpixel rendering
 //        title.setTranslateX(Math.round(title.getTranslateX()));
 //        title.setTranslateY(Math.round(title.getTranslateY()));
 //
-//        // Opcional: cache al grup del títol
+//        // Optional: cache on the title group
 //        // title.setCache(true);
 //        // title.setCacheHint(CacheHint.SPEED);
 //
-//        System.out.println("Text creat amb " + title.getChildren().size() + " caràcters");
+//        System.out.println("Text created with " + title.getChildren().size() + " characters");
 //
 //        rootPane.getChildren().add(title);
 //    }
 
+
+    /////////////////////////////
+    ///   BUTTON HANDLERS    ///
+    /////////////////////////////
+
+    /**
+     * "New Game" button handler. Loads the player-setup FXML and replaces
+     * the current scene without recreating the {@link Stage}.
+     */
     @FXML
     private void handleNewGame() {
         try {
@@ -180,6 +250,11 @@ public class MainMenuController {
         }
     }
 
+
+    /**
+     * "Stats" button handler. Loads the player-statistics FXML and swaps
+     * the current scene for the leaderboard view.
+     */
     @FXML
     private void handleStats() {
         try {
@@ -199,54 +274,68 @@ public class MainMenuController {
         }
     }
 
+
+    /**
+     * "Load Game" button handler. Queries the database for every saved-game
+     * id; if any exist, opens a chooser dialog to let the user pick one.
+     */
     @FXML
     private void handleLoadGame() {
-        // 1. Buscamos todas las partidas guardadas en Oracle
-        List<String> partidas = model.game.SaveLoadService.getAllSavedGameIds();
+        // 1. Fetch every saved-game id from Oracle
+        List<String> savedGames = model.game.SaveLoadService.getAllSavedGameIds();
 
-        if (partidas.isEmpty()) {
-            System.out.println("No hay partidas guardadas.");
+        if (savedGames.isEmpty()) {
+            System.out.println("No saved games found.");
         } else {
-            promptLoadGameChoice(partidas);
+            promptLoadGameChoice(savedGames);
         }
     }
+
 
     /**
      * Shows the saved-games picker dialog and loads the selected one.
      * Extracted so handleLoadGame() does not need an early empty return.
+     *
+     * <p>The flow is: pick id -> load board/players from DB -> ask each
+     * player for their password -> jump to the gameBoard scene on success.</p>
+     *
+     * @param savedGames list of saved-game ids returned by the DB layer
      */
-    private void promptLoadGameChoice(List<String> partidas) {
-        // 2. Abrimos el selector para que el usuario elija
-        javafx.scene.control.ChoiceDialog<String> dialog = new javafx.scene.control.ChoiceDialog<>(partidas.get(0), partidas);
-        dialog.setTitle("Cargar Partida");
-        dialog.setHeaderText("Selecciona la partida que quieres jugar:");
-        dialog.setContentText("ID de partida:");
+    private void promptLoadGameChoice(List<String> savedGames) {
+        // 2. Open the picker so the user can choose one
+        javafx.scene.control.ChoiceDialog<String> dialog = new javafx.scene.control.ChoiceDialog<>(savedGames.get(0), savedGames);
+        dialog.setTitle("Load Game");
+        dialog.setHeaderText("Select the saved game you want to play:");
+        dialog.setContentText("Game id:");
 
         java.util.Optional<String> result = dialog.showAndWait();
 
-        // 3. Si el usuario selecciona una...
+        // 3. If the user selects one...
         result.ifPresent(gameId -> {
             boolean success = model.game.SaveLoadService.loadGame(gameId);
             if (success) {
-                System.out.println("Partida " + gameId + " cargada. Verificando jugadores...");
+                System.out.println("Game " + gameId + " loaded. Verifying players...");
                 if (authenticateLoadedPlayers()) {
                     enterLoadedGameScene();
                 } else {
-                    System.out.println("Autenticación cancelada o fallida — vuelve al menú.");
+                    System.out.println("Authentication cancelled or failed — back to menu.");
                     // Reset the loaded-game flag so future navigation doesn't
                     // accidentally re-enter the half-loaded state.
                     model.config.GameSetupConfig.setLoadedGame(false);
                 }
             } else {
-                System.out.println("Error al cargar la partida seleccionada.");
+                System.out.println("Error loading the selected saved game.");
             }
         });
     }
+
 
     /**
      * For each player in the just-loaded game, asks for their password and
      * checks it against the encrypted DB value. Stops at the first failure.
      * Returns true only if every player authenticates successfully.
+     *
+     * @return {@code true} when every player's password matched, {@code false} otherwise
      */
     private boolean authenticateLoadedPlayers() {
         java.util.List<model.entity.Player> players = model.config.GameSetupConfig.getPlayers();
@@ -254,6 +343,9 @@ public class MainMenuController {
             return true; // nothing to authenticate; let the game proceed
         }
         for (model.entity.Player p : players) {
+
+            // Custom Dialog with a single PasswordField so the typed password
+            // is masked while the user types it.
             javafx.scene.control.Dialog<String> pwDialog = new javafx.scene.control.Dialog<>();
             pwDialog.setTitle(LangConfig.getLang(Lang.DIALOG_SELECTPLAYER_TITLE));
             pwDialog.setHeaderText("Enter password for " + p.getName());
@@ -284,6 +376,7 @@ public class MainMenuController {
         return true;
     }
 
+
     /** Switches the scene to the loaded gameBoard FXML. */
     private void enterLoadedGameScene() {
         try {
@@ -303,9 +396,18 @@ public class MainMenuController {
         }
     }
 
+
+    /////////////////////////////
+    ///    LANGUAGE REFRESH   ///
+    /////////////////////////////
+
     /**
      * Changed: refreshes all translatable text after a language change.
      * Called from the ComboBox selection listener.
+     *
+     * <p>Includes a small extra step that re-applies the (now translated)
+     * title to the {@link Stage} so the OS-level window title also tracks
+     * the chosen language.</p>
      */
     private void refreshTexts() {
         String title = (String) LangConfig.getLang(Lang.TEXT_GAME_TITLE);

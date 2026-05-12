@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"d:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/esquema-obsidian/_build\")",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(node build.mjs)",
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=20000 --run-all-compositor-stages-before-draw --print-to-pdf=\"D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/esquema-obsidian/Joc del Pingu - Guia Completa.pdf\" \"file:///D:/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets/esquema-obsidian/_build/guia-completa.html\")"
+    ]
+  }
+}

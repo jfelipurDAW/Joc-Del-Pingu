@@ -41,7 +41,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
+/**
+ * Controller for the gameplay screen ({@code gameBoard.fxml}).
+ *
+ * <p>This is by far the most complex screen in the game. It is responsible
+ * for everything that happens once a match has started:</p>
+ * <ul>
+ *   <li>Building the snake-pattern board, cell by cell, with pixel-art
+ *       backgrounds and foregrounds rendered onto {@link Canvas} nodes to
+ *       avoid blurring.</li>
+ *   <li>Driving the turn loop through {@code TurnController} and
+ *       {@code GameManager}, with animations for dice rolls, player
+ *       movement, snowball throws and bear / seal events.</li>
+ *   <li>Managing the optional seal NPC: its dedicated turn, its tail-hit
+ *       interactions and its eating cooldown.</li>
+ *   <li>Drawing the live HUD: per-player portraits, inventory slots and
+ *       the central game title.</li>
+ *   <li>Persisting an in-memory event history that the user can review at
+ *       any time via the "History" button.</li>
+ *   <li>Offering a hidden developer "debug mode" (Ctrl+Shift+D) that lets
+ *       the developer teleport pinguins by dragging, force the next dice
+ *       roll, and tweak each player's inventory live.</li>
+ *   <li>Handling save / exit flows and the cinematic win sequence.</li>
+ * </ul>
+ *
+ * <p>The class keeps a strict no-bindings policy on the board grid: cell
+ * sizes are snapshotted from the container size and used as fixed values,
+ * because reactive bindings combined with the resize listener would cause
+ * a redraw loop.</p>
+ */
 public class GameBoardController {
+
+
+    /////////////////////////////
+    ///   FXML INJECTIONS    ///
+    /////////////////////////////
 
     // --- FXML Bindings ---
     @FXML private StackPane mainStack;
@@ -75,17 +110,46 @@ public class GameBoardController {
 
     @FXML private Button historyButton;
 
+
+    /////////////////////////////
+    ///    EVENT HISTORY     ///
+    /////////////////////////////
+
     // --- Event history backing list (no on-screen ticker; the full
     //     log is reachable through the "📜 History" button on the action bar)
+    // Every meaningful in-game event is appended here so the "History"
+    // dialog can show the full chronological log even after many turns.
     private final java.util.List<String> eventHistoryFull = new ArrayList<>();
 
+
+    /////////////////////////////
+    ///   DEBUG-MODE FIELDS  ///
+    /////////////////////////////
+
     // --- Debug mode (Ctrl+Shift+D) ---
-    // Lets the developer drag a player token to any cell and pre-set the
-    // value of the next dice roll. Off by default, no effect on normal play.
+    // Lets the developer drag a player token to any cell, pre-set the value
+    // of the next dice roll, and tweak any player's inventory. Off by
+    // default, no effect on normal play.
     private boolean debugMode = false;
+
+    // When non-null, the next call to rollOrForce(...) returns this value
+    // and clears the field, bypassing the actual dice randomness.
     private Integer debugForcedDice = null;
-    private HBox debugPanel;
+
+    // UI containers for the developer panel; built lazily the first time
+    // debug mode is toggled on.
+    private VBox debugPanel;
     private Label debugBannerLabel;
+    private ComboBox<String> debugPlayerCombo;
+    private Label debugSnowballLabel;
+    private Label debugFishLabel;
+    private Label debugFastDiceLabel;
+    private Label debugSlowDiceLabel;
+
+
+    /////////////////////////////
+    ///     GAME STATE       ///
+    /////////////////////////////
 
     // --- Game State ---
     private Board gameBoard;
@@ -100,23 +164,46 @@ public class GameBoardController {
     private StackPane animationOverlay;
     private String winner;
 
+
+    /////////////////////////////
+    ///       SPRITES        ///
+    /////////////////////////////
+
     // --- Sprites ---
-    // Player: 4 sprite layers (base/colour x left/right), plus damaged frames
+    // Player: 4 sprite layers (base/colour x left/right), plus damaged and frozen frames
+    // The colour variant is layered on top of the base sprite and tinted at
+    // runtime via a Lighting effect so the same PNG can represent every
+    // player's chosen colour without needing per-colour assets.
     private final Image baseRightImage;
     private final Image colorRightImage;
     private final Image baseLeftImage;
     private final Image colorLeftImage;
     private final Image damagedRightImage;
     private final Image damagedLeftImage;
+    private final Image iceRightImage;
+    private final Image iceLeftImage;
     // Seal: idle facing left/right
     private final Image sealRightImage;
     private final Image sealLeftImage;
 
+    // Image-cache keyed by resource path so we never decode the same PNG twice.
     private final Map<String, Image> resourceCache = new HashMap<>();
 
     // Guard against re-entrant drawBoard calls
+    // (the boardContainer resize listener fires while drawBoard mutates the
+    //  grid; without this flag the redraw would recurse and freeze the UI).
     private boolean isRedrawing = false;
 
+
+    /////////////////////////////
+    ///     CONSTRUCTOR      ///
+    /////////////////////////////
+
+    /**
+     * Pre-loads every static sprite used by the game board (players in
+     * various states + seal). The actual gameplay state is built later, in
+     * {@link #initialize()}, once the FXML injections are available.
+     */
     public GameBoardController() {
         baseRightImage    = loadImage("/assets/sprites/entities/player/player_idle_right.png");
         colorRightImage   = loadImage("/assets/sprites/entities/player/player_idle_colour_right.png");
@@ -124,21 +211,27 @@ public class GameBoardController {
         colorLeftImage    = loadImage("/assets/sprites/entities/player/player_idle_colour_left.png");
         damagedRightImage = loadImage("/assets/sprites/entities/player/player_damaged_right.png");
         damagedLeftImage  = loadImage("/assets/sprites/entities/player/player_damaged_left.png");
+        iceRightImage     = loadImage("/assets/sprites/entities/player/ice_player_right.png");
+        iceLeftImage      = loadImage("/assets/sprites/entities/player/ice_player_left.png");
         sealRightImage    = loadImage("/assets/sprites/entities/seal/seal_idle_right.png");
         sealLeftImage     = loadImage("/assets/sprites/entities/seal/seal_idle_left.png");
         gameOver = false;
     }
 
-    private Image loadImage(String path) {
-<<<<<<< Updated upstream
-        if (resourceCache.containsKey(path)) return resourceCache.get(path);
-=======
-        Map<String, Object> resourceCache = null;
-		if (resourceCache.containsKey(path)) {
-            return (Image) resourceCache.get(path);
-        }
 
->>>>>>> Stashed changes
+    /**
+     * Loads a PNG / GIF from the classpath, caching by path so repeated
+     * lookups (e.g. one per cell of the board) are essentially free.
+     *
+     * <p>The {@code Image} is created with smoothing disabled and at the
+     * source PNG's natural size; downstream code rescales onto a Canvas with
+     * nearest-neighbour interpolation, preserving the pixel-art look.</p>
+     *
+     * @param path classpath-style resource path (must start with {@code /})
+     * @return the loaded image, or {@code null} if the resource is missing
+     */
+    private Image loadImage(String path) {
+        if (resourceCache.containsKey(path)) return resourceCache.get(path);
         try (InputStream is = getClass().getResourceAsStream(path)) {
             if (is == null) { System.err.println("Resource not found: " + path); return null; }
             Image img = new Image(is, 0, 0, true, false); // natural size, nearest-neighbour
@@ -150,12 +243,26 @@ public class GameBoardController {
         }
     }
 
+
+    /////////////////////////////
+    ///  SCENE INITIALIZATION ///
+    /////////////////////////////
+
+    /**
+     * FXML lifecycle hook. Builds the {@code GameManager}, restores the
+     * board from a save (if applicable) or creates a fresh one, prepares
+     * the dice instances, wires up the resize listener and the Ctrl+Shift+D
+     * debug hotkey, and finally hands control to {@code drawBoard()}.
+     */
     @FXML
     public void initialize() {
         gameManager = new model.game.GameManager("LOCAL_MATCH", 0);
         gameBoard = new Board();
         gameManager.setBoard(gameBoard);
 
+        // Two distinct paths: restoring a saved game versus starting fresh.
+        // The "loaded" path also restores the seal's current square and how
+        // many turns it has left of its eating-fish cooldown.
         if (GameSetupConfig.isLoadedGame()) {
             gameBoard.loadBoard(GameSetupConfig.getLoadedBoardState());
             turnController = new TurnController();
@@ -192,6 +299,9 @@ public class GameBoardController {
             }
         }
 
+        // The three dice variants are created once and reused for every roll;
+        // their internal state is just min/max values, so a single instance
+        // per variant is enough.
         defaultDice = new Dice(ObjectType.DICE);
         fastDice    = new Dice(ObjectType.FASTDICE);
         slowDice    = new Dice(ObjectType.SLOWDICE);
@@ -216,11 +326,10 @@ public class GameBoardController {
         }
         logEvent("🎯 " + getCurrentPlayer().getName() + "'s turn!");
 
-        // Music has likely been playing since the main menu — make sure it is
-        // running. Volume stays at the menu level for the whole game so the
-        // background track sounds the same as on the main menu.
-        model.game.SoundManager.getInstance().startBackgroundMusic();
-        model.game.SoundManager.getInstance().restoreMenuVolume();
+        // Switch the soundtrack: the menu's title music stops, the in-game
+        // bg_music starts from the beginning. Leaving the game (handleWin,
+        // handleBack, handleReturnToMenu) brings the title track back.
+        model.game.SoundManager.getInstance().playGameMusic();
 
         // Redraw the board once the container has its real layout size,
         // and again whenever the window is resized (width OR height) — no bindings, no loop.
@@ -244,10 +353,20 @@ public class GameBoardController {
         });
     }
 
-    // ============================================
-    //  DEBUG MODE  (Ctrl+Shift+D)
-    // ============================================
 
+    /////////////////////////////
+    /// DEBUG MODE (CTRL+SHIFT+D) ///
+    /////////////////////////////
+
+    // Everything below is wired only when the developer hits Ctrl+Shift+D.
+    // The toggle builds (lazily) a black panel at the top of the scene with
+    // a "Force next roll" field, drag-to-teleport handlers on every pingu,
+    // and live inventory editing for any player.
+
+    /**
+     * Flips the debug-mode flag and rebuilds the developer panel and the
+     * player drag handlers accordingly. Triggered by Ctrl+Shift+D.
+     */
     private void toggleDebugMode() {
         debugMode = !debugMode;
         if (debugPanel == null) {
@@ -255,7 +374,9 @@ public class GameBoardController {
         }
         debugPanel.setVisible(debugMode);
         debugPanel.setManaged(debugMode);
-        if (!debugMode) {
+        if (debugMode) {
+            populateDebugPlayerCombo();
+        } else {
             debugForcedDice = null;
             updateDebugBanner();
         }
@@ -263,7 +384,14 @@ public class GameBoardController {
         drawBoard();
     }
 
+
+    /**
+     * Builds the developer panel once and stashes it inside {@code mainStack}.
+     * The panel has two rows: forced-dice / drag hint, and per-player
+     * inventory editor.
+     */
     private void buildDebugPanel() {
+        // ---------- Row 1: status + forced dice + drag hint ----------
         debugBannerLabel = new Label("🛠 DEBUG ON  ");
         debugBannerLabel.setStyle("-fx-text-fill: #ffeb3b; -fx-font-weight: 900; -fx-font-size: 14px;");
 
@@ -297,9 +425,34 @@ public class GameBoardController {
         Label hint = new Label("    Drag any 🐧 to teleport.");
         hint.setStyle("-fx-text-fill: #a0c4ff; -fx-font-size: 12px;");
 
-        debugPanel = new HBox(8, debugBannerLabel, forceLbl, diceField, setBtn, clearBtn, hint);
+        HBox row1 = new HBox(8, debugBannerLabel, forceLbl, diceField, setBtn, clearBtn, hint);
+        row1.setAlignment(Pos.CENTER_LEFT);
+
+        // ---------- Row 2: inventory editor (player + per-item +/-) ----------
+        Label playerLbl = new Label("Inventory of:");
+        playerLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 13px;");
+
+        debugPlayerCombo = new ComboBox<>();
+        debugPlayerCombo.setPrefWidth(140);
+        debugPlayerCombo.setOnAction(e -> refreshDebugInventoryLabels());
+
+        debugSnowballLabel  = buildInventoryDisplay("⛄ -");
+        debugFishLabel      = buildInventoryDisplay("🐟 -");
+        debugFastDiceLabel  = buildInventoryDisplay("🎲✨ -");
+        debugSlowDiceLabel  = buildInventoryDisplay("🎲 -");
+
+        HBox row2 = new HBox(6,
+            playerLbl, debugPlayerCombo,
+            debugSnowballLabel,  invMinus(ObjectType.SNOWBALL), invPlus(ObjectType.SNOWBALL),
+            debugFishLabel,      invMinus(ObjectType.FISH),     invPlus(ObjectType.FISH),
+            debugFastDiceLabel,  invMinus(ObjectType.FASTDICE), invPlus(ObjectType.FASTDICE),
+            debugSlowDiceLabel,  invMinus(ObjectType.SLOWDICE), invPlus(ObjectType.SLOWDICE)
+        );
+        row2.setAlignment(Pos.CENTER_LEFT);
+
+        // ---------- Container ----------
+        debugPanel = new VBox(4, row1, row2);
         debugPanel.setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 6 14;");
-        debugPanel.setAlignment(Pos.CENTER_LEFT);
         debugPanel.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         debugPanel.setMouseTransparent(false);
         debugPanel.setVisible(false);
@@ -308,6 +461,102 @@ public class GameBoardController {
         StackPane.setAlignment(debugPanel, Pos.TOP_CENTER);
         StackPane.setMargin(debugPanel, new javafx.geometry.Insets(2, 0, 0, 0));
         mainStack.getChildren().add(debugPanel);
+    }
+
+    private Label buildInventoryDisplay(String initial) {
+        Label l = new Label(initial);
+        l.setStyle("-fx-text-fill: #ffeb3b; -fx-font-weight: 900; -fx-font-size: 13px; -fx-padding: 0 0 0 8;");
+        return l;
+    }
+
+    private Button invMinus(ObjectType type) {
+        Button b = new Button("−");
+        b.setStyle("-fx-padding: 2 8; -fx-font-weight: 900;");
+        b.setOnAction(e -> tweakInventory(type, -1));
+        return b;
+    }
+
+    private Button invPlus(ObjectType type) {
+        Button b = new Button("+");
+        b.setStyle("-fx-padding: 2 8; -fx-font-weight: 900;");
+        b.setOnAction(e -> tweakInventory(type, +1));
+        return b;
+    }
+
+    private void populateDebugPlayerCombo() {
+        if (debugPlayerCombo != null) {
+            String previous = debugPlayerCombo.getValue();
+            debugPlayerCombo.getItems().clear();
+            for (Entity e : turnController.getAllPlayers()) {
+                if (e instanceof Player) {
+                    debugPlayerCombo.getItems().add(e.getName());
+                }
+            }
+            if (previous != null && debugPlayerCombo.getItems().contains(previous)) {
+                debugPlayerCombo.setValue(previous);
+            } else if (!debugPlayerCombo.getItems().isEmpty()) {
+                debugPlayerCombo.setValue(debugPlayerCombo.getItems().get(0));
+            }
+            refreshDebugInventoryLabels();
+        }
+    }
+
+    private Player findDebugSelectedPlayer() {
+        if (debugPlayerCombo == null) {
+            return null;
+        }
+        String name = debugPlayerCombo.getValue();
+        if (name == null) {
+            return null;
+        }
+        for (Entity e : turnController.getAllPlayers()) {
+            if (e instanceof Player && name.equals(e.getName())) {
+                return (Player) e;
+            }
+        }
+        return null;
+    }
+
+    private void refreshDebugInventoryLabels() {
+        Player p = findDebugSelectedPlayer();
+        if (p == null) {
+            debugSnowballLabel.setText("⛄ -");
+            debugFishLabel.setText("🐟 -");
+            debugFastDiceLabel.setText("🎲✨ -");
+            debugSlowDiceLabel.setText("🎲 -");
+        } else {
+            Inventory inv = p.getInventory();
+            debugSnowballLabel.setText("⛄ "   + inv.getSnowballQuantity() + "/" + Inventory.MAX_SNOWBALLS);
+            debugFishLabel.setText("🐟 "       + inv.getFishQuantity()     + "/" + Inventory.MAX_FISH);
+            debugFastDiceLabel.setText("🎲✨ " + inv.getFastdiceQuantity());
+            debugSlowDiceLabel.setText("🎲 "   + inv.getSlowdiceQuantity());
+        }
+    }
+
+    /**
+     * Bumps the selected player's count for the given object up or down by 1,
+     * respecting the per-item caps in Inventory (snowballs/fish/total dice).
+     * Negative deltas only act when there is at least one to remove.
+     */
+    private void tweakInventory(ObjectType type, int delta) {
+        Player p = findDebugSelectedPlayer();
+        if (p != null) {
+            Inventory inv = p.getInventory();
+            if (delta > 0) {
+                switch (type) {
+                    case SNOWBALL: inv.addSnowballs(1); break;
+                    case FISH:     inv.addFish();      break;
+                    case FASTDICE: inv.addDice(ObjectType.FASTDICE); break;
+                    case SLOWDICE: inv.addDice(ObjectType.SLOWDICE); break;
+                    default: break;
+                }
+            } else if (inv.getObjectQuantity(type) > 0) {
+                inv.useObject(type, 1);
+            }
+            refreshDebugInventoryLabels();
+            updateHUD();
+            drawBoard();
+        }
     }
 
     private void updateDebugBanner() {
@@ -405,6 +654,14 @@ public class GameBoardController {
         return -1;
     }
 
+
+    /**
+     * Pulls the player list out of {@link GameSetupConfig} (filled by the
+     * player-setup screen or by a loaded save) and adds each one to the
+     * turn controller. When no list is configured a default two-player
+     * match is created so the developer can always launch the screen
+     * directly from the IDE.
+     */
     private void initializePlayers() {
         List<Player> players = GameSetupConfig.getPlayers();
         if (players != null && !players.isEmpty()) {
@@ -425,6 +682,12 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * Loads the dedicated stylesheet for the game-board scene. The main-menu
+     * stylesheet is cleared first so its rules cannot leak in and affect the
+     * game-board look.
+     */
     private void applyCss() {
         try {
             mainStack.getStylesheets().clear();
@@ -436,10 +699,15 @@ public class GameBoardController {
         }
     }
 
-    // ============================================
-    //  ACTION HANDLERS
-    // ============================================
 
+    /////////////////////////////
+    ///   ACTION HANDLERS    ///
+    /////////////////////////////
+
+    /**
+     * "Roll" button handler (default 1-6 die). Skips the dice randomness
+     * entirely when debug mode has forced a value via the developer panel.
+     */
     @FXML
     private void rollDice() {
         if (!gameOver) {
@@ -448,6 +716,12 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * "Roll Fast Dice" handler. Consumes one fast-dice item from the
+     * current player's inventory and triggers a 5-10 roll, or warns the
+     * user when they have none.
+     */
     @FXML
     private void rollFastDice() {
         if (!gameOver) {
@@ -462,6 +736,11 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * "Roll Slow Dice" handler. Consumes one slow-dice item and triggers a
+     * 1-3 roll; useful when the player wants to avoid overshooting a trap.
+     */
     @FXML
     private void rollSlowDice() {
         if (!gameOver) {
@@ -476,6 +755,11 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * "Throw Snowball" handler. Defers to {@link #beginThrowSnowball()}
+     * which checks inventory, lists targets and asks the user to pick one.
+     */
     @FXML
     private void throwSnowball() {
         if (!gameOver) {
@@ -483,6 +767,12 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * Verifies the current player actually has snowballs and other players
+     * to target; otherwise it shows a friendly alert. Splitting this out
+     * keeps the {@code @FXML} handler tiny.
+     */
     private void beginThrowSnowball() {
         Player current = getCurrentPlayer();
 
@@ -502,6 +792,15 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * Shows a chooser dialog listing every other player, then resolves the
+     * snowball action via {@code GameManager}: logs the event, flashes the
+     * target's damage frame, plays the SFX and ends the turn.
+     *
+     * @param current the attacker (current turn)
+     * @param targets every other player still on the board
+     */
     private void promptSnowballTargetAndThrow(Player current, List<Player> targets) {
         ChoiceDialog<String> dialog = new ChoiceDialog<>();
         dialog.setTitle("Throw Snowball ⛄");
@@ -533,39 +832,59 @@ public class GameBoardController {
         }
     }
 
+
+    /////////////////////////////
+    ///      SAVE / EXIT     ///
+    /////////////////////////////
+
+    /**
+     * "Save Game" handler. Prompts for a save name and persists the board,
+     * the turn controller, the seal state and the winner (when applicable)
+     * through {@link SaveLoadService}. Duplicate names are rejected by the
+     * DB layer and reported back as an error alert.
+     */
     @FXML
     private void saveGame() {
-        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("MiPartida");
-        dialog.setTitle("Guardar Partida");
-        dialog.setHeaderText("Introduce un nombre para identificar tu partida:");
-        dialog.setContentText("Nombre:");
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("MyGame");
+        dialog.setTitle("Save Game");
+        dialog.setHeaderText("Enter a name to identify your saved game:");
+        dialog.setContentText("Name:");
 
         java.util.Optional<String> result = dialog.showAndWait();
         result.ifPresent(name -> {
             if (!name.trim().isEmpty()) {
                 boolean ok = SaveLoadService.saveGame(name, this.gameBoard, this.turnController, this.seal, this.winner);
-                if (ok) mostrarAlerta("Éxito", "Partida '" + name + "' guardada correctamente.");
-                else     mostrarAlerta("Error", "No se pudo guardar la partida. Quizás el nombre ya existe.");
+                if (ok) showAlert("Success", "Game '" + name + "' saved successfully.");
+                else     showAlert("Error", "Could not save the game. The name may already exist.");
             }
         });
     }
 
-    private void mostrarAlerta(String titulo, String msg) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.showAndWait();
-    }
 
-    // ============================================
-    //  GAME LOGIC
-    // ============================================
+    /////////////////////////////
+    ///   TURN / DICE LOGIC  ///
+    /////////////////////////////
 
+    /**
+     * Master routine for "the player just rolled X". Disables the action
+     * buttons while animations play, thaws the player if they were frozen,
+     * fires the dice GIF, then the result badge, then walks the pingu to
+     * its new square via {@link #runDiceMovement}.
+     *
+     * @param diceResult the value rolled (or forced by debug mode)
+     * @param diceType   "Normal" / "Fast" / "Slow" - used purely for logging
+     */
     private void processDiceRoll(int diceResult, String diceType) {
         disableActions();
         Player current = getCurrentPlayer();
         int startSquare = current.getSquareIndex();
+
+        // The player is rolling now → if they were frozen from a previous
+        // ice-hole landing, thaw them so the sprite reverts on the next draw.
+        if (current.isFrozen()) {
+            current.setFrozen(false);
+            drawBoard();
+        }
 
         logEvent("🎲 " + current.getName() + " rolled " + diceResult + " (" + diceType + " die)");
 
@@ -582,6 +901,16 @@ public class GameBoardController {
         });
     }
 
+
+    /**
+     * Plays the per-step movement animation and resolves the consequences
+     * of the landing square: bear attack, ice hole, broken floor, event
+     * pick-up, player-collision war, seal encounter, and the win check.
+     *
+     * <p>The method is dense because it co-ordinates animation, sound and
+     * game-state mutation. Each {@code case} of the switch corresponds to a
+     * different square type defined by the game-logic layer.</p>
+     */
     private void runDiceMovement(Player current, int startSquare, int diceResult, String diceType) {
         animatePlayerMovement(current, diceResult, () -> {
             current.setSquare(startSquare);
@@ -603,6 +932,11 @@ public class GameBoardController {
                             flashDamage(current);
                             break;
                         case ICE_HOLE:
+                            // Player fell into an ice hole → freeze sprite
+                            // until their next turn's move.
+                            current.setFrozen(true);
+                            flashDamage(current);
+                            break;
                         case BROKEN_FLOOR_FALL:
                         case BROKEN_FLOOR_LOSE_ITEM:
                             flashDamage(current);
@@ -630,6 +964,9 @@ public class GameBoardController {
                     if (sealResult != null) {
                         switch (sealResult.getType()) {
                             case SEAL_HIT_HOLE:
+                                current.setFrozen(true);
+                                flashDamage(current);
+                                break;
                             case SEAL_HIT_START:
                             case SEAL_PASS:
                                 flashDamage(current);
@@ -662,7 +999,13 @@ public class GameBoardController {
         }
     }
 
-    /** Look up a Player in the current game by name (used for seal-turn log results). */
+
+    /**
+     * Look up a Player in the current game by name (used for seal-turn log results).
+     *
+     * @param name the player's display name (case-sensitive)
+     * @return the matching player, or {@code null} when no such player is in the match
+     */
     private Player findPlayerByName(String name) {
         if (name == null) return null;
         for (Entity e : turnController.getAllPlayers()) {
@@ -671,6 +1014,21 @@ public class GameBoardController {
         return null;
     }
 
+
+    /////////////////////////////
+    ///   PLAYER MOVEMENT    ///
+    /////////////////////////////
+
+    /**
+     * Walks the player one square at a time, ~250 ms per step, by setting
+     * the visual square index on each {@link KeyFrame} and triggering a
+     * {@code drawBoard()}. After the last frame the {@code onFinished}
+     * callback is invoked so the caller can resolve the landing square.
+     *
+     * <p>The visual position is capped at {@code MAX_SQUARES - 1} so the
+     * animation never walks past the final square; the actual game logic
+     * runs afterwards in {@link #runDiceMovement}.</p>
+     */
     private void animatePlayerMovement(Player player, int steps, Runnable onFinished) {
         int startPos = player.getSquareIndex();
         Timeline timeline = new Timeline();
@@ -689,6 +1047,12 @@ public class GameBoardController {
         timeline.play();
     }
 
+
+    /**
+     * Advances the turn pointer. When the seal is enabled and the loop has
+     * wrapped back to the first player, the seal gets to play its own
+     * animated turn before the next human plays.
+     */
     private void endTurn() {
         if (!gameOver) {
             turnController.nextTurn();
@@ -700,6 +1064,11 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * Refreshes the HUD, re-enables the action buttons and logs the new
+     * player's turn header into the event history.
+     */
     private void startNextPlayerTurn() {
         if (!gameOver) {
             updateHUD();
@@ -710,6 +1079,21 @@ public class GameBoardController {
         }
     }
 
+
+    /////////////////////////////
+    ///     SEAL LOGIC       ///
+    /////////////////////////////
+
+    /**
+     * Runs the seal's animated turn. The {@code seal.playTurn(...)} call
+     * returns a list of {@link model.game.ActionResult} entries describing
+     * everything that happened (rolls, moves, hits). The method then
+     * staggers their UI feedback over a {@link Timeline} so the user can
+     * actually follow the sequence visually.
+     *
+     * <p>When the seal reaches the final square every player has lost and
+     * the win screen for the seal is shown instead of the normal one.</p>
+     */
     private void playSealTurnAnimated() {
         disableActions();
         logEvent("──────────────────");
@@ -728,12 +1112,17 @@ public class GameBoardController {
             final model.game.ActionResult msg = sealLog.get(i);
             KeyFrame kf = new KeyFrame(Duration.millis(delay + i * 700), e -> {
                 logEvent(formatActionMessage(msg));
-                // Flash any player hit by the seal during its turn
+                // Flash any player hit by the seal during its turn; if the
+                // hit lands them in an ice hole, also freeze their sprite.
+                Player hitPlayer = findPlayerByName(msg.getPlayerName());
                 switch (msg.getType()) {
                     case SEAL_HIT_HOLE:
+                        if (hitPlayer != null) hitPlayer.setFrozen(true);
+                        flashDamage(hitPlayer);
+                        break;
                     case SEAL_HIT_START:
                     case SEAL_PASS:
-                        flashDamage(findPlayerByName(msg.getPlayerName()));
+                        flashDamage(hitPlayer);
                         break;
                     default: break;
                 }
@@ -749,7 +1138,7 @@ public class GameBoardController {
                 gameOver = true;
                 this.winner = "Seal";
                 disableActions();
-                model.game.SoundManager.getInstance().restoreMenuVolume();
+                model.game.SoundManager.getInstance().playTitleMusic();
                 SaveLoadService.recordGameResult(turnController.getAllPlayers(), null);
                 drawBoard();
                 showSealWinAnimation();
@@ -763,6 +1152,16 @@ public class GameBoardController {
         sealTimeline.play();
     }
 
+
+    /////////////////////////////
+    ///   SNOWBALL COMBAT    ///
+    /////////////////////////////
+
+    /**
+     * Resolves a same-square encounter between two players. If neither has
+     * snowballs we just log a friendly "draw" message; otherwise the proper
+     * {@link #executeSnowballWar} routine kicks in.
+     */
     private void handlePlayerWar(Player attacker, Player defender) {
         int atkBalls = attacker.getInventory().getObjectQuantity(ObjectType.SNOWBALL);
         int defBalls = defender.getInventory().getObjectQuantity(ObjectType.SNOWBALL);
@@ -774,6 +1173,12 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * Delegates the actual rules of the snowball war to {@code GameManager},
+     * then flashes the loser's damaged sprite, plays the SFX and starts the
+     * grid-shake flash animation.
+     */
     private void executeSnowballWar(Player attacker, Player defender) {
         logEvent("⚔️ SNOWBALL WAR! " + attacker.getName() + " vs " + defender.getName() + "!");
         model.game.ActionResult warResult = gameManager.getPlayerManager().snowballWar(attacker, defender);
@@ -790,6 +1195,20 @@ public class GameBoardController {
         animateWarFlash();
     }
 
+
+    /////////////////////////////
+    ///   EVENT FEEDBACK     ///
+    /////////////////////////////
+
+    /**
+     * Converts an {@link model.game.ActionResult} returned by the game
+     * logic into a human-readable, emoji-prefixed string that fits in the
+     * event log and the per-player history. Every possible action type is
+     * mapped here so the UI side never has to know about the result codes.
+     *
+     * @param res the action result from {@code GameManager}
+     * @return a single, log-friendly message (empty when {@code res} is null)
+     */
     private String formatActionMessage(model.game.ActionResult res) {
         if (res == null) return "";
         switch (res.getType()) {
@@ -828,10 +1247,16 @@ public class GameBoardController {
         }
     }
 
-    // ============================================
-    //  HUD UPDATES
-    // ============================================
 
+    /////////////////////////////
+    ///     INVENTORY UI     ///
+    /////////////////////////////
+
+    /**
+     * Re-renders the top-of-screen hotbar for the player whose turn it is.
+     * Also enables / disables the fast / slow / snowball buttons based on
+     * the player's current item counts.
+     */
     private void updateHUD() {
         Player current = getCurrentPlayer();
 
@@ -848,6 +1273,15 @@ public class GameBoardController {
         if (sealEnabled && seal != null) updateSealStatus();
     }
 
+
+    /**
+     * Builds the per-turn hotbar: portrait + name on the left, inventory
+     * slots next to it, and the centred game-title banner with empty
+     * spacers around it.
+     *
+     * @param player the player whose turn it is
+     * @return a new {@link HBox} ready to be set as the top of the layout
+     */
     private HBox createHotbar(Player player) {
         HBox hotbar = new HBox(18);
         hotbar.setAlignment(Pos.CENTER_LEFT);
@@ -935,11 +1369,23 @@ public class GameBoardController {
         return hotbar;
     }
 
+
+    /**
+     * Adds an inventory slot for a given item only when the player actually
+     * has at least one of it; this avoids cluttering the hotbar with empty
+     * placeholders for stuff the player has not picked up yet.
+     */
     private void addSlotIfPresent(HBox container, Inventory inv, ObjectType type, String path) {
         int qty = inv.getObjectQuantity(type);
         if (qty > 0) container.getChildren().add(createInventorySlot(loadImage(path), qty));
     }
 
+
+    /**
+     * Renders one inventory slot (icon + quantity badge). Always uses
+     * nearest-neighbour scaling on a {@link Canvas} so the pixel-art icons
+     * stay crisp at any size.
+     */
     private StackPane createInventorySlot(Image icon, int quantity) {
         StackPane slot = new StackPane();
         slot.getStyleClass().add("inventory-slot");
@@ -971,6 +1417,12 @@ public class GameBoardController {
         return slot;
     }
 
+
+    /**
+     * Refreshes the seal status box in the right panel: current square and
+     * whether it is currently eating (blocked for N turns) or back to
+     * dangerous mode.
+     */
     private void updateSealStatus() {
         if (seal != null) {
             sealPositionLabel.setText("📍 Position: Square " + seal.getSquareIndex());
@@ -980,10 +1432,21 @@ public class GameBoardController {
         }
     }
 
-    // ============================================
-    //  BOARD DRAWING — no reactive bindings
-    // ============================================
 
+    /////////////////////////////
+    ///   BOARD RENDERING    ///
+    /////////////////////////////
+
+    // The drawing pipeline deliberately avoids reactive bindings on width
+    // and height because the board container is itself listened to for
+    // resizes - a binding would cause infinite redraw loops.
+
+    /**
+     * Entry point of the redraw pipeline. The {@link #isRedrawing} flag
+     * stops the resize listener from firing a second redraw while one is
+     * already in flight, which would otherwise spin until the stack
+     * overflowed.
+     */
     private void drawBoard() {
         // Re-entrancy guard: prevents the listener on boardContainer.widthProperty()
         // from triggering a second drawBoard() while we are still inside one.
@@ -994,6 +1457,13 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * Single redraw pass. Computes the best cell size that fits the current
+     * container, sets fixed-size column/row constraints to that value, and
+     * rebuilds the cells in snake order (even rows go left-to-right, odd
+     * rows go right-to-left, just like a real Snakes-and-Ladders board).
+     */
     private void redrawBoardOnce() {
         isRedrawing = true;
         try {
@@ -1032,6 +1502,9 @@ public class GameBoardController {
             grid.setMaxSize(cellSize * cols, cellSize * rows);
             grid.setAlignment(Pos.CENTER);
 
+            // Snake-pattern coordinate maths: every other row reverses the
+            // column index so the visual "path" makes a zig-zag from the
+            // start cell (0) all the way to the final square.
             for (int i = 0; i < Board.MAX_SQUARES; i++) {
                 int row = i / cols;
                 int col = (row % 2 == 0) ? (i % cols) : (cols - 1 - (i % cols));
@@ -1042,6 +1515,20 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * Builds one cell of the board. The cell stacks:
+     * <ol>
+     *   <li>a background tile drawn on a {@link Canvas} so it stays crisp,</li>
+     *   <li>an optional foreground overlay for special square types,</li>
+     *   <li>every player currently on that square,</li>
+     *   <li>the seal sprite when the seal is on this square.</li>
+     * </ol>
+     *
+     * <p>All images go through a Canvas because {@code ImageView.setSmooth(false)}
+     * is unreliable across JavaFX versions, while explicit
+     * {@code setImageSmoothing(false)} on a Canvas is consistent.</p>
+     */
     // All images are drawn onto a Canvas so we can force nearest-neighbour
     // (no blur) even at large zoom factors — ImageView.setSmooth(false) is
     // not reliable across all JavaFX versions/platforms.
@@ -1123,6 +1610,16 @@ public class GameBoardController {
         return cell;
     }
 
+
+    /**
+     * Picks the correct background-tile PNG for a given square. The start
+     * (0) and end ({@code MAX_SQUARES - 1}) cells have dedicated artwork.
+     * The remaining cells use one of five edge / interior variants based on
+     * where the cell sits in its row, so the visual joins line up.
+     *
+     * @param squareIndex linear index of the cell in snake order
+     * @return classpath path to the PNG to use
+     */
     private String getBackgroundImagePath(int squareIndex) {
         if (squareIndex == 0)                      return "/assets/sprites/squares/background/Square-0.png";
         if (squareIndex == Board.MAX_SQUARES - 1)  return "/assets/sprites/squares/background/Square-6.png";
@@ -1137,11 +1634,23 @@ public class GameBoardController {
         return "/assets/sprites/squares/background/Square-1.png";
     }
 
+
+    /**
+     * Returns the foreground overlay sprite for a given square type (bear,
+     * ice hole, sled...), or {@code null} for normal squares which have no
+     * overlay. The PNG name on disk matches the enum constant.
+     */
     private Image getForegroundImageForType(SquareType type) {
         if (type == null || type == SquareType.NORMAL) return null;
         return loadImage("/assets/sprites/squares/foreground/" + type.name() + ".png");
     }
 
+
+    /**
+     * Adds every player currently standing on this square to the cell. The
+     * heavy lifting (sprite picking, tinting, centering) is delegated to
+     * {@link #renderPlayersOnCell}.
+     */
     // Player sprites are also drawn onto Canvas for the same pixel-art reason.
     private void addPlayerSpritesToCell(StackPane cell, int squareIndex, double cellSize) {
         List<Player> playersHere = new ArrayList<>();
@@ -1153,6 +1662,20 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * Renders one or more player sprites inside a single cell.
+     *
+     * <p>Each player token is a {@link StackPane} with two canvases: the
+     * base silhouette and a colour overlay tinted via {@link Lighting} to
+     * the player's chosen hue. Damaged / frozen states swap the base sprite
+     * out for the matching frame; frozen also skips the colour overlay
+     * because the ice sprite already includes its own colour.</p>
+     *
+     * <p>Tokens are spaced horizontally so they remain visible when several
+     * players share a square. While debug mode is on, drag handlers are
+     * attached so the developer can teleport any pingu by dragging it.</p>
+     */
     private void renderPlayersOnCell(StackPane cell, int squareIndex, double cellSize, List<Player> playersHere) {
 
         // Snake-pattern board: even rows go left→right (face right),
@@ -1169,11 +1692,14 @@ public class GameBoardController {
             Player player = playersHere.get(idx);
             StackPane playerToken = new StackPane();
 
-            // Pick base / colour overlay according to row direction and damaged state.
-            // Damaged frames have no colour-overlay variant → fall back to the idle colour.
+            // Sprite priority: damaged (short flash) > frozen (persistent) > idle.
+            // Damaged/frozen frames have no colour-overlay variant → reuse the idle
+            // colour overlay so the player's tint still shows.
             Image baseSprite;
             if (player.isDamaged()) {
                 baseSprite = rowFacesRight ? damagedRightImage : damagedLeftImage;
+            } else if (player.isFrozen()) {
+                baseSprite = rowFacesRight ? iceRightImage : iceLeftImage;
             } else {
                 baseSprite = rowFacesRight ? baseRightImage : baseLeftImage;
             }
@@ -1194,16 +1720,23 @@ public class GameBoardController {
                 gcBase.setImageSmoothing(false);
                 gcBase.drawImage(baseSprite, 0, 0, sw, sh, dx, dy, dw, dh);
 
-                Canvas colorCanvas = new Canvas(spriteSize, spriteSize);
-                GraphicsContext gcColor = colorCanvas.getGraphicsContext2D();
-                gcColor.setImageSmoothing(false);
-                gcColor.drawImage(colorSprite, 0, 0, sw, sh, dx, dy, dw, dh);
+                // The ice sprite already carries its own colour and replaces
+                // the regular pingu silhouette, so the tintable colour overlay
+                // would either be invisible or paint over the ice. Skip it.
+                if (player.isFrozen()) {
+                    playerToken.getChildren().add(baseCanvas);
+                } else {
+                    Canvas colorCanvas = new Canvas(spriteSize, spriteSize);
+                    GraphicsContext gcColor = colorCanvas.getGraphicsContext2D();
+                    gcColor.setImageSmoothing(false);
+                    gcColor.drawImage(colorSprite, 0, 0, sw, sh, dx, dy, dw, dh);
 
-                Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
-                lighting.setSurfaceScale(0.0);
-                colorCanvas.setEffect(lighting);
+                    Lighting lighting = new Lighting(new Light.Distant(45, 90, getColorFromHex(player.getColour())));
+                    lighting.setSurfaceScale(0.0);
+                    colorCanvas.setEffect(lighting);
 
-                playerToken.getChildren().addAll(baseCanvas, colorCanvas);
+                    playerToken.getChildren().addAll(baseCanvas, colorCanvas);
+                }
             } else {
                 Circle fallback = new Circle(spriteSize / 2);
                 fallback.setFill(getColorFromHex(player.getColour()));
@@ -1223,9 +1756,10 @@ public class GameBoardController {
         }
     }
 
-    // ============================================
-    //  ANIMATIONS
-    // ============================================
+
+    /////////////////////////////
+    ///   DICE ANIMATION     ///
+    /////////////////////////////
 
     /**
      * Pixel-art overlay that flashes the dice result over the board for ~1s
@@ -1260,6 +1794,12 @@ public class GameBoardController {
         new SequentialTransition(new PauseTransition(Duration.millis(180)), stay, fadeOut).play();
     }
 
+
+    /**
+     * Plays the rolling-dice GIF in the centre of the board as an overlay.
+     * Falls through to {@code onFinished} immediately when the GIF resource
+     * cannot be located so the game still progresses.
+     */
     private void showDiceAnimation(Runnable onFinished) {
         InputStream is = getClass().getResourceAsStream("/assets/dice/dados.gif");
         if (is == null) {
@@ -1270,6 +1810,12 @@ public class GameBoardController {
         }
     }
 
+
+    /**
+     * Sub-routine of {@link #showDiceAnimation} that builds and times the
+     * fade-in / hold / fade-out lifecycle of the dice GIF. Once the fade-out
+     * ends the overlay is removed and the supplied callback is invoked.
+     */
     private void playDiceGifOverlay(InputStream is, Runnable onFinished) {
         Image gif = new Image(is);
         ImageView view = new ImageView(gif);
@@ -1296,6 +1842,12 @@ public class GameBoardController {
         new SequentialTransition(fadeIn, stay, fadeOut).play();
     }
 
+
+    /**
+     * Quick double-blink of the whole board to emphasise that a snowball
+     * has just been thrown. Auto-reversing the fade does the blink without
+     * a separate "fade back" transition.
+     */
     private void animateSnowballThrow() {
         FadeTransition flash = new FadeTransition(Duration.millis(100), grid);
         flash.setFromValue(1.0); flash.setToValue(0.7);
@@ -1303,6 +1855,11 @@ public class GameBoardController {
         flash.play();
     }
 
+
+    /**
+     * Stronger, longer flash than {@link #animateSnowballThrow}, used when
+     * two players battle on the same square (snowball war).
+     */
     private void animateWarFlash() {
         FadeTransition flash = new FadeTransition(Duration.millis(150), grid);
         flash.setFromValue(1.0); flash.setToValue(0.5);
@@ -1310,18 +1867,35 @@ public class GameBoardController {
         flash.play();
     }
 
-    // ============================================
-    //  UTILITIES
-    // ============================================
 
+    /////////////////////////////
+    ///       HELPERS        ///
+    /////////////////////////////
+
+    /**
+     * Convenience accessor that casts the {@code TurnController}'s current
+     * entity back to {@link Player}. Safe because the controller only ever
+     * adds Players (and the seal, which takes its own turn through a
+     * separate code path).
+     */
     private Player getCurrentPlayer() { return (Player) turnController.getCurrentTurn(); }
 
+
+    /**
+     * Appends a single line to the global event history. Empty / null lines
+     * are dropped so the {@code History} dialog stays readable.
+     */
     private void logEvent(String message) {
         if (message != null && !message.isBlank()) {
             eventHistoryFull.add(message);
         }
     }
 
+
+    /**
+     * "History" button handler. Opens a modal dialog with a non-editable
+     * text area containing every event logged so far, line by line.
+     */
     @FXML
     private void showEventHistory() {
         javafx.scene.control.Dialog<Void> dialog = new javafx.scene.control.Dialog<>();
@@ -1338,6 +1912,12 @@ public class GameBoardController {
         dialog.showAndWait();
     }
 
+
+    /**
+     * Disables every action button. Called for the duration of animations
+     * and during the seal's turn so the player can't click on anything
+     * while the screen is busy.
+     */
     private void disableActions() {
         rollDiceButton.setDisable(true);
         rollFastDiceButton.setDisable(true);
@@ -1345,11 +1925,24 @@ public class GameBoardController {
         throwSnowballButton.setDisable(true);
     }
 
+
+    /**
+     * Re-enables only the default-dice button. The fast / slow / snowball
+     * buttons are toggled separately in {@link #updateHUD} based on the
+     * current player's inventory, so a player without items doesn't see
+     * misleadingly active buttons.
+     */
     private void enableActions() {
         rollDiceButton.setDisable(false);
         // fast/slow/snowball re-enabled by updateHUD()
     }
 
+
+    /**
+     * Shows a non-blocking information alert. Wrapped in
+     * {@code Platform.runLater(...)} so it is always run on the JavaFX
+     * thread, regardless of where the call originated.
+     */
     private void showAlert(String title, String content) {
         javafx.application.Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -1360,6 +1953,12 @@ public class GameBoardController {
         });
     }
 
+
+    /**
+     * Pads a hex string out to six characters by prepending zeroes; required
+     * because the colour-picker sometimes returns a shorter representation
+     * (e.g. "FF00") that JavaFX's {@code Color.web} cannot parse.
+     */
     private String padColor(String hex) {
         if (hex == null) return "FFFFFF";
         hex = hex.trim();
@@ -1367,26 +1966,51 @@ public class GameBoardController {
         return hex;
     }
 
+
+    /**
+     * Parses a hex string (3 or 6 digits, no "#") to a JavaFX {@link Color},
+     * defaulting to grey if the conversion fails so the sprite tinting code
+     * never throws on bad input.
+     */
     private Color getColorFromHex(String hex) {
         try { return Color.web("#" + padColor(hex)); }
         catch (Exception e) { return Color.GRAY; }
     }
 
+
+    /////////////////////////////
+    ///     WIN ANIMATION    ///
+    /////////////////////////////
+
+    /**
+     * Called by the game-logic layer when a player has reached the final
+     * square. Marks the game as over, disables actions, switches the music
+     * back to the title track, persists the result to the leaderboard and
+     * shows the cinematic win overlay.
+     *
+     * @param winner the {@link Player} who just won
+     */
     public void handleWin(Player winner) {
         gameOver = true;
         this.winner = winner.getName();
         disableActions();
-        model.game.SoundManager.getInstance().restoreMenuVolume();
+        model.game.SoundManager.getInstance().playTitleMusic();
         logEvent("🏆 GAME OVER! " + winner.getName() + " HAS WON THE GAME! 🏆");
         SaveLoadService.recordGameResult(turnController.getAllPlayers(), winner.getName());
         drawBoard();
         showWinAnimation(winner);
     }
 
-    // ============================================
-    //  CINEMATIC ANIMATIONS
-    // ============================================
 
+    /////////////////////////////
+    ///  CINEMATIC ANIMATIONS ///
+    /////////////////////////////
+
+    /**
+     * Pops a giant bear sprite in the middle of the screen, scales it from
+     * 0 to 2x in 300 ms and then fades it out. Used when a player lands on
+     * a BEAR square with no fish to bribe.
+     */
     private void showBearAnimation() {
         Image bearSprite = loadImage("/assets/sprites/squares/foreground/BEAR.png");
         Node bearNode;
@@ -1414,6 +2038,12 @@ public class GameBoardController {
         st.play(); ft.play();
     }
 
+
+    /**
+     * Slides a large seal sprite in from the right edge of the screen and
+     * fades it out after a short hold. Plays whenever a seal interaction
+     * happens (player landing on the seal, or seal hitting a player).
+     */
     private void showSealAnimation() {
         // Cinematic always slides in from the right → use the left-facing sprite
         // (the seal "looks toward" the centre as it enters).
@@ -1447,10 +2077,20 @@ public class GameBoardController {
         tt.play(); ft.play();
     }
 
+
+    /**
+     * Convenience overload that builds the winner's character sprite and
+     * forwards to the generic {@link #showWinAnimation(String, Node)}.
+     */
     private void showWinAnimation(Player winner) {
         showWinAnimation(winner.getName(), buildPlayerCharacterNode(winner, 200));
     }
 
+
+    /**
+     * Variant of the win animation used when the seal reaches the final
+     * square and beats every human player.
+     */
     private void showSealWinAnimation() {
         showWinAnimation("THE SEAL", buildSealCharacterNode(200));
     }
@@ -1489,7 +2129,7 @@ public class GameBoardController {
         backBtn.getStyleClass().add("nav-btn-home");
         backBtn.setStyle("-fx-font-size: 22px; -fx-padding: 14 40;");
         backBtn.setOnAction(e -> {
-            model.game.SoundManager.getInstance().restoreMenuVolume();
+            model.game.SoundManager.getInstance().playTitleMusic();
             navigateTo("/view/fxml/mainMenu.fxml", "/assets/css/style.css");
         });
 
@@ -1577,22 +2217,39 @@ public class GameBoardController {
         return sp;
     }
 
+
+    /**
+     * @return the in-memory board currently being played; mostly useful for
+     *         tests or save/load integration that needs to peek at the state
+     */
     public Board getCurrentGameBoard() { return this.gameBoard; }
 
-    // ===== NAVIGATION =====
 
+    /////////////////////////////
+    ///     NAVIGATION       ///
+    /////////////////////////////
+
+    /**
+     * "Back" handler. Bounces to the player-setup screen, with a confirm
+     * dialog if there is still a game in progress that would be lost.
+     */
     @FXML
     private void handleBack() {
         if (confirmLeaveIfNeeded("Leave Game?", "You will lose your current game progress!", "Go back to Player Setup?")) {
-            model.game.SoundManager.getInstance().restoreMenuVolume();
+            model.game.SoundManager.getInstance().playTitleMusic();
             navigateTo("/view/fxml/playerSetup.fxml", "/assets/css/style.css");
         }
     }
 
+
+    /**
+     * "Return to Menu" handler. Same as {@link #handleBack()} but jumps all
+     * the way back to the main menu instead of the player-setup screen.
+     */
     @FXML
     private void handleReturnToMenu() {
         if (confirmLeaveIfNeeded("Return to Menu?", "You will lose your current game progress!", "Return to Main Menu?")) {
-            model.game.SoundManager.getInstance().restoreMenuVolume();
+            model.game.SoundManager.getInstance().playTitleMusic();
             navigateTo("/view/fxml/mainMenu.fxml", "/assets/css/style.css");
         }
     }
@@ -1614,6 +2271,13 @@ public class GameBoardController {
         return result.isPresent() && result.get() == ButtonType.OK;
     }
 
+
+    /**
+     * Generic helper that loads the FXML at {@code fxmlPath}, optionally
+     * attaches a stylesheet, and swaps the result into the current
+     * {@link Stage}. Used by both the back / menu navigation and the win
+     * screen's "back to menu" button.
+     */
     private void navigateTo(String fxmlPath, String cssPath) {
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource(fxmlPath));

@@ -26,7 +26,31 @@ import model.config.GameSetupConfig;
 import model.config.Lang;
 import model.config.LangConfig;
 
+
+/**
+ * Controller for the "Player Setup" screen ({@code playerSetup.fxml}).
+ *
+ * <p>This screen is shown when the user clicks "New Game" in the main menu.
+ * It lets the user:</p>
+ * <ul>
+ *   <li>Pick the number of players (1 to 4) via a {@link ComboBox}.</li>
+ *   <li>For each player, enter a name, a password, a colour and optionally
+ *       a custom avatar image.</li>
+ *   <li>Reuse an existing player from the database without retyping all
+ *       their data ("Select Existing Player").</li>
+ *   <li>Toggle whether the seal (extra hostile NPC) is enabled.</li>
+ * </ul>
+ *
+ * <p>On "Start Game" every password is validated against the stored hash;
+ * if all is well, the players are pushed into {@link GameSetupConfig} and
+ * the scene transitions to the game board.</p>
+ */
 public class PlayerSetupController {
+
+
+    /////////////////////////////
+    ///   FXML INJECTIONS    ///
+    /////////////////////////////
 
     @FXML private StackPane rootPane;
     @FXML private ComboBox<Integer> numPlayersCombo;
@@ -39,17 +63,36 @@ public class PlayerSetupController {
     @FXML private Button selectExistingButton;
     @FXML private Button startGameButton;
 
+
+    /////////////////////////////
+    ///       FIELDS         ///
+    /////////////////////////////
+
+    // One PlayerInput per visible row. Rebuilt every time the player-count
+    // combobox changes, so we can show / hide the right number of cards.
     private List<PlayerInput> playerInputs = new ArrayList<>();
 
+
+    /////////////////////////////
+    ///    INITIALIZATION    ///
+    /////////////////////////////
+
+    /**
+     * FXML lifecycle hook. Wires the language listener, populates the
+     * player-count combobox and renders the default two-player layout.
+     */
     @FXML
     public void initialize() {
         LangConfig.addLanguageChangeListener(this::refreshTexts);
         refreshTexts();
 
+        // Available player counts: 1 to 4. Default is 2 so the screen is
+        // immediately useful without forcing a click on the combobox.
         numPlayersCombo.getItems().addAll(1, 2, 3, 4);
         numPlayersCombo.setValue(2);
         sealCheckBox.setSelected(false);
 
+        // Re-render the player cards whenever the count changes.
         numPlayersCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) updatePlayerFields(newVal);
         });
@@ -57,6 +100,17 @@ public class PlayerSetupController {
         updatePlayerFields(2);
     }
 
+
+    /////////////////////////////
+    ///   PLAYER INPUT ROWS   ///
+    /////////////////////////////
+
+    /**
+     * Clears the current set of input cards and rebuilds exactly
+     * {@code numPlayers} of them.
+     *
+     * @param numPlayers the new number of player slots to render
+     */
     private void updatePlayerFields(int numPlayers) {
         playersContainer.getChildren().clear();
         playerInputs.clear();
@@ -68,6 +122,14 @@ public class PlayerSetupController {
         }
     }
 
+
+    /**
+     * Builds the visual card for a single player slot: name + password +
+     * colour picker + avatar chooser, wired up to a {@link PlayerInput}.
+     *
+     * @param playerNumber the 1-based index used for the label "Player N"
+     * @return a fully-built {@link PlayerInput} ready to add to the screen
+     */
     private PlayerInput createPlayerInput(int playerNumber) {
         VBox playerVBox = new VBox();
         playerVBox.getStyleClass().add("setup-card");
@@ -86,6 +148,9 @@ public class PlayerSetupController {
         javafx.scene.control.ColorPicker colorPicker = new javafx.scene.control.ColorPicker(javafx.scene.paint.Color.RED);
         colorPicker.setMaxWidth(Double.MAX_VALUE);
 
+        // When the user selects a colour the picker dropdown closes; we move
+        // the focus back to the root pane so the next Tab keystroke navigates
+        // through the form instead of staying on the now-closed picker.
         colorPicker.setOnAction((javafx.event.ActionEvent event) -> {
             if (rootPane != null) rootPane.requestFocus();
         });
@@ -96,6 +161,10 @@ public class PlayerSetupController {
         Button avatarBtn = new Button(LangConfig.getLang(Lang.GAMESETUP_CHOOSEAVATAR));
         avatarBtn.setMaxWidth(Double.MAX_VALUE);
         avatarBtn.getStyleClass().add("player-setup-field");
+
+        // Avatar path lives in a single-cell String[] so the inner lambda
+        // below can mutate it - lambdas can only reference effectively-final
+        // local variables, but they can mutate an array's contents.
         final String[] avatarPath = new String[1];
 
         avatarBtn.setOnAction(e -> {
@@ -116,8 +185,20 @@ public class PlayerSetupController {
         return new PlayerInput(playerNumber, nameField, passwordField, colorPicker, avatarPath, avatarBtn, playerVBox);
     }
 
+
+    /////////////////////////////
+    ///   BUTTON HANDLERS    ///
+    /////////////////////////////
+
+    /**
+     * "Start Game" handler. Validates every filled-in row, persists the
+     * player list in {@link GameSetupConfig} and switches the scene to
+     * the game board.
+     */
     @FXML
     private void handleStartGame() {
+        // Mark this as a fresh game (not a load) so the GameBoardController
+        // builds a new board instead of restoring saved state.
         GameSetupConfig.setLoadedGame(false);
         List<Player> players = collectAndValidatePlayers();
 
@@ -136,11 +217,15 @@ public class PlayerSetupController {
         }
     }
 
+
     /**
      * Builds the player list from the current input rows, validating each
      * password. Returns null if validation fails, or the (possibly empty)
      * list of valid players otherwise. Extracted so handleStartGame() does
      * not need an early empty return.
+     *
+     * @return the validated list of {@link Player} objects, or {@code null}
+     *         if any password did not match the stored hash
      */
     private List<Player> collectAndValidatePlayers() {
         List<Player> players = new ArrayList<>();
@@ -148,11 +233,15 @@ public class PlayerSetupController {
         for (PlayerInput input : playerInputs) {
             String name = input.nameField.getText().trim();
             String password = input.passwordField.getText();
+
+            // ColorPicker.toString() yields "0xRRGGBBAA"; we keep just the
+            // 6 RGB digits in upper-case so the value matches what is stored
+            // in the DB and used by the sprite-tint logic.
             String color = input.colorPicker.getValue().toString().substring(2, 8).toUpperCase();
 
             if (!name.isEmpty() && !color.isEmpty()) {
                 if (!SaveLoadService.verifyPassword(name, password)) {
-                    mostrarAlerta(
+                    showAlert(
                         LangConfig.getLang(Lang.ALERT_WRONGPASSWORD_TITLE),
                         String.format(LangConfig.getLang(Lang.ALERT_WRONGPASSWORD_MESSAGE), name)
                     );
@@ -166,12 +255,24 @@ public class PlayerSetupController {
                 }
                 players.add(player);
 
+                // Either inserts a brand-new player or no-ops if the name
+                // already exists with the correct password.
                 SaveLoadService.registerPlayer(name, password, color);
             }
         }
         return players;
     }
 
+
+    /////////////////////////////
+    ///   INTERNAL HELPERS   ///
+    /////////////////////////////
+
+    /**
+     * Tiny value-object that groups together all JavaFX widgets belonging
+     * to a single player-setup card. Keeping them together avoids passing
+     * five parameters around every helper method.
+     */
     private static class PlayerInput {
         int playerNumber;
         TextField nameField;
@@ -196,6 +297,16 @@ public class PlayerSetupController {
         VBox getVBox() { return vbox; }
     }
 
+
+    /////////////////////////////
+    ///   LANGUAGE REFRESH    ///
+    /////////////////////////////
+
+    /**
+     * Re-applies the current translation to every label / prompt / button
+     * in the screen. Triggered by the {@link LangConfig} listener whenever
+     * the language is changed at runtime.
+     */
     private void refreshTexts() {
         titleText.setText(LangConfig.getLang(Lang.TEXT_SETUP_TITLE));
         player_number_select.setText(LangConfig.getLang(Lang.GAMESETUP_TEXT_PLAYERNUMBER));
@@ -208,6 +319,8 @@ public class PlayerSetupController {
         if (startGameButton != null)
             startGameButton.setText(LangConfig.getLang(Lang.TEXT_GAME_STARTGAME));
 
+        // Refresh each per-player card too: title, prompts and (if no avatar
+        // is selected yet) the "choose avatar" button label.
         for (PlayerInput input : playerInputs) {
             if (!input.vbox.getChildren().isEmpty()) {
                 javafx.scene.Node node = input.vbox.getChildren().get(0);
@@ -223,39 +336,52 @@ public class PlayerSetupController {
         }
     }
 
+
+    /////////////////////////////
+    ///  EXISTING-PLAYER PICK ///
+    /////////////////////////////
+
+    /**
+     * "Select Existing Player" handler. Loads every previously-registered
+     * player from the DB and, if any exist, shows a chooser dialog so the
+     * user can populate an empty row with one of them.
+     */
     @FXML
     private void handleSelectExistingPlayer() {
-        List<Player> existentes = SaveLoadService.getRegisteredPlayers();
+        List<Player> existingPlayers = SaveLoadService.getRegisteredPlayers();
 
-        if (existentes.isEmpty()) {
-            mostrarAlerta(
+        if (existingPlayers.isEmpty()) {
+            showAlert(
                 LangConfig.getLang(Lang.ALERT_NOPLAYERS_TITLE),
                 LangConfig.getLang(Lang.ALERT_NOPLAYERS_MESSAGE)
             );
         } else {
-            promptExistingPlayerChoice(existentes);
+            promptExistingPlayerChoice(existingPlayers);
         }
     }
+
 
     /**
      * Shows the existing-player picker dialog and assigns the selection.
      * Extracted so handleSelectExistingPlayer() does not need an early return.
+     *
+     * @param existingPlayers the players known to the database
      */
-    private void promptExistingPlayerChoice(List<Player> existentes) {
-        List<String> nombres = existentes.stream().map(Player::getName).collect(Collectors.toList());
+    private void promptExistingPlayerChoice(List<Player> existingPlayers) {
+        List<String> names = existingPlayers.stream().map(Player::getName).collect(Collectors.toList());
 
         javafx.scene.control.ChoiceDialog<String> dialog =
-            new javafx.scene.control.ChoiceDialog<>(nombres.get(0), nombres);
+            new javafx.scene.control.ChoiceDialog<>(names.get(0), names);
         dialog.setTitle(LangConfig.getLang(Lang.DIALOG_SELECTPLAYER_TITLE));
         dialog.setHeaderText(LangConfig.getLang(Lang.DIALOG_SELECTPLAYER_HEADER));
 
         java.util.Optional<String> result = dialog.showAndWait();
 
-        result.ifPresent(nombreSeleccionado -> {
-            for (Player p : existentes) {
-                if (p.getName().equals(nombreSeleccionado)) {
-                    if (!asignarJugadorAlPrimerInputVacio(p)) {
-                        mostrarAlerta(
+        result.ifPresent(selectedName -> {
+            for (Player p : existingPlayers) {
+                if (p.getName().equals(selectedName)) {
+                    if (!assignPlayerToFirstEmptyInput(p)) {
+                        showAlert(
                             LangConfig.getLang(Lang.ALERT_FULL_TITLE),
                             LangConfig.getLang(Lang.ALERT_FULL_MESSAGE)
                         );
@@ -265,12 +391,16 @@ public class PlayerSetupController {
         });
     }
 
+
     /**
      * Fills the first empty PlayerInput row with this player's data.
      * Returns true if a slot was found, false if all rows are full.
      * Extracted so the search can return early without a loop break.
+     *
+     * @param p the existing player to insert into the form
+     * @return {@code true} if an empty slot was filled, {@code false} if all rows are taken
      */
-    private boolean asignarJugadorAlPrimerInputVacio(Player p) {
+    private boolean assignPlayerToFirstEmptyInput(Player p) {
         for (PlayerInput input : playerInputs) {
             if (input.nameField.getText().trim().isEmpty()) {
                 input.nameField.setText(p.getName());
@@ -278,6 +408,8 @@ public class PlayerSetupController {
                     input.passwordField.setText(p.getPassword());
                 }
                 try {
+                    // Stored colours are 6-digit hex strings ("FF00FF"). We
+                    // prepend "#" so JavaFX's Color.web() can parse them.
                     input.colorPicker.setValue(javafx.scene.paint.Color.web("#" + p.getColour()));
                 } catch (Exception e) {
                     // ignore invalid stored color
@@ -288,7 +420,19 @@ public class PlayerSetupController {
         return false;
     }
 
-    private void mostrarAlerta(String title, String message) {
+
+    /////////////////////////////
+    ///       ALERTS         ///
+    /////////////////////////////
+
+    /**
+     * Tiny helper that shows a modal information alert with the given title
+     * and message. Used for "wrong password", "no players", etc.
+     *
+     * @param title   alert window title
+     * @param message body text shown inside the alert
+     */
+    private void showAlert(String title, String message) {
         javafx.scene.control.Alert alert =
             new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -297,11 +441,24 @@ public class PlayerSetupController {
         alert.showAndWait();
     }
 
+
+    /////////////////////////////
+    ///     NAVIGATION       ///
+    /////////////////////////////
+
+    /**
+     * "Back" button handler. Returns to the main menu without saving any
+     * of the form fields.
+     */
     @FXML
     private void handleBack() {
         navigateToMainMenu();
     }
 
+
+    /**
+     * Loads the main menu FXML and replaces the current scene.
+     */
     private void navigateToMainMenu() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/mainMenu.fxml"));
