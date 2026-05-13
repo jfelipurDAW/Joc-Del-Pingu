@@ -76,7 +76,47 @@ L'aplicació segueix una arquitectura en capes per a tot el que toca la base de 
 3. **Controladors de la UI** (`MainMenuController`, `PlayerSetupController`, `PlayerStatsController`, `GameBoardController`): criden els mètodes d'alt nivell de SaveLoadService quan l'usuari interacciona amb la UI. Mai construeixen SQL directament.
 4. **`view.ui.BBDDPanel`**: classe separada amb el seu propi `main`, utilitzada exclusivament per al lliurament inicial del projecte. Permet provar les quatre operacions CRUD bàsiques contra la taula `ENTITY` sense haver d'iniciar el joc complet.
 
-> **[CAPTURA 1.1]** Diagrama de capes mostrant la jerarquia UI → SaveLoadService → BBDD → Oracle, amb fletxes indicant la direcció de les crides.
+```
+┌──────────────────────────────────────────────────────────┐
+│                    CAPA UI (JavaFX)                      │
+│  ┌────────────────┐  ┌────────────────┐  ┌────────────┐  │
+│  │ MainMenu       │  │ PlayerSetup    │  │ GameBoard  │  │
+│  │ Controller     │  │ Controller     │  │ Controller │  │
+│  └────────────────┘  └────────────────┘  └────────────┘  │
+└──────────────────────────┬───────────────────────────────┘
+                           │  (crida mètodes alt nivell)
+                           ▼
+┌──────────────────────────────────────────────────────────┐
+│           CAPA DE SERVEI (Lògica de negoci)              │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │              SaveLoadService                       │  │
+│  │  · registerPlayer()   · saveGame()                 │  │
+│  │  · verifyPassword()   · loadGame()                 │  │
+│  │  · getPlayerStats()   · recordGameResult()         │  │
+│  └────────────────────────────────────────────────────┘  │
+└──────────────────────────┬───────────────────────────────┘
+                           │  (construeix SQL i delega)
+                           ▼
+┌──────────────────────────────────────────────────────────┐
+│              CAPA D'ACCÉS A DADES (JDBC)                 │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │                    BBDD                            │  │
+│  │  · insert()   · update()   · delete()              │  │
+│  │  · select()   · print()                            │  │
+│  │  · conectarBaseDatos()                             │  │
+│  └────────────────────────────────────────────────────┘  │
+└──────────────────────────┬───────────────────────────────┘
+                           │  (sentències SQL via JDBC)
+                           ▼
+┌──────────────────────────────────────────────────────────┐
+│                  BASE DE DADES                           │
+│                                                          │
+│              Oracle XEPDB2                               │
+│        (taules ENTITY, SAVED_GAMES, GAME, BOARD)         │
+└──────────────────────────────────────────────────────────┘
+```
+
+*Figura 1.1: Diagrama de capes de la persistència. Les crides flueixen sempre de dalt cap a baix.*
 
 ### 1.3. Connexió a la base de dades Oracle
 

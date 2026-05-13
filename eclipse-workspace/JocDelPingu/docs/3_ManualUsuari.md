@@ -2,8 +2,6 @@
 
 **Com instal·lar, jugar i resoldre problemes**
 
-Grup DW25-26 GR06 — Curs 2025/2026
-
 ---
 
 ## Índex
@@ -20,8 +18,6 @@ Grup DW25-26 GR06 — Curs 2025/2026
 ## 1. Què és el Joc del Pingu
 
 **Joc del Pingu** és un joc de taula per ordinador per a 1-4 jugadors, ambientat a l'Àrtic. Cada jugador controla un pingüí que ha d'arribar el primer a la casella final, esquivant forats de gel, óssos polars i una foca controlada per IA (opcional). En el camí pot recollir peixos, boles de neu i daus alternatius per guanyar avantatge sobre els rivals.
-
-> **[CAPTURA 1.1]** Pantalla del menú principal mostrant el títol "Joc del Pingu" amb el fons àrtic i els quatre botons.
 
 ### 1.1. Característiques principals
 
@@ -70,8 +66,6 @@ Si tens un JAR empaquetat, fes doble clic o executa:
 java -jar JocDelPingu.jar
 ```
 
-> **[CAPTURA 2.1]** Pantalla d'Eclipse mostrant el botó dret sobre MainMenu.java amb l'opció "Run As → Java Application".
-
 ---
 
 ## 3. Funcionament bàsic
@@ -89,18 +83,12 @@ java -jar JocDelPingu.jar
 5. Marca **Enable Seal** si vols afegir la foca antagonista.
 6. Prem **Start Game**.
 
-> **[CAPTURA 3.1]** Pantalla "Player Setup" amb 3 jugadors configurats (cadascun amb el seu color), el checkbox de la foca marcat i el botó "Start Game" remarcat.
-
 ### 3.2. Carregar una partida guardada
 
 1. Al menú principal, prem **Load Game**.
 2. Apareixerà una llista amb totes les partides guardades. Selecciona'n una.
 3. Si els jugadors d'aquella partida tenen contrasenya, et demanarà que la introdueixis un per un.
 4. Un cop validades, es restaurarà l'estat exacte de la partida.
-
-> **[CAPTURA 3.2]** Diàleg "Load Game" amb una llista de noms de partides guardades i el botó OK.
-
-> **[CAPTURA 3.3]** Diàleg "Enter password for [Nom]" demanant la contrasenya d'un jugador.
 
 ### 3.3. Veure estadístiques
 
@@ -111,15 +99,11 @@ Prem **Stats** al menú principal per veure el rànquing global:
 - 🥉 Bronze per al tercer.
 - Ordenat per partides guanyades, després per partides jugades.
 
-> **[CAPTURA 3.4]** Pantalla "Stats" amb el rànquing complet, medalles i columnes Player/Colour/Played/Won.
-
 ### 3.4. Canviar d'idioma
 
 Al menú principal hi ha un desplegable d'idiomes. Selecciona'l i tota la interfície es traduirà a l'instant (sense reiniciar el joc).
 
 Idiomes disponibles: Català, Castellà, Anglès, Francès, Portuguès, Romanès, Rus, Ucraïnès, Àrab, Japonès, i variants.
-
-> **[CAPTURA 3.5]** Desplegable d'idiomes obert al menú principal mostrant la llista d'idiomes.
 
 ---
 
@@ -151,8 +135,6 @@ Arribar el primer a la casella **END** (l'última del tauler). Si la foca està 
 | 🧊 | **BROKEN FLOOR** (terra trencat) | El pingüí cau i la casella es converteix en un nou **forat de gel** permanent. |
 | 🏁 | **END** (meta) | Casella final. El primer que hi arriba **guanya la partida**. |
 
-> **[CAPTURA 4.1]** Visió completa del tauler amb diversos tipus de caselles visibles (forats, trineus, os, terra trencat).
-
 ### 4.4. Objectes recollibles
 
 | Objecte | Funció |
@@ -171,8 +153,6 @@ Si has activat la foca al setup, apareixerà al tauler com un personatge control
 - Si comparteix casella amb un pingüí, **li fa perdre la meitat de l'inventari**.
 - Es pot "alimentar" amb peixos per fer-la dormir uns torns.
 
-> **[CAPTURA 4.2]** Foca al tauler amb el panell lateral "Seal Status" mostrant la seva posició i torns bloquejats.
-
 ### 4.6. Combat de boles de neu
 
 Quan dos o més jugadors coincideixen en la mateixa casella, es pot iniciar una guerra de boles de neu. El llançador escull l'objectiu i, si l'encerta, l'objectiu salta el següent torn.
@@ -190,8 +170,6 @@ Quatre opcions:
 - **Stats**: rànquing global de jugadors.
 - **Language**: desplegable per canviar d'idioma.
 
-> **[CAPTURA 5.1]** Menú principal amb tots els elements anotats: títol, fons, botons, dropdown d'idioma.
-
 ### 5.2. Pantalla "Player Setup"
 
 - **Nombre de jugadors**: 1-4.
@@ -199,8 +177,6 @@ Quatre opcions:
 - **Targetes de jugador**: una per slot, amb nom, contrasenya, color, avatar.
 - **Select Existing Player**: per reutilitzar un jugador registrat.
 - **Start Game / Back**: continuar o tornar al menú.
-
-> **[CAPTURA 5.2]** Player Setup amb tots els elements anotats.
 
 ### 5.3. Pantalla del tauler
 
@@ -227,13 +203,9 @@ L'àrea principal és el tauler central de 50 caselles en patró serp. Al voltan
 - **💾 Save Game**: guarda la partida amb un nom.
 - **📜 History**: mostra el log d'esdeveniments.
 
-> **[CAPTURA 5.3]** Pantalla completa del tauler amb totes les zones anotades: tauler, panell esquerre, HUD dret, barra inferior, indicador de torn.
-
 ### 5.4. Diàleg d'històric
 
 Prement el botó **📜 History** apareix una finestra amb el llistat cronològic de tots els esdeveniments de la partida: tirades, moviments, efectes de casella, atacs, etc.
-
-> **[CAPTURA 5.4]** Diàleg "History" obert amb una llista d'esdeveniments.
 
 ### 5.5. Pantalla "Stats"
 
@@ -244,8 +216,6 @@ Llista en format taula, ordenada de millor a pitjor:
 - Color (mostra hexadecimal i quadrat acolorit).
 - Partides jugades.
 - Partides guanyades.
-
-> **[CAPTURA 5.5]** Stats amb diverses files de jugadors i medalles.
 
 ### 5.6. Drecera oculta: mode debug
 

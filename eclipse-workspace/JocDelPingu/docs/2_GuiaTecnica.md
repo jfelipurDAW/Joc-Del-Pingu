@@ -2,8 +2,6 @@
 
 **Estructura, tecnologies i decisions de disseny**
 
-Grup DW25-26 GR06 — Curs 2025/2026
-
 ---
 
 ## Índex
@@ -16,6 +14,7 @@ Grup DW25-26 GR06 — Curs 2025/2026
 6. Relacions entre classes
 7. Decisions de disseny rellevants
 8. Instruccions per compilar i executar
+9. Documentació PL/SQL
 
 ---
 
@@ -38,8 +37,6 @@ L'aplicació segueix una arquitectura **MVC** amb tres capes ben diferenciades (
 | JCE (Java Cryptography) | Estàndard JDK | Encriptació AES-128 de contrasenyes i partides guardades |
 | Eclipse IDE | 2024+ | IDE de desenvolupament (workspace inclòs) |
 | FXML + CSS | — | Definició declarativa de pantalles i estils |
-
-> **[CAPTURA 2.1]** Pantalla d'Eclipse mostrant el classpath del projecte amb javafx-lib, ojdbc, snakeyaml.
 
 ---
 
@@ -247,8 +244,6 @@ Sistema d'internacionalització. Carrega un YAML d'idioma (`assets/lang/<codi>.y
 
 Idiomes disponibles: ar, ca, en, en_es, es, es_ca, ff, fr, jp, pt, ro, ru, uk.
 
-> **[CAPTURA 4.1]** ComboBox del menú principal mostrant la llista d'idiomes desplegada.
-
 ### 4.3. Capa *View*
 
 Definida exclusivament en **FXML + CSS**. Cada pantalla consisteix en:
@@ -256,8 +251,6 @@ Definida exclusivament en **FXML + CSS**. Cada pantalla consisteix en:
 - Un fitxer `.fxml` que descriu l'arbre de nodes.
 - Una referència al controlador via `fx:controller`.
 - Estils centralitzats a `assets/css/style.css`.
-
-> **[CAPTURA 4.2]** Arbre de fitxers FXML a Eclipse (view/fxml/) i mainMenu.fxml obert mostrant l'estructura.
 
 ---
 
@@ -302,10 +295,6 @@ Definida exclusivament en **FXML + CSS**. Cada pantalla consisteix en:
 6. Si la foca està habilitada i comparteix casella amb un jugador, atac de la foca (perd la meitat de l'inventari).
 7. `TurnController.nextTurn()` passa al següent jugador (saltant els que tenen `skipNextTurn`).
 8. Si algú arriba a la casella END → seqüència de victòria + `recordGameResult()`.
-
-> **[CAPTURA 5.1]** Tauler en plena partida amb el HUD complet (jugador actiu, inventaris, botons de dau, indicador de torn).
-
-> **[CAPTURA 5.2]** Animació de tirada de dau en marxa amb el valor visible al centre.
 
 ### 5.5. Flux "Save Game"
 
@@ -410,8 +399,6 @@ El joc és pixel-art: amb `ImageView` i interpolació estàndard de JavaFX, els 
 
 Per accelerar el testing: permet teletransportar pingüins arrossegant-los, forçar el resultat del següent dau i editar inventaris en viu, sense reiniciar la partida.
 
-> **[CAPTURA 7.1]** Mode debug activat amb el panell negre superior, comboBox de jugadors i botons per modificar inventari.
-
 ---
 
 ## 8. Instruccions per compilar i executar
@@ -432,8 +419,6 @@ Per accelerar el testing: permet teletransportar pingüins arrossegant-los, for�
 3. Confirma que el `.classpath` i `.project` es detecten.
 4. Revisa que les llibreries de `javafx-lib/` estiguin enllaçades al Build Path.
 5. Comprova que el JRE configurat sigui Java 17+.
-
-> **[CAPTURA 8.1]** Eclipse amb el projecte JocDelPingu importat i la jerarquia de paquets visible.
 
 ### 8.3. Configuració de l'entorn de BBDD
 
