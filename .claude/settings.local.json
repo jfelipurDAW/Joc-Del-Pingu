@@ -16,7 +16,8 @@
       "Bash(where wkhtmltopdf *)",
       "Bash(where node *)",
       "Bash(where python *)",
-      "Bash(where npx *)"
+      "Bash(where npx *)",
+      "PowerShell(head -100)"
     ]
   }
 }
