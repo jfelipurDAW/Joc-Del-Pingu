@@ -29,37 +29,37 @@ public class BBDDPanel {
 			System.out.flush();
 			int filesInsert = model.db.BBDD.insert(con,
 				"INSERT INTO ENTITY (ENTITYID, ENTITYTYPE, PLAYERNAME, PLAYERPASSWORD, COLOUR) " +
-				"VALUES (999, 'PLAYER', 'PinguTest', 'SuperPingu1234', 'BLUE')");
+				"VALUES (222, 'PLAYER', 'PinguTest2', 'SuperPingu1234', 'BLUE')");
 			System.out.println("==> INSERT ha afectat " + filesInsert + " fila(es).");
 			System.out.flush();
 
 			System.out.println("==> [PAS 4] SELECT per verificar INSERT:");
 			System.out.flush();
-			model.db.BBDD.print(con, "SELECT * FROM ENTITY WHERE ENTITYID = 999", columnas);
+			model.db.BBDD.print(con, "SELECT * FROM ENTITY WHERE ENTITYID = 222", columnas);
 
 			////////////////////////////////////////////////////////////////////////////////////
 			System.out.println("\n==> [PAS 5] --- 2. UPDATE ---");
 			System.out.flush();
 			int filesUpdate = model.db.BBDD.update(con,
-				"UPDATE ENTITY SET PLAYERPASSWORD = 'NuevaClave99' WHERE PLAYERNAME = 'PinguTest'");
+				"UPDATE ENTITY SET PLAYERPASSWORD = 'NuevaClave99' WHERE PLAYERNAME = 'PinguTest2'");
 			System.out.println("==> UPDATE ha afectat " + filesUpdate + " fila(es).");
 			System.out.flush();
 
 			System.out.println("==> [PAS 6] SELECT per verificar UPDATE:");
 			System.out.flush();
-			model.db.BBDD.print(con, "SELECT * FROM ENTITY WHERE ENTITYID = 999", columnas);
+			model.db.BBDD.print(con, "SELECT * FROM ENTITY WHERE ENTITYID = 222", columnas);
 
 			////////////////////////////////////////////////////////////////////////////////////
 			System.out.println("\n==> [PAS 7] --- 3. DELETE ---");
 			System.out.flush();
 			int filesDelete = model.db.BBDD.delete(con,
-				"DELETE FROM ENTITY WHERE PLAYERNAME = 'PinguTest'");
+				"DELETE FROM ENTITY WHERE PLAYERNAME = 'PinguTest2'");
 			System.out.println("==> DELETE ha afectat " + filesDelete + " fila(es).");
 			System.out.flush();
 
 			System.out.println("==> [PAS 8] SELECT per verificar DELETE (hauria de ser buit):");
 			System.out.flush();
-			model.db.BBDD.print(con, "SELECT * FROM ENTITY WHERE ENTITYID = 999", columnas);
+			model.db.BBDD.print(con, "SELECT * FROM ENTITY WHERE ENTITYID = 222", columnas);
 
 			////////////////////////////////////////////////////////////////////////////////////
 			System.out.println("\n==> [PAS 9] Tancant connexió...");
