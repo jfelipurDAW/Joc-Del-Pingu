@@ -48,6 +48,9 @@ public class BBDD {
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			Connection con = DriverManager.getConnection(url, user, pwd);
+			// Force autoCommit so each statement is committed immediately and never
+			// leaves a dangling transaction that could lock the next run.
+			con.setAutoCommit(true);
 			if (con.isValid(5)) {
 				System.out.println("Database connection established successfully.");
 			}
@@ -171,8 +174,12 @@ public class BBDD {
 					}
 				}
 
+				if (!hayResultados) {
+					System.out.println("(SELECT sense resultats per a: " + sql + ")");
+				}
 			} catch (SQLException e) {
-				// error in SELECT execution
+				System.err.println("SELECT/print error: " + e.getMessage());
+				e.printStackTrace();
 			}
 		}
 	}
@@ -192,10 +199,13 @@ public class BBDD {
 		}
 
 		try (Statement st = con.createStatement()) {
+			// 10-second timeout so a locked row doesn't hang the program forever.
+			st.setQueryTimeout(10);
 			int filas = st.executeUpdate(sql);
 			return filas;
 		} catch (SQLException e) {
 			System.err.println(etiqueta + " error: " + e.getMessage());
+			e.printStackTrace();
 			return 0;
 		}
 	}

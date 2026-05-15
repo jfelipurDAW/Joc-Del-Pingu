@@ -1,3 +1,2 @@
-2026/04/08-15:26:03.041 19bc Reusing MANIFEST D:\Usuarios\badrneymar2010\Joc-Del-Pingu\.metadata\.plugins\org.eclipse.swt\EBWebView\Default\Local Storage\leveldb/MANIFEST-000001
-2026/04/08-15:26:03.052 19bc Recovering log #3
-2026/04/08-15:26:03.055 19bc Reusing old log D:\Usuarios\badrneymar2010\Joc-Del-Pingu\.metadata\.plugins\org.eclipse.swt\EBWebView\Default\Local Storage\leveldb/000003.log 
+2026/05/13-10:24:40.697 2328 Creating DB C:\Users\PC\Documents\GitHub\Joc-Del-Pingu\.metadata\.plugins\org.eclipse.swt\EBWebView\Default\Local Storage\leveldb since it was missing.
+2026/05/13-10:24:40.748 2328 Reusing MANIFEST C:\Users\PC\Documents\GitHub\Joc-Del-Pingu\.metadata\.plugins\org.eclipse.swt\EBWebView\Default\Local Storage\leveldb/MANIFEST-000001
