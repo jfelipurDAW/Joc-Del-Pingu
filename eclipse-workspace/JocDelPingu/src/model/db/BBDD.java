@@ -41,6 +41,10 @@ public class BBDD {
 		String pwd = "ABDJFMV";
 
 		// 3) Conectar
+		// catch (Throwable) per cobrir NoClassDefFoundError de classes de modulos
+		// que el runtime jpackage minimalista pot no incloure (p. ex.
+		// javax.management.* que Oracle JDBC usa internament). Si la carrega
+		// del driver falla, retornem null i SaveLoadService gestiona el cas.
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			Connection con = DriverManager.getConnection(url, user, pwd);
@@ -48,12 +52,11 @@ public class BBDD {
 				System.out.println("Database connection established successfully.");
 			}
 			return con;
-		} catch (ClassNotFoundException e) {
-			System.err.println("Oracle JDBC driver not found. Make sure ojdbc is in the classpath.");
-			e.printStackTrace();
-		} catch (SQLException e) {
-			System.err.println("Failed to connect to database at: " + url);
-			System.err.println("SQL Error: " + e.getMessage());
+		} catch (Throwable t) {
+			System.err.println("Database initialization failed ("
+					+ t.getClass().getSimpleName() + "): " + t.getMessage());
+			System.err.println("The game will continue without database access "
+					+ "(no save/load/stats functionality).");
 		}
 		return null;
 	}

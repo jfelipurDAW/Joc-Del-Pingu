@@ -61,6 +61,13 @@ public class MainMenuController {
     private Button stats_button;
 
     @FXML
+    private Button console_button;
+
+    // Held as static so the same Console window is reused if the user
+    // clicks the button several times - prevents stacking multiple consoles.
+    private static Stage consoleStage;
+
+    @FXML
     private Text titleText;
 
     @FXML
@@ -245,6 +252,73 @@ public class MainMenuController {
             );
             stage.setScene(setupScene);
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * "Console" button handler. Opens (or focuses) a separate modeless
+     * {@link Stage} that holds the debug console. The console window is
+     * completely independent of the game window: closing it never disturbs
+     * the running game, and the player can leave it open across screens.
+     */
+    @FXML
+    private void handleOpenConsole() {
+        try {
+            // If a previous console window is still alive, just bring it to
+            // front and focus the input - no need to create another one.
+            if (consoleStage != null && consoleStage.isShowing()) {
+                consoleStage.toFront();
+                consoleStage.requestFocus();
+                return;
+            }
+
+            // Try multiple lookup strategies so this works whether the JAR is
+            // on the classpath, in a named module, or behind the jar-in-jar
+            // loader. In named modules a leading-slash path can fail when the
+            // FXML lives in a package that has no Java classes; using the
+            // ClassLoader fallback or loading via a stream sidesteps that.
+            java.net.URL fxmlUrl = MainMenuController.class.getResource("/view/fxml/debugConsole.fxml");
+            if (fxmlUrl == null) {
+                fxmlUrl = MainMenuController.class.getClassLoader().getResource("view/fxml/debugConsole.fxml");
+            }
+
+            FXMLLoader loader = new FXMLLoader();
+            Parent root;
+            if (fxmlUrl != null) {
+                loader.setLocation(fxmlUrl);
+                root = loader.load();
+            } else {
+                // Last-resort fallback: load directly from a stream. This
+                // bypasses the URL plumbing entirely and works as long as
+                // the JAR contains the resource at all.
+                java.io.InputStream is = MainMenuController.class.getResourceAsStream("/view/fxml/debugConsole.fxml");
+                if (is == null) {
+                    is = MainMenuController.class.getClassLoader().getResourceAsStream("view/fxml/debugConsole.fxml");
+                }
+                if (is == null) {
+                    System.err.println("debugConsole.fxml not found on classpath.");
+                    return;
+                }
+                root = loader.load(is);
+                is.close();
+            }
+
+            Scene scene = new Scene(root);
+            try {
+                java.net.URL css = MainMenuController.class.getResource("/assets/css/style.css");
+                if (css != null) scene.getStylesheets().add(css.toExternalForm());
+            } catch (Exception cssIgnored) {
+                // optional - the console has its own inline styles
+            }
+            consoleStage = new Stage();
+            consoleStage.setTitle("Joc del Pingu - Debug Console");
+            consoleStage.setScene(scene);
+            // No modality: the console floats over (or beside) the game window
+            // without blocking input on either side.
+            consoleStage.show();
         } catch (Exception e) {
             e.printStackTrace();
         }

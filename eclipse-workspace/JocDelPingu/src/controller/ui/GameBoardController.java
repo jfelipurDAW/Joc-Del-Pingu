@@ -146,6 +146,11 @@ public class GameBoardController {
     private Label debugFastDiceLabel;
     private Label debugSlowDiceLabel;
 
+    // Toggled by the in-game console command "/view numbers". When true, each
+    // square overlay is annotated with its linear index. Persisted through
+    // DebugConsoleService so the setting survives between game sessions.
+    private boolean viewSquareNumbers = false;
+
 
     /////////////////////////////
     ///     GAME STATE       ///
@@ -351,6 +356,11 @@ public class GameBoardController {
                 });
             }
         });
+
+        // Register with the debug console service so /tp, /give, /view
+        // numbers, /setdice ... can all talk to this board controller. The
+        // service re-applies any persistent flags (e.g. viewNumbers) here.
+        model.game.DebugConsoleService.getInstance().setActiveBoardController(this);
     }
 
 
@@ -1576,6 +1586,23 @@ public class GameBoardController {
 
         addPlayerSpritesToCell(cell, squareIndex, cellSize);
 
+        // /view numbers overlay - tiny label in the corner with the cell
+        // index. Useful for crafting /tp commands.
+        if (viewSquareNumbers) {
+            Label idxLabel = new Label(String.valueOf(squareIndex));
+            int fontPx = Math.max(8, (int) (cellSize * 0.22));
+            idxLabel.setStyle(
+                "-fx-text-fill: white;"
+                + "-fx-background-color: rgba(0,0,0,0.65);"
+                + "-fx-padding: 1 4 1 4;"
+                + "-fx-font-family: 'Consolas','Courier New',monospace;"
+                + "-fx-font-weight: 900;"
+                + "-fx-font-size: " + fontPx + "px;"
+            );
+            StackPane.setAlignment(idxLabel, Pos.TOP_LEFT);
+            cell.getChildren().add(idxLabel);
+        }
+
         if (sealEnabled && seal != null && seal.getSquareIndex() == squareIndex) {
             // Cap the seal to ~55% of the cell on its longest axis, then size the
             // canvas to match the sprite's actual aspect ratio. The seal is
@@ -2290,8 +2317,51 @@ public class GameBoardController {
                 if (css != null) newScene.getStylesheets().add(css.toExternalForm());
             }
             stage.setScene(newScene);
+            // Leaving the game scene - unregister from the debug console so
+            // its commands stop targeting a board that is no longer visible.
+            model.game.DebugConsoleService.getInstance().setActiveBoardController(null);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    /////////////////////////////
+    ///  DEBUG-CONSOLE API    ///
+    /////////////////////////////
+
+    /** Exposed for {@code model.game.DebugConsoleService} command implementations. */
+    public TurnController getTurnController() { return turnController; }
+
+    /** Exposed for the debug console; {@code null} if the seal is disabled. */
+    public Seal getSeal() { return seal; }
+
+    public boolean isSealEnabled() { return sealEnabled; }
+
+    /** Public redraw entry point used by the debug console after mutating game state. */
+    public void requestRedraw() {
+        javafx.application.Platform.runLater(() -> {
+            drawBoard();
+            updateHUD();
+        });
+    }
+
+    /**
+     * Sets (or clears with {@code null}) the value that {@code rollOrForce}
+     * will return on the next dice roll. Called by the {@code /setdice} and
+     * {@code /reset} console commands.
+     */
+    public void setDebugForcedDice(Integer value) {
+        this.debugForcedDice = value;
+        javafx.application.Platform.runLater(this::updateDebugBanner);
+    }
+
+    /**
+     * Applies the global "show square numbers" flag and triggers a redraw so
+     * the change is visible immediately.
+     */
+    public void applyDebugViewNumbers(boolean enabled) {
+        this.viewSquareNumbers = enabled;
+        javafx.application.Platform.runLater(this::drawBoard);
     }
 }

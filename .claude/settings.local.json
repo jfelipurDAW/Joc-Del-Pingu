@@ -16,7 +16,21 @@
       "Bash(where wkhtmltopdf *)",
       "Bash(where node *)",
       "Bash(where python *)",
-      "Bash(where npx *)"
+      "Bash(where npx *)",
+      "Bash(unzip -p /c/Users/martavoytk/Downloads/Essadaoui_Badreddine-Felip_Jan-Voytkovych_Marta/Juego/app/JocDelPingu.jar view/fxml/debugConsole.fxml)",
+      "Bash(mkdir -p /tmp/modinfo)",
+      "Bash('/c/Program Files/Android/Android Studio/jbr/bin/jar.exe' -xf /c/Users/martavoytk/Downloads/Essadaoui_Badreddine-Felip_Jan-Voytkovych_Marta/Juego/app/JocDelPingu.jar module-info.class)",
+      "Bash('/c/Program Files/Android/Android Studio/jbr/bin/javap.exe' -p module-info.class)",
+      "Bash(unzip -t /c/Users/martavoytk/Downloads/Essadaoui_Badreddine-Felip_Jan-Voytkovych_Marta/Juego/app/JocDelPingu.jar)",
+      "Bash('/c/Program Files/Android/Android Studio/jbr/bin/javac.exe' --release 21 -p /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/javafx-lib:/d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/external-libraries --add-modules javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,org.yaml.snakeyaml -cp /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/bin:/d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/external-libraries/ojdbc8.jar -d /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/bin /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/controller/ui/MainMenuController.java)",
+      "Bash(cp /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/view/fxml/debugConsole.fxml /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/bin/view/fxml/debugConsole.fxml)",
+      "Bash(cp /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/view/fxml/mainMenu.fxml /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/bin/view/fxml/mainMenu.fxml)",
+      "Bash('/c/Program Files/Android/Android Studio/jbr/bin/jar.exe' cfm /c/Users/martavoytk/Downloads/Essadaoui_Badreddine-Felip_Jan-Voytkovych_Marta/Juego/app/JocDelPingu.jar C:/Users/martavoytk/AppData/Local/Temp/joc-rebuild/MANIFEST.MF .)",
+      "Bash(mkdir -p /tmp/joc-clean-bin/view/fxml /tmp/joc-clean-bin/assets)",
+      "Bash(cp /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/view/fxml/*.fxml /tmp/joc-clean-bin/view/fxml/)",
+      "Bash(cp -r /d/Usuarios/martavoytk/Joc-Del-Pingu/eclipse-workspace/JocDelPingu/src/assets /tmp/joc-clean-bin/)",
+      "Bash(taskkill //F //IM JocDelPingu.exe)",
+      "Bash(taskkill //F //IM JocDelPingu_v2.exe)"
     ]
   }
 }

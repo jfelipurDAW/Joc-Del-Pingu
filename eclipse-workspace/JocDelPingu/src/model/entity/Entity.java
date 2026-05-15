@@ -45,7 +45,7 @@ public abstract class Entity {
     // Back-reference to the board the entity currently lives on.
     private Board board;
 
-    // True when the entity must skip its upcoming turn (e.g. after being
+    // True when the entity must skip its upcoming turn (e.g. a fter being
     // hit by a snowball event). Consumed by the turn manager.
     private boolean skipNextTurn;
 
